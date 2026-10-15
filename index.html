@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aerial Manipulation · Flight DiT and π0.5</title>
+  <meta name="description" content="Aerial manipulation progress: keep a tabletop-pretrained VLA for the arm, and model flight intent with a lightweight Flight DiT. This week closes the π0.5 LoRA-to-sim pipeline. Next week starts RDT-170M.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2310161b' width='32' height='32' rx='6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23f6d7b8'/%3E%3Cpath d='M6 16h6M20 16h6M16 6v6M16 20v6' stroke='%23d7eef0' stroke-width='1.6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,520;9..144,620&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#problem">Skip to content</a>
+  <header class="nav">
+    <a class="brand" href="#top">Aerial Manipulation<small>Flight DiT + VLA</small></a>
+    <ul>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#idea">Idea</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#papers">Related works</a></li>
+      <li><a href="#progress">Current works</a></li>
+      <li><a href="#plan">Plan</a></li>
+    </ul>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <div class="hero-grid">
+        <div>
+          <div class="kicker">
+            <span>Mingtian Tan</span>
+            <span>12 Oct 2026</span>
+            <span class="tag now">This week · data + π0.5 LoRA</span>
+            <span class="tag next">Next week · RDT-170M</span>
+          </div>
+          <h1>The arm stays pretrained. Flight is only a condition.</h1>
+          <p class="lede">Tabletop manipulation data is cheap to collect at scale. Aerial manipulation data is not. Reuse a VLA that already understands the arm, and let a small Flight DiT carry the scarce flight data.</p>
+          <div class="meta">
+            <div><b>Working now</b>In Isaac Sim, frozen π0.5-DROID closes the loop through a virtual Franka and flies toward a wall button.</div>
+            <div><b>Not yet</b>It does not understand the task. Deploy-only memory is about 14.6 GB.</div>
+            <div><b>Next</b>Finish data collection and the π0.5 LoRA-to-sim pipeline this week. Start RDT-170M next week.</div>
+          </div>
+        </div>
+        <div class="scene sketches">
+          <svg viewBox="0 0 640 980">
+            <defs>
+              <pattern id="sg" width="16" height="16" patternUnits="userSpaceOnUse">
+                <path d="M16 0H0V16" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="1"/>
+              </pattern>
+              <symbol id="quad" viewBox="0 0 78 56">
+                <rect class="rotor" x="0" y="10" width="26" height="4" rx="2" fill="#f7f3eb" stroke="#1c1915" stroke-width="1"/>
+                <rect class="rotor" x="52" y="10" width="26" height="4" rx="2" fill="#f7f3eb" stroke="#1c1915" stroke-width="1"/>
+                <rect class="rotor" x="0" y="34" width="26" height="4" rx="2" fill="#f7f3eb" stroke="#1c1915" stroke-width="1"/>
+                <rect class="rotor" x="52" y="34" width="26" height="4" rx="2" fill="#f7f3eb" stroke="#1c1915" stroke-width="1"/>
+                <path d="M13 12 L32 22 M65 12 L46 22 M13 36 L32 26 M65 36 L46 26" stroke="#1c1915" stroke-width="1.4" fill="none"/>
+                <rect x="26" y="16" width="26" height="12" rx="3" fill="#1c1915"/>
+                <path d="M40 26 L54 42 L66 36" fill="none" stroke="#1c1915" stroke-width="2.2"/>
+                <circle cx="68" cy="35" r="3.4" fill="#0d6772"/>
+              </symbol>
+            </defs>
+            <g id="c0">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M36 150 C70 140, 100 110, 138 96" fill="none" stroke="#c45116" stroke-width="2" stroke-dasharray="5 6"/>
+              <rect x="156" y="28" width="16" height="146" rx="2" fill="#d9d3c8" stroke="#8d877c"/>
+              <circle cx="156" cy="98" r="7" fill="#c45116"/>
+              <use href="#quad" x="28" y="108" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Press button</text>
+            </g>
+            <g transform="translate(220,0)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <rect x="148" y="36" width="34" height="128" rx="2" fill="#d9d3c8" stroke="#8d877c"/>
+              <rect x="158" y="82" width="12" height="28" rx="2" fill="#b7d0d6"/>
+              <path d="M118 108 H156" stroke="#1c1915" stroke-width="3"/>
+              <use href="#quad" x="22" y="78" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Peg-in-hole</text>
+            </g>
+            <g transform="translate(440,0)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M150 118 v28 M176 118 v28" stroke="#8d877c" stroke-width="3"/>
+              <rect x="132" y="96" width="62" height="26" fill="none" stroke="#0d6772" stroke-width="2.4"/>
+              <use href="#quad" x="18" y="52" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Frame assembly</text>
+            </g>
+            <g transform="translate(0,248)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <rect x="138" y="40" width="48" height="124" rx="2" fill="#d9d3c8" stroke="#8d877c"/>
+              <path d="M162 40 v124" stroke="#8d877c" stroke-width="2"/>
+              <circle cx="124" cy="118" r="7" fill="#c45116"/>
+              <use href="#quad" x="16" y="78" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Pick and place</text>
+            </g>
+            <g transform="translate(220,248)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M128 48c18-22 40 2 22 22" fill="none" stroke="#2f6840" stroke-width="2.4"/>
+              <circle cx="150" cy="52" r="8" fill="#d4b106"/>
+              <path d="M124 150 h52 l-6 18 h-40z" fill="#d9d3c8" stroke="#8d877c"/>
+              <use href="#quad" x="16" y="72" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Harvest lemon</text>
+            </g>
+            <g transform="translate(440,248)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M70 130 C110 70, 150 78, 168 108" fill="none" stroke="#c45116" stroke-width="2" stroke-dasharray="4 5"/>
+              <circle cx="168" cy="108" r="6" fill="#c45116"/>
+              <path d="M150 146 h36 l-4 16 h-28z" fill="#d9d3c8" stroke="#8d877c"/>
+              <use href="#quad" x="8" y="88" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Toss ball</text>
+            </g>
+            <g transform="translate(0,496)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <circle cx="158" cy="100" r="26" fill="none" stroke="#8d877c" stroke-width="3"/>
+              <circle cx="158" cy="100" r="6" fill="#8d877c"/>
+              <path d="M158 74 v8 M158 118 v8 M132 100 h8 M176 100 h8" stroke="#8d877c" stroke-width="2"/>
+              <use href="#quad" x="18" y="70" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Rotate valve</text>
+            </g>
+            <g transform="translate(220,496)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M90 128 H184" stroke="#8d877c" stroke-width="5" stroke-linecap="round"/>
+              <rect x="132" y="112" width="18" height="16" rx="2" fill="#c45116"/>
+              <use href="#quad" x="14" y="72" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Push slider</text>
+            </g>
+            <g transform="translate(440,496)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M162 36 V164" stroke="#8d877c" stroke-width="6" stroke-linecap="round"/>
+              <path d="M162 58 H118" stroke="#c45116" stroke-width="6" stroke-linecap="round"/>
+              <use href="#quad" x="16" y="28" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Pull lever</text>
+            </g>
+            <g transform="translate(0,744)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <path d="M136 40 H186 V160 H136 Z" fill="#d9d3c8" stroke="#8d877c"/>
+              <path d="M136 40 V160 L168 140 V60 Z" fill="#f4efe6" stroke="#8d877c"/>
+              <circle cx="156" cy="98" r="2.5" fill="#8d877c"/>
+              <use href="#quad" x="14" y="70" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Open door</text>
+            </g>
+            <g transform="translate(220,744)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <rect x="132" y="36" width="52" height="64" fill="#e7eef0" stroke="#8d877c" stroke-width="2"/>
+              <path d="M158 36 V100 M132 68 H184" stroke="#8d877c" stroke-width="1.6"/>
+              <path d="M96 78 C130 60, 140 96, 150 86" fill="none" stroke="#0d6772" stroke-width="2.4"/>
+              <use href="#quad" x="10" y="96" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Wipe window</text>
+            </g>
+            <g transform="translate(440,744)">
+              <rect width="200" height="232" rx="14" fill="rgba(255,255,255,.5)"/>
+              <rect width="200" height="232" rx="14" fill="url(#sg)"/>
+              <rect x="150" y="24" width="28" height="152" rx="2" fill="#d9d3c8" stroke="#8d877c"/>
+              <circle cx="150" cy="92" r="5" fill="#0d6772"/>
+              <circle cx="138" cy="104" r="4" fill="#c45116"/>
+              <use href="#quad" x="20" y="64" width="78" height="56"/>
+              <text x="100" y="218" text-anchor="middle" font-size="16" font-family="Source Sans 3, Segoe UI, sans-serif" fill="#1c1915">Inspect surface</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <section id="problem">
+      <div class="wrap">
+        <div class="section-index">01 — Problems try to solve</div>
+        <h2>The data that teaches an arm does not teach a vehicle to fly.</h2>
+        <p class="intro">Aerial manipulation has to stabilize an underactuated platform and still make contact with an arm. Language, vision, and grasping are already strong inside a fixed-base VLA. The flight dynamics are not in that pretraining, and the data that would put them there is the expensive kind.</p>
+        <div class="statements">
+          <article>
+            <em>01</em>
+            <div>
+              <h3>Tabletop data scales. Aerial data does not.</h3>
+              <p>Desktop manipulation can be collected in volume. Aerial manipulation data is expensive. It usually depends on expert teleoperation, or on scripts and MPC that hard-code the behavior. That supply cannot support learning a whole-vehicle policy from scratch.</p>
+            </div>
+          </article>
+          <article>
+            <em>02</em>
+            <div>
+              <h3>Keep the arm the tabletop data already taught.</h3>
+              <p>The reasonable route is to reuse a VLA pretrained on rich tabletop data, so the semantic understanding and the fine control of the arm stay intact. Scarce flight data should not be spent retraining the entire model.</p>
+            </div>
+          </article>
+          <article>
+            <em>03</em>
+            <div>
+              <h3>Do not steer manipulation from inside one action chunk.</h3>
+              <p>Physical constraints or guidance on a unified action chunk let flight feasibility intervene directly in how manipulation actions are generated. That can damage the pretrained VLA’s behavior distribution. It also welds the flight coupling to the backbone, so replacing or upgrading the VLA later means rebuilding the constraint, not just swapping a model.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="idea">
+      <div class="wrap">
+        <div class="section-index">02 — The idea</div>
+        <h2>A light module owns flight. The mature VLA keeps the arm.</h2>
+        <div class="quote-band">
+          <p>A small Mobility-to-Body Conditioning module models flight intent and injects it only as a condition. Flight data stays on the light module. The arm’s intelligence stays in the original VLA.</p>
+          <div class="en">Meeting 025 put the same split this way: bring the DiT pipeline into the mobile base, other than a full-body transfer, which brings constraints and reduces the performance of the original pre-trained VLA.</div>
+        </div>
+        <div class="split">
+          <article class="card flight">
+            <h3>Flight · a small Flight DiT</h3>
+            <p>The conditioning module is a lightweight diffusion Transformer, in the spirit of AC-DiT’s mobility head, sized so that RDT-170M can move on one 4090. It reads language, multi-view images, and proprioception, emits a flight chunk, and leaves an intermediate token for the arm. The scarce flight data trains this module, not the large VLA.</p>
+            <ol>
+              <li>Action: a<sub>flight</sub> = [Δx, Δy, Δz, Δψ], horizon H</li>
+              <li>Stage A supervises flight only</li>
+              <li>The token before the MLP is F<sub>flight</sub>, the flight intent</li>
+            </ol>
+          </article>
+          <article class="card arm">
+            <h3>Arm · a mature VLA</h3>
+            <p>π0.5 keeps the arm and the gripper. Most of its weights stay frozen. LoRA and a conditioning interface are the only new pieces. Flight intent is read at every denoising or flow-matching step. It does not rewrite the arm’s own action distribution.</p>
+            <ol>
+              <li>Action: a<sub>arm</sub> = [q1, q2, q3, gripper], horizon H</li>
+              <li>The interface is flight-to-arm conditioning</li>
+              <li>Low level stays split: PX4 tracks flight, joint servos track the arm</li>
+            </ol>
+          </article>
+        </div>
+
+        <div class="flow" aria-label="Flight intent conditions the arm policy">
+          <div class="flow-box flight">
+            <strong>Flight DiT</strong>
+            <span>Iterative denoising. Self-attention on the flight chunk. Cross-attention on the observations. This is the only place flight data has to land.</span>
+            <span class="formula">a_flight , F_flight</span>
+          </div>
+          <div class="bridge" title="F_flight"><i></i></div>
+          <div class="flow-box arm">
+            <strong>Arm VLA</strong>
+            <span>Every generation step reads F<sub>flight</sub>. The arm knows where the base is about to go, then chooses joints. Swap the VLA later and reconnect this interface.</span>
+            <span class="formula">a_arm | F_obs , F_flight</span>
+          </div>
+        </div>
+        <p class="cap">The split is model-replacement friendly. Changing the arm backbone means reattaching the conditioning interface, not rebuilding the flight–arm coupling. AC-DiT’s mobility-to-body idea is the source of F<sub>flight</sub>, but AC-DiT still emits the whole body from one network. Here the base and the arm are two policies. They share only the flight intent.</p>
+      </div>
+    </section>
+
+    <section id="pipeline">
+      <div class="wrap">
+        <div class="section-index">03 — The pipeline</div>
+        <h2>Proposal pipeline</h2>
+        <p class="intro">Inputs are a language instruction, forward / downward / wrist RGB, and pose, velocity, three arm joints, and the gripper. The vision-language encoder is the VLA backbone. Both policies emit a chunk of horizon H. Real-time chunking is optional.</p>
+        <figure class="figure">
+          <img src="assets/pipeline.jpg" alt="Hybrid aerial manipulation pipeline: inputs, encoding, Flight DiT, a mature VLA arm policy, and low-level tracking">
+          <figcaption><b>Project pipeline.</b> Blue is the lightweight Flight DiT. Green is the mature VLA. Orange arrows are flight-to-arm conditioning. The comparison at the lower right is the point of the design: F<sub>flight</sub> is handed to an arm policy that is already trained, rather than asking one large DiT to learn flight and manipulation together. Project figure.</figcaption>
+        </figure>
+        <div class="beats" aria-hidden="true">
+          <div class="beat"><strong>Stage A · flight only</strong><span>Supervise a<sub>flight</sub> and extract F<sub>flight</sub>. Next week starts here.</span></div>
+          <div class="beat"><strong>Stage B · condition the arm</strong><span>Freeze most of the VLA. Train the interface and LoRA against F<sub>flight</sub>. This waits on Stage A.</span></div>
+          <div class="beat"><strong>This week · arm adaptation</strong><span>Frozen π0.5 does not yet know the task. Collect data and connect LoRA in sim first.</span></div>
+          <div class="beat"><strong>Stage C · deploy</strong><span>Synchronize both chunks. PX4 tracks flight. Joint servos track the arm. Payload and safety filters stay optional.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="papers">
+      <div class="wrap">
+        <div class="section-index">04 — Related works</div>
+        <h2>Related works</h2>
+        <p class="intro">The model stack is a Transformer, a Diffusion Transformer, and RDT. The four aerial-manipulation papers under them are where that stack meets a flying arm. Quotations are from the papers.</p>
+        <div class="model-grid">
+          <div>
+            <p>A Transformer decides who looks at whom. Action tokens are the queries. Language, images, and later the flight intent are the keys and values. Cross-attention is the flight-to-arm interface: a condition, not a rewrite of the arm head.</p>
+            <p>DiT puts that Transformer inside a diffusion process, so a chunk can be drawn out of noise. In the derivation used here, a clean action x<sub>0</sub> is noised into x<sub>t</sub> and the network learns the noise. Here x<sub>0</sub> is the next H actions. For the Flight DiT those actions are the flight deltas. RDT is that idea trained as a robot policy. π0.5, the arm model already in the loop, generates with flow matching instead. Stage B only adds F<sub>flight</sub> to the condition.</p>
+          </div>
+          <div class="math">
+            <p>Forward noising</p>
+            <p><code>x_t = √ᾱ_t · x_0 + √(1 − ᾱ_t) · ε</code></p>
+            <p>ε ~ N(0, I). Training loss</p>
+            <p><code>L = || ε − ε_θ(x_t, t, c) ||²</code></p>
+            <p>c is language, images, and proprioception. After Stage B it also includes F<sub>flight</sub>.</p>
+            <div class="bars" title="An action chunk settling out of noise">
+              <span style="--h:46%;--d:0s"></span>
+              <span style="--h:72%;--d:.1s"></span>
+              <span style="--h:58%;--d:.2s"></span>
+              <span style="--h:84%;--d:.15s"></span>
+              <span style="--h:63%;--d:.25s"></span>
+              <span style="--h:90%;--d:.05s"></span>
+              <span style="--h:70%;--d:.18s"></span>
+              <span style="--h:52%;--d:.12s"></span>
+            </div>
+          </div>
+        </div>
+        <div class="papers">
+          <p class="group-label">Transformer, DiT, and RDT</p>
+          <article class="paper">
+            <div class="who">Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, Polosukhin<br>NeurIPS 2017<br><a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a></div>
+            <div>
+              <h3>The Transformer</h3>
+              <blockquote>We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.</blockquote>
+              <p class="mean">This is the backbone under both the flight module and the arm VLA. Self-attention reads the action chunk. Cross-attention is where language, images, and F<sub>flight</sub> enter. Nothing in this project replaces that interface. Flight intent is just another condition on it.</p>
+            </div>
+          </article>
+          <article class="paper">
+            <div class="who">Peebles, Xie<br>ICCV 2023 · arXiv:2212.09748<br><a href="https://arxiv.org/abs/2212.09748">Scalable Diffusion Models with Transformers</a></div>
+            <div>
+              <h3>DiT</h3>
+              <blockquote>We explore a new class of diffusion models based on the transformer architecture. We train latent diffusion models of images, replacing the commonly-used U-Net backbone with a transformer that operates on latent patches.</blockquote>
+              <p class="mean">DiT swaps the U-Net for a Transformer inside diffusion. The Flight DiT keeps that swap and changes the target: patches of an image become a short flight-action chunk. The same scalability argument is why the flight module can stay small. Depth and width are chosen so RDT-170M fits on one 4090, instead of growing a second foundation model.</p>
+            </div>
+          </article>
+          <article class="paper">
+            <div class="who">Liu, Wu, Li, Tan, Chen, Wang, Xu, Su, Zhu<br>ICLR 2025 · arXiv:2410.07864<br><a href="https://arxiv.org/abs/2410.07864">RDT-1B</a> · <a href="https://huggingface.co/robotics-diffusion-transformer/rdt-170m">RDT-170M</a></div>
+            <div>
+              <h3>RDT, the flight model that starts next week</h3>
+              <img src="assets/rdt.jpg" alt="RDT-1B teaser: diffusion Transformer, unified action space, and the scale of pretraining and fine-tuning data">
+              <blockquote>RDT builds on diffusion models to effectively represent multi-modality, with innovative designs of a scalable Transformer to deal with the heterogeneity of multi-modal inputs and to capture the nonlinearity and high frequency of robotic data.</blockquote>
+              <blockquote>To address data scarcity, we further introduce a Physically Interpretable Unified Action Space, which can unify the action representations of various robots while preserving the physical meanings of original actions.</blockquote>
+              <p class="mean">RDT-1B was pretrained on more than a million multi-robot episodes. Its unified action space packs end-effector, joint, velocity, and wheeled base quantities into one 128-dimensional vector. Fine-tuning the 1B model is about a week on 4×A100, or roughly $500 a run. That is too expensive for this project. RDT-170M is the small ablation: about 170M parameters, hidden size 1024, depth 14, half of RDT-1B on both axes. It takes language plus up to three RGB views and predicts 64 future actions. One 4090 and about a week. That is the checkpoint next week’s training starts from, sized as the light flight module rather than a second foundation model for the arm.</p>
+            </div>
+          </article>
+
+          <p class="group-label">Aerial manipulation</p>
+          <article class="paper">
+            <div class="who">He, Guo, Tang, Zhang, Mousaei, Xu, Geng, Scherer, Shi<br>arXiv:2504.10334 · 2025<br><a href="https://arxiv.org/abs/2504.10334">Flying Hand</a></div>
+            <div>
+              <h3>Decide at the end-effector. Let the platform be someone else’s problem.</h3>
+              <blockquote>Inspired by the success of robot learning in tabletop manipulation, we propose a unified aerial manipulation framework with an end-effector-centric interface that decouples high-level platform-agnostic decision-making from task-agnostic low-level control.</blockquote>
+              <p class="mean">This was the starting point of Meeting 025. A fully actuated hexarotor, a 4-DoF arm, and an end-effector whole-body MPC, with teleoperation or imitation learning on top. It shows that the high level can talk only about the end-effector. The high level here goes further: a language-conditioned VLA stays on the arm, and flight itself is learned by a separate light module, rather than being only an MPC tracking an end-effector target.</p>
+            </div>
+          </article>
+
+          <article class="paper">
+            <div class="who">Zhan, Jiang, Zhang, Geng<br>arXiv:2609.30521 · 2026<br><a href="https://arxiv.org/abs/2609.30521">Aerial Manipulation in the Wild</a></div>
+            <div>
+              <h3>A diffusion policy proposes the end-effector. Whole-body MPC flies it.</h3>
+              <blockquote>A Diffusion Policy is trained from manipulation demonstrations to generate desired end-effector motions from onboard observations. These learned commands are executed by a whole-body MPC that jointly coordinates the aerial platform and manipulator to realize the desired end-effector trajectory.</blockquote>
+              <p class="mean">Same separation of a learned command and a model-based whole-body tracker, already outdoors with onboard LiDAR-inertial odometry, on a peg-in-hole task. The policy is still a Diffusion Policy trained from demonstrations. What changes here is the upper model: a VLA pretrained at tabletop scale, not a policy that has to learn the end-effector trajectory from aerial demonstrations alone.</p>
+            </div>
+          </article>
+
+          <article class="paper">
+            <div class="who">Tucker, Liu, Swann, Ren, Yu, Sun, Kim, McGranahan, Vuong, Schwager<br>Stanford / Physical Intelligence<br>arXiv:2603.25038<br><a href="https://arxiv.org/abs/2603.25038">π, But Make It Fly</a> · <a href="https://airvla.github.io/">AirVLA</a></div>
+            <div>
+              <h3>Vision transfers. Writing flight into the VLA sampler is the part this project leaves out.</h3>
+              <blockquote>We find that while visual representations transfer effectively, the specific control dynamics required for flight do not. To bridge this “dynamics gap” without retraining the foundation model, we introduce a Payload-Aware Guidance mechanism that injects payload constraints directly into the policy’s flow-matching sampling process.</blockquote>
+              <blockquote>Our inference-time intervention, Payload-Aware Guidance, increases real-world pick-and-place task success from 23% to 50%.</blockquote>
+              <p class="mean">AirVLA is the evidence that visual features move and flight dynamics do not, and it is also the design this project does not copy. Payload guidance is a physical constraint written into the same sampling process that produces the manipulation actions. That is the unified-chunk intervention above: flight feasibility edits the VLA’s own samples, and the coupling lives inside that backbone. Real pick-and-place rose from 23% to 50%, and a long-horizon compositional task reached 62%, with Gaussian-splatting navigation data. The lesson taken here is the dynamics gap. The mechanism is different: flight intent comes from a separate module and enters only as a condition.</p>
+            </div>
+          </article>
+
+          <article class="paper">
+            <div class="who">Chen, Liu, Qian, et al. · Peking University / BAAI<br>arXiv:2507.01961<br><a href="https://arxiv.org/abs/2507.01961">AC-DiT</a> · <a href="https://ac-dit.github.io/">Project page</a></div>
+            <div>
+              <h3>Extract base motion first, then condition the body.</h3>
+              <img src="assets/acdit.jpg" alt="AC-DiT architecture: perception-aware multimodal adaptation and a lightweight mobility head conditioning the whole-body action head">
+              <blockquote>Since the motion of the mobile base directly influences the manipulator’s actions, we introduce a mobility-to-body conditioning mechanism that guides the model to first extract base motion representations, which are then used as context prior for predicting whole-body actions.</blockquote>
+              <p class="mean">F<sub>flight</sub> comes from this mechanism. The difference is in the lower-right of the pipeline figure. AC-DiT still predicts the whole body with one network, and a full training run is about two weeks on 8×A100, which is out of scope. The module kept here is only the first half: a small model that makes the base motion explicit, then hands that intent to a VLA that already knows the arm.</p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="progress">
+      <div class="wrap">
+        <div class="section-index">05 — Current works</div>
+        <h2>Current works</h2>
+        <p class="warn-title">Not working as mapping only</p>
+        <p class="intro">Frozen π0.5 is already in the loop. It flies forward. The current experiment is a closed-loop transfer from π0.5-DROID to a UA-Quad. Official weights stay frozen and are served over a WebSocket. A virtual Franka sits in between. The policy believes it is moving a 7-DoF arm over a table. The simulator is flying a quadrotor with a 4-DoF arm, and the target is on a wall. This is the arm policy before any flight module exists, which is why the task semantics are still missing.</p>
+        <figure class="figure">
+          <img src="assets/transfer.jpg" alt="Closed-loop transfer from π0.5-DROID to a UA-Quad through a virtual Franka adapter">
+          <figcaption><b>The adapter.</b> Body and wrist cameras are resized to 224. The virtual Franka holds a 7-dimensional joint state, reset to the DROID posture. Table axes map onto the wall: forward becomes up, left stays left. Franka forward-kinematics steps are capped at 7.5 cm. Measured end-effector pose is written back through damped least-squares inverse kinematics, which closes the loop. Low level is Pyroki IK plus PID at 120 Hz.</figcaption>
+        </figure>
+
+        <div class="progress-grid">
+          <div>
+            <ol class="steps">
+              <li><i>1</i><span>The policy receives two RGB images, 7 joint angles, gripper state, and language. The instruction in this run is “press the button.”</span></li>
+              <li><i>2</i><span>It returns a 15-step chunk. Each step is 7 joint velocities plus one gripper command. The first 8 steps run; steps 9–15 are dropped. Eight simulator ticks are 1/15 s, then the policy is queried again.</span></li>
+              <li><i>3</i><span>Gripper: g &gt; 0.5 maps to closed, otherwise open. The end-effector target is linearly interpolated over 8 ticks, with fixed orientation, no roll about the approach axis, and lead limited to 25 cm.</span></li>
+              <li><i>4</i><span>A script can fly to 0.4 m in front of the button, reset the virtual Franka, and then hand over. The long transit does not have to be learned by the zero-shot VLA.</span></li>
+            </ol>
+            <div class="stats">
+              <div class="stat"><b>120 Hz</b><span>sim and low-level tracking</span></div>
+              <div class="stat"><b>8 / 15</b><span>steps executed from each chunk</span></div>
+              <div class="stat"><b>14.6 GB</b><span>deploy only, weights frozen</span></div>
+              <div class="stat"><b>Zero-shot</b><span>no LoRA on this run</span></div>
+            </div>
+          </div>
+          <figure class="player" data-film>
+            <div class="stage">
+              <img class="on" src="assets/sim/f1.jpg" alt="Simulation frame: quadrotor and arm beside a wall">
+              <img src="assets/sim/f2.jpg" alt="Simulation frame: the vehicle closer to the wall">
+              <img src="assets/sim/f3.jpg" alt="Simulation frame: wall and vehicle in view">
+              <img src="assets/sim/f4.jpg" alt="Simulation frame: camera moved around the vehicle">
+              <img src="assets/sim/f5.jpg" alt="Simulation frame: red button visible on the wall">
+              <img src="assets/sim/f6.jpg" alt="Simulation frame: vehicle holding beside the button wall">
+            </div>
+            <div class="controls">
+              <button type="button" data-dir="-1">Previous</button>
+              <button type="button" data-play aria-pressed="true">Pause</button>
+              <button type="button" data-dir="1">Next</button>
+              <div class="dots">
+                <button type="button" data-frame="0" aria-label="Frame 1"></button>
+                <button type="button" data-frame="1" aria-label="Frame 2"></button>
+                <button type="button" data-frame="2" aria-label="Frame 3"></button>
+                <button type="button" data-frame="3" aria-label="Frame 4"></button>
+                <button type="button" data-frame="4" aria-label="Frame 5"></button>
+                <button type="button" data-frame="5" aria-label="Frame 6"></button>
+              </div>
+            </div>
+            <figcaption class="cap"><b>Six moments from the 12 October Isaac Sim recording.</b> The camera moves, so the wall and the vehicle jump in the frame. The red mark is the button. This run is an attempt forward: the direction is right, and the task is not yet understood.</figcaption>
+          </figure>
+        </div>
+
+        <figure class="figure" style="margin-top:18px">
+          <video controls preload="metadata" poster="assets/sim/f5.jpg">
+            <source src="assets/approach.mp4" type="video/mp4">
+          </video>
+          <figcaption><b>The simulation portion of the same recording, about 34 s to 90 s.</b> The earlier pass over the Franka documentation site is left out. The controller log is below.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="assets/controller.jpg" alt="Controller log with end-effector pose, distance to target, lateral offset, and gripper state">
+          <figcaption><b>Controller side.</b> The log prints end-effector pose, distance, lateral offset, lead, and gripper state. The gripper opens near the end of this trace. That shows the instruction reached the low level. It does not show that the button was pressed. Two conclusions: LoRA is required before the policy understands the task, and deployment itself is about 14.6 GB.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="plan">
+      <div class="wrap">
+        <div class="section-index">06 — Compute, and the next two weeks</div>
+        <div class="goal">
+          <div>
+            <div class="when" style="letter-spacing:.12em;font-size:12px;text-transform:uppercase;color:#f6d7b8">Goal</div>
+            <h2>ICML 2027</h2>
+            <p>The target venue for this line of work. The 2027 call is not on icml.cc yet. The clock below is the ICML 2026 cycle, shifted one year, and it will move if the official dates do. About 15 weeks from 15 Oct 2026 to a late-January full-paper deadline.</p>
+          </div>
+          <div class="dates">
+            <div><b>23 Jan AoE</b><span>Abstract. ICML 2026 was 23 Jan 2026. Author list locks here.</span></div>
+            <div><b>28 Jan AoE</b><span>Full paper. ICML 2026 was 28 Jan 2026. Strict, no extension.</span></div>
+            <div><b>Early July</b><span>Conference. City for 2027 is not announced. <a href="https://icml.cc/Conferences/2026/Dates">2026 dates</a></span></div>
+          </div>
+        </div>
+        <h2>Teach the arm this task in sim, then start the flight DiT.</h2>
+        <p class="intro">This order does not fight the pipeline. Stage B needs F<sub>flight</sub> to exist, and the flight DiT is not trained yet. The gap visible today is different: frozen π0.5 has no task semantics on the wall button. This week closes data collection and the LoRA loop. Next week opens Stage A, which is where the scarce flight data is supposed to go — into the light module, not back into the VLA.</p>
+        <table>
+          <thead>
+            <tr><th>Route</th><th>Compute cost</th><th>Decision</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Full AC-DiT</td><td>8×A100, about two weeks</td><td>Not in scope</td></tr>
+            <tr><td>RDT-1B fine-tune</td><td>4×A100 for about a week, or about $500 a run</td><td>Too expensive</td></tr>
+            <tr class="hot"><td>π0.5 LoRA</td><td>One 4090, about 2–3 days</td><td>This week, into sim</td></tr>
+            <tr class="pick"><td>RDT-170M</td><td>One 4090, about a week</td><td>Start training next week</td></tr>
+          </tbody>
+        </table>
+        <div class="weeks">
+          <article class="week this">
+            <div class="when">This week · by 18 Oct 2026</div>
+            <h3>Data in, LoRA through sim</h3>
+            <p>Finish the π0.5 LoRA-to-simulation pipeline, not just a weight file on disk.</p>
+            <ul>
+              <li>Close data collection for the wall-button task. The scripted pre-approach can stay. The policy takes the last segment.</li>
+              <li>Run π0.5 LoRA on a 4090. About two to three days. Weights are no longer frozen for the whole run.</li>
+              <li>Put the LoRA back into Isaac Sim on the same virtual Franka and the same 120 Hz low level. The loop should still close, and the behavior should be more than a forward creep.</li>
+            </ul>
+          </article>
+          <article class="week next">
+            <div class="when">Next week · from 19 Oct 2026</div>
+            <h3>Start RDT-170M</h3>
+            <p>This is Stage A for the flight module. The bar for the week is that training is running, not that a one-week run is declared finished.</p>
+            <ul>
+              <li>Start from <a href="https://huggingface.co/robotics-diffusion-transformer/rdt-170m">RDT-170M</a>. Language, up to three RGB views, 64-step prediction.</li>
+              <li>Supervise only a<sub>flight</sub>, and keep the pre-MLP token as F<sub>flight</sub>.</li>
+              <li>One 4090. Fill the flight quantities in the unified action space first. The arm head waits until F<sub>flight</sub> is stable, then reconnects through the same interface.</li>
+            </ul>
+          </article>
+        </div>
+
+        <h2 style="margin-top:48px;font-size:32px">To do</h2>
+        <ul class="todo">
+          <li>
+            <input type="checkbox" id="todo-this-week">
+            <label for="todo-this-week">This week</label>
+            <span>RL / script: generate training trajectories. LoRA π0.5.</span>
+          </li>
+          <li>
+            <input type="checkbox" id="todo-next-week">
+            <label for="todo-next-week">Next week</label>
+            <span>Train RDT.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Updated 15 October 2026. The two-week plan is the current schedule.</p>
+      <p>Paper figures belong to their authors and are cited here with links to arXiv. The pipeline diagram, the adapter diagram, the simulation frames, and the controller log are project figures.</p>
+      <p>Open <code>index.html</code> locally. For GitHub Pages, publish the repository root from the main branch.</p>
+    </div>
+  </footer>
+  <script src="main.js"></script>
+</body>
+</html>
