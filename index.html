@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aerial Manipulation · Flight DiT and π0.5</title>
-  <meta name="description" content="Aerial manipulation progress: keep a tabletop-pretrained VLA for the arm, and model flight intent with a lightweight Flight DiT. This week closes the π0.5 LoRA-to-sim pipeline. Next week starts RDT-170M.">
+  <meta name="description" content="Aerial manipulation progress: keep a tabletop-pretrained VLA for the arm, and model flight intent with a lightweight Flight DiT. The Dataset page shows the upgraded scripted specialists on FA-Hexa, before and after.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%2310161b' width='32' height='32' rx='6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23f6d7b8'/%3E%3Cpath d='M6 16h6M20 16h6M16 6v6M16 20v6' stroke='%23d7eef0' stroke-width='1.6'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,20 +12,25 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip" href="#problem">Skip to content</a>
+  <a class="skip" href="#dataset">Skip to content</a>
   <header class="nav">
     <a class="brand" href="#top">Aerial Manipulation<small>Flight DiT + VLA</small></a>
     <ul>
-      <li><a href="#problem">Problem</a></li>
-      <li><a href="#idea">Idea</a></li>
-      <li><a href="#pipeline">Pipeline</a></li>
-      <li><a href="#papers">Related works</a></li>
-      <li><a href="#progress">Current works</a></li>
-      <li><a href="#plan">Plan</a></li>
+      <li><a href="#introduction">Introduction</a></li>
+      <li><a href="#dataset">Dataset</a></li>
+      <li><a href="#upgrades">Before / after</a></li>
+      <li><a href="#all-tasks">All tasks</a></li>
     </ul>
   </header>
 
   <main id="top">
+    <details class="page" id="introduction">
+    <summary>
+      <span class="page-no">Page 1</span>
+      <span class="page-title">Introduction</span>
+      <span class="page-sub">Problem, idea, pipeline, related works, the 12 Oct zero-shot π0.5 run, and the plan</span>
+      <span class="page-toggle" aria-hidden="true"></span>
+    </summary>
     <div class="wrap hero">
       <div class="hero-grid">
         <div>
@@ -223,7 +228,7 @@
             <h3>Arm · a mature VLA</h3>
             <p>π0.5 keeps the arm and the gripper. Most of its weights stay frozen. LoRA and a conditioning interface are the only new pieces. Flight intent is read at every denoising or flow-matching step. It does not rewrite the arm’s own action distribution.</p>
             <ol>
-              <li>Action: a<sub>arm</sub> = [q1, q2, q3, gripper], horizon H</li>
+              <li>Action: a<sub>arm</sub> = [q1, q2, q3, q4, gripper], horizon H. FA-Hexa’s arm has three pitch joints and a wrist roll</li>
               <li>The interface is flight-to-arm conditioning</li>
               <li>Low level stays split: PX4 tracks flight, joint servos track the arm</li>
             </ol>
@@ -251,10 +256,10 @@
       <div class="wrap">
         <div class="section-index">03 — The pipeline</div>
         <h2>Proposal pipeline</h2>
-        <p class="intro">Inputs are a language instruction, forward / downward / wrist RGB, and pose, velocity, three arm joints, and the gripper. The vision-language encoder is the VLA backbone. Both policies emit a chunk of horizon H. Real-time chunking is optional.</p>
+        <p class="intro">Inputs are a language instruction, forward / downward / wrist RGB, and pose, velocity, the four FA-Hexa arm joints, and the gripper. The vision-language encoder is the VLA backbone. Both policies emit a chunk of horizon H. Real-time chunking is optional.</p>
         <figure class="figure">
           <img src="assets/pipeline.jpg" alt="Hybrid aerial manipulation pipeline: inputs, encoding, Flight DiT, a mature VLA arm policy, and low-level tracking">
-          <figcaption><b>Project pipeline.</b> Blue is the lightweight Flight DiT. Green is the mature VLA. Orange arrows are flight-to-arm conditioning. The comparison at the lower right is the point of the design: F<sub>flight</sub> is handed to an arm policy that is already trained, rather than asking one large DiT to learn flight and manipulation together. Project figure.</figcaption>
+          <figcaption><b>Project pipeline.</b> Blue is the lightweight Flight DiT. Green is the mature VLA. Orange arrows are flight-to-arm conditioning. The comparison at the lower right is the point of the design: F<sub>flight</sub> is handed to an arm policy that is already trained, rather than asking one large DiT to learn flight and manipulation together. Project figure. The figure still draws a quadrotor with a 3-DoF arm; the platform is now FA-Hexa, a fully actuated hexarotor with a 4-DoF arm, so a<sub>arm</sub> has four joints.</figcaption>
         </figure>
         <div class="beats" aria-hidden="true">
           <div class="beat"><strong>Stage A · flight only</strong><span>Supervise a<sub>flight</sub> and extract F<sub>flight</sub>. Next week starts here.</span></div>
@@ -328,7 +333,7 @@
             <div>
               <h3>Decide at the end-effector. Let the platform be someone else’s problem.</h3>
               <blockquote>Inspired by the success of robot learning in tabletop manipulation, we propose a unified aerial manipulation framework with an end-effector-centric interface that decouples high-level platform-agnostic decision-making from task-agnostic low-level control.</blockquote>
-              <p class="mean">This was the starting point of Meeting 025. A fully actuated hexarotor, a 4-DoF arm, and an end-effector whole-body MPC, with teleoperation or imitation learning on top. It shows that the high level can talk only about the end-effector. The high level here goes further: a language-conditioned VLA stays on the arm, and flight itself is learned by a separate light module, rather than being only an MPC tracking an end-effector target.</p>
+              <p class="mean">This was the starting point of Meeting 025. A fully actuated hexarotor, a 4-DoF arm, and an end-effector whole-body MPC, with teleoperation or imitation learning on top. It shows that the high level can talk only about the end-effector. FA-Hexa, the platform used here, is the same class of vehicle. The high level here goes further: a language-conditioned VLA stays on the arm, and flight itself is learned by a separate light module, rather than being only an MPC tracking an end-effector target.</p>
             </div>
           </article>
 
@@ -370,7 +375,7 @@
         <div class="section-index">05 — Current works</div>
         <h2>Current works</h2>
         <p class="warn-title">Not working as mapping only</p>
-        <p class="intro">Frozen π0.5 is already in the loop. It flies forward. The current experiment is a closed-loop transfer from π0.5-DROID to a UA-Quad. Official weights stay frozen and are served over a WebSocket. A virtual Franka sits in between. The policy believes it is moving a 7-DoF arm over a table. The simulator is flying a quadrotor with a 4-DoF arm, and the target is on a wall. This is the arm policy before any flight module exists, which is why the task semantics are still missing.</p>
+        <p class="intro">Frozen π0.5 is already in the loop. It flies forward. The current experiment is a closed-loop transfer from π0.5-DROID to a UA-Quad. Official weights stay frozen and are served over a WebSocket. A virtual Franka sits in between. The policy believes it is moving a 7-DoF arm over a table. The simulator is flying a quadrotor with a 4-DoF arm, and the target is on a wall. This is the arm policy before any flight module exists, which is why the task semantics are still missing. This zero-shot run was recorded on UA-Quad on 12 October. The project platform has since moved to FA-Hexa, and the specialist dataset on the Dataset page is recorded on FA-Hexa.</p>
         <figure class="figure">
           <img src="assets/transfer.jpg" alt="Closed-loop transfer from π0.5-DROID to a UA-Quad through a virtual Franka adapter">
           <figcaption><b>The adapter.</b> Body and wrist cameras are resized to 224. The virtual Franka holds a 7-dimensional joint state, reset to the DROID posture. Table axes map onto the wall: forward becomes up, left stays left. Franka forward-kinematics steps are capped at 7.5 cm. Measured end-effector pose is written back through damped least-squares inverse kinematics, which closes the loop. Low level is Pyroki IK plus PID at 120 Hz.</figcaption>
@@ -496,12 +501,346 @@
         </ul>
       </div>
     </section>
+    </details>
+
+    <details class="page" id="dataset" open>
+    <summary>
+      <span class="page-no">Page 2</span>
+      <span class="page-title">Dataset</span>
+      <span class="page-sub">Scripted specialists on FA-Hexa, audited on video before data collection · 17 Oct 2026</span>
+      <span class="page-toggle" aria-hidden="true"></span>
+    </summary>
+
+    <section id="dataset-overview">
+      <div class="wrap">
+        <div class="section-index">01 — Why audit the specialists</div>
+        <h2>The LoRA learns whatever the specialist does. So every specialist was watched first.</h2>
+        <p class="intro">π0.5 LoRA is trained on successful demonstrations from AM-Bench’s scripted specialists, one per task. A demonstration that passes a loose success check, or a specialist that fails for a reason unrelated to the task, goes straight into the training data. Before recording at scale, every task was recorded five times and watched, on the old platform (Demo 1) and again after the upgrades (Demo 2).</p>
+        <div class="stats ds-stats">
+          <div class="stat"><b>35 / 60</b><span>Demo 1 · OmniHexa · all official</span></div>
+          <div class="stat"><b>59 / 60</b><span>Demo 2 · FA-Hexa · five tasks upgraded</span></div>
+          <div class="stat"><b>12 × 5</b><span>tasks × runs per recording</span></div>
+          <div class="stat"><b>5</b><span>specialists or success checks changed</span></div>
+        </div>
+        <div class="setup">
+          <div><b>Platform</b>Demo 1 is OmniHexa. Demo 2 is FA-Hexa, the fully actuated hexarotor with a 4-DoF arm that the project now uses.</div>
+          <div><b>Control</b>Absolute end-effector pose, IK plus PID, 120 Hz. Every task runs its scripted specialist.</div>
+          <div><b>Video</b>1280×720, 30 fps, real time. Recording stops 5 s after success, or at the end of the episode. The overlay shows task, run, time, and a green “SUCCESS at X.Xs”.</div>
+        </div>
+        <p class="note">35 / 60 overstates Demo 1. Two of its passes, Frame assembly and Open door, only pass because the old checks were loose. See below.</p>
+        <table class="results">
+          <thead>
+            <tr><th>Task</th><th>Demo 1</th><th>Demo 2</th><th>What changed</th></tr>
+          </thead>
+          <tbody>
+            <tr class="k-same"><td><span class="tid">01</span> Press button</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind same">Unchanged</span> Official specialist and check.</td></tr>
+            <tr class="k-up"><td><span class="tid">02</span> Peg-in-hole</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind up">Specialist upgraded</span> Grasp initialisation fixed. Specialist and check are official.</td></tr>
+            <tr class="k-same"><td><span class="tid">03</span> Inspect surface (NDT)</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind same">Unchanged</span> Official. Recorded with a follow camera, because the inspection point is 7 m up.</td></tr>
+            <tr class="k-up"><td><span class="tid">04</span> Wipe window</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind up">Specialist upgraded</span> New press-and-retract specialist. Check is official.</td></tr>
+            <tr class="k-plat"><td><span class="tid">05</span> Cabinet pick and place</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind plat">Platform only</span> Official specialist and check. Only the platform changed.</td></tr>
+            <tr class="k-up"><td><span class="tid">06</span> Frame assembly</td><td><span class="chip ok">5/5*</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind up">Specialist upgraded</span> Stricter check and a new bar-grasp specialist.</td></tr>
+            <tr class="k-plat"><td><span class="tid">07</span> Harvest lemon</td><td><span class="chip bad">0/5</span></td><td><span class="chip part">4/5</span></td><td><span class="kind plat">Platform only</span> Official specialist and check. Only the platform changed.</td></tr>
+            <tr class="k-up"><td><span class="tid">08</span> Toss ball</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind up">Specialist upgraded</span> New lob specialist. Check is official.</td></tr>
+            <tr class="k-same"><td><span class="tid">09</span> Rotate valve</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind same">Unchanged</span> Official specialist and check.</td></tr>
+            <tr class="k-same"><td><span class="tid">10</span> Push slider</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind same">Unchanged</span> Official specialist and check.</td></tr>
+            <tr class="k-same"><td><span class="tid">11</span> Pull lever</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind same">Unchanged</span> Official specialist and check.</td></tr>
+            <tr class="k-up"><td><span class="tid">12</span> Open door</td><td><span class="chip ok">5/5*</span></td><td><span class="chip ok">5/5</span></td><td><span class="kind up">Specialist upgraded</span> Door latch added to the check, and a new handle specialist.</td></tr>
+          </tbody>
+        </table>
+        <p class="cap">* passes the old success check, which the upgrade replaces. Each cell counts successes over five runs.</p>
+      </div>
+    </section>
+
+    <section id="upgrades">
+      <div class="wrap">
+        <div class="section-index">02 — Specialist upgrades, before and after</div>
+        <h2>Five tasks changed. Each pair is the same task, Demo 1 on the left, Demo 2 on the right.</h2>
+        <p class="intro">“Before” is the Demo 1 recording: OmniHexa with the official specialist and check. A first FA-Hexa pass with the official specialists was also run: Wipe window, Toss ball, and Frame assembly were still 0 / 5 there, so the failures are in the specialists, not only the platform. Those intermediate videos were not kept, so the visual “before” is OmniHexa.</p>
+        
+        <article class="upgrade" id="up-peginhole">
+          <header>
+            <em>01</em>
+            <div>
+              <h3>Peg-in-hole</h3>
+              <p class="what">Grasp initialisation</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip bad">0/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_02_PegInHole.jpg"><source src="assets/dataset/demo1/02_PegInHole.mp4" type="video/mp4"></video>
+              <figcaption>The peg is placed into the gripper at reset. The fingers used to start closed, so the peg was pushed into them and sprang out before the flight began. Every Demo 1 run fails this way.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip ok">5/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_02_PegInHole.jpg"><source src="assets/dataset/demo2/02_PegInHole.mp4" type="video/mp4"></video>
+              <figcaption>The fingers now open to the object’s width first, and the object slides in against the palm. The fix lives in the shared reset, so every task that starts with an object in hand gets it. Specialist and success check are official.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+        <article class="upgrade" id="up-wipewindow">
+          <header>
+            <em>02</em>
+            <div>
+              <h3>Wipe window</h3>
+              <p class="what">New specialist · WipeWindowPressPolicy</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip bad">0/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_04_WipeWindow.jpg"><source src="assets/dataset/demo1/04_WipeWindow.mp4" type="video/mp4"></video>
+              <figcaption>The official specialist kept moving up and down while the sponge was on the glass. Friction dragged the sponge out between the fingers, and the stain was never cleared.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip ok">5/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_04_WipeWindow.jpg"><source src="assets/dataset/demo2/04_WipeWindow.mp4" type="video/mp4"></video>
+              <figcaption>For each stain that is still there: line up in front of it, press along the window normal, hold, and retract. The sponge’s position in the hand is measured before every press, and stains that are already gone are skipped. Success check is official.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+        <article class="upgrade" id="up-frameassembly">
+          <header>
+            <em>03</em>
+            <div>
+              <h3>Frame assembly</h3>
+              <p class="what">Stricter check · new specialist FrameAssemblyBarGraspPolicy</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip ok">5/5*</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_06_FrameAssembly.jpg"><source src="assets/dataset/demo1/06_FrameAssembly.mp4" type="video/mp4"></video>
+              <figcaption>Demo 1 counts 5/5, but the old check passed when the frame centre was within 10 cm of the post midpoint. A frame hanging on the post tips was a success.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip ok">5/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_06_FrameAssembly.jpg"><source src="assets/dataset/demo2/06_FrameAssembly.mp4" type="video/mp4"></video>
+              <figcaption>Success now needs the frame within 2 cm of the wall, within 3 cm of the post centres, under 10° to the wall, and still for 0.25 s. The new specialist rotates the gripper 90° and clamps the top bar, measures the frame in front of the posts, aligns, pushes it flat to the wall, and releases. For this task only, finger stiffness goes from 100 to 1000 (a 2 cm bar used to get under 1 N of grip and spun in the hand), and the forward limit goes from x ≤ 1.0 to 1.25 m so the wall is reachable.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+        <article class="upgrade" id="up-tossball">
+          <header>
+            <em>04</em>
+            <div>
+              <h3>Toss ball</h3>
+              <p class="what">New specialist · TossBallLobPolicy</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip bad">0/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_08_TossBall.jpg"><source src="assets/dataset/demo1/08_TossBall.mp4" type="video/mp4"></video>
+              <figcaption>The official specialist pitched the gripper 36° down at the start. The fingers hit the vehicle’s own rotor arm and the ball was squeezed out.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip ok">5/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_08_TossBall.jpg"><source src="assets/dataset/demo2/08_TossBall.mp4" type="video/mp4"></video>
+              <figcaption>The gripper stays level and flies behind the bin, then accelerates smoothly. The landing point is predicted from the ball’s measured position and velocity, and the fingers open when that point reaches the bin centre. The vehicle slows and backs off only after the fingers are fully open. Success check is official.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+        <article class="upgrade" id="up-opendoor">
+          <header>
+            <em>05</em>
+            <div>
+              <h3>Open door</h3>
+              <p class="what">Door latch in the check · new specialist OpenDoorHandlePolicy</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip ok">5/5*</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_12_OpenDoor.jpg"><source src="assets/dataset/demo1/12_OpenDoor.mp4" type="video/mp4"></video>
+              <figcaption>Demo 1 counts 5/5, but the old check only asked for the door to open more than 20°. The specialist pushed the door open with the airframe. The arm never touched the handle.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip ok">5/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg"><source src="assets/dataset/demo2/12_OpenDoor.mp4" type="video/mp4"></video>
+              <figcaption>The door now starts latched. The gripper has to close at the handle and hold for 0.2 s to unlatch it, and success is the door opening past 20° after that. The specialist aligns in closed loop in front of the handle, reaches in, closes, waits for the unlatch, then pushes along the hinge arc.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="platform">
+      <div class="wrap">
+        <div class="section-index">03 — Platform only</div>
+        <h2>Two tasks recovered just by moving to FA-Hexa.</h2>
+        <p class="intro">No code changed for these two. Same official specialist, same check. The only difference is the vehicle.</p>
+        
+        <article class="upgrade platform">
+          <header>
+            <em><span class="chip bad">0/5</span>→<span class="chip ok">5/5</span></em>
+            <div>
+              <h3>Cabinet pick and place</h3>
+              <p class="what">OmniHexa runs out the 60 s episode in every Demo 1 attempt. On FA-Hexa the same official specialist finishes in about 28 s, 5 of 5.</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip bad">0/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_05_CabinetPickPlace.jpg"><source src="assets/dataset/demo1/05_CabinetPickPlace.mp4" type="video/mp4"></video>
+              <figcaption>OmniHexa with the official specialist.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip ok">5/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg"><source src="assets/dataset/demo2/05_CabinetPickPlace.mp4" type="video/mp4"></video>
+              <figcaption>FA-Hexa with the same official specialist.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+        <article class="upgrade platform">
+          <header>
+            <em><span class="chip bad">0/5</span>→<span class="chip part">4/5</span></em>
+            <div>
+              <h3>Harvest lemon</h3>
+              <p class="what">0 of 5 on OmniHexa, 4 of 5 on FA-Hexa. Run 4 failed and was kept, not re-recorded. Six further diagnostic runs all succeeded, so the official specialist stands at 10 of 11 on FA-Hexa, and it was left unchanged.</p>
+            </div>
+          </header>
+          <div class="ba-pair" data-pair>
+            <figure class="ba-side before">
+              <div class="ba-tag"><b>Before</b> Demo 1 · OmniHexa · official <span class="chip bad">0/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo1_07_LemonHarvesting.jpg"><source src="assets/dataset/demo1/07_LemonHarvesting.mp4" type="video/mp4"></video>
+              <figcaption>OmniHexa with the official specialist.</figcaption>
+            </figure>
+            <figure class="ba-side after">
+              <div class="ba-tag"><b>After</b> Demo 2 · FA-Hexa <span class="chip part">4/5</span></div>
+              <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_07_LemonHarvesting.jpg"><source src="assets/dataset/demo2/07_LemonHarvesting.mp4" type="video/mp4"></video>
+              <figcaption>FA-Hexa with the same official specialist.</figcaption>
+            </figure>
+          </div>
+          <button type="button" class="textbtn sync" data-sync>Play both from the start</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="all-tasks">
+      <div class="wrap">
+        <div class="section-index">04 — All twelve tasks</div>
+        <h2>Every task, run 1 of 5.</h2>
+        <div class="seg" role="group" aria-label="Choose recording">
+          <button type="button" data-demo="demo1" aria-pressed="false">Demo 1 · OmniHexa · official</button>
+          <button type="button" data-demo="demo2" aria-pressed="true">Demo 2 · FA-Hexa · upgraded</button>
+        </div>
+        <div class="gallery" data-gallery>
+          <figure class="tile" data-task="01_PressButton" data-r1="5/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_01_PressButton.jpg">
+              <source src="assets/dataset/demo2/01_PressButton.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>01 · Press button</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind same">Unchanged</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="02_PegInHole" data-r1="0/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_02_PegInHole.jpg">
+              <source src="assets/dataset/demo2/02_PegInHole.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>02 · Peg-in-hole</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind up">Specialist upgraded</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="03_NDT" data-r1="5/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_03_NDT.jpg">
+              <source src="assets/dataset/demo2/03_NDT.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>03 · Inspect surface (NDT)</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind same">Unchanged</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="04_WipeWindow" data-r1="0/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_04_WipeWindow.jpg">
+              <source src="assets/dataset/demo2/04_WipeWindow.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>04 · Wipe window</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind up">Specialist upgraded</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="05_CabinetPickPlace" data-r1="0/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg">
+              <source src="assets/dataset/demo2/05_CabinetPickPlace.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>05 · Cabinet pick and place</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind plat">Platform only</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="06_FrameAssembly" data-r1="5/5*" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_06_FrameAssembly.jpg">
+              <source src="assets/dataset/demo2/06_FrameAssembly.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>06 · Frame assembly</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind up">Specialist upgraded</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="07_LemonHarvesting" data-r1="0/5" data-r2="4/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_07_LemonHarvesting.jpg">
+              <source src="assets/dataset/demo2/07_LemonHarvesting.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>07 · Harvest lemon</b> <span class="tile-result"><span class="chip part">4/5</span></span> <span class="kind plat">Platform only</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="08_TossBall" data-r1="0/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_08_TossBall.jpg">
+              <source src="assets/dataset/demo2/08_TossBall.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>08 · Toss ball</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind up">Specialist upgraded</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="09_RotateValve" data-r1="5/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_09_RotateValve.jpg">
+              <source src="assets/dataset/demo2/09_RotateValve.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>09 · Rotate valve</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind same">Unchanged</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="10_PushSlider" data-r1="5/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_10_PushSlider.jpg">
+              <source src="assets/dataset/demo2/10_PushSlider.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>10 · Push slider</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind same">Unchanged</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="11_PullLever" data-r1="5/5" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_11_PullLever.jpg">
+              <source src="assets/dataset/demo2/11_PullLever.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>11 · Pull lever</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind same">Unchanged</span></figcaption>
+          </figure>
+          <figure class="tile" data-task="12_OpenDoor" data-r1="5/5*" data-r2="5/5">
+            <video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg">
+              <source src="assets/dataset/demo2/12_OpenDoor.mp4" type="video/mp4">
+            </video>
+            <figcaption><b>12 · Open door</b> <span class="tile-result"><span class="chip ok">5/5</span></span> <span class="kind up">Specialist upgraded</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="dataset-next">
+      <div class="wrap">
+        <div class="section-index">05 — Limits, and what comes next</div>
+        <div class="weeks">
+          <article class="week next">
+            <div class="when">Known limits</div>
+            <h3>What the upgrades do not fix</h3>
+            <ul>
+              <li>Open door: the handle bar in <code>door.usd</code> sits flush on the door and has no collision body, so it cannot be gripped. “Using the handle” means closing the gripper at the handle position to unlatch, not grasping the bar.</li>
+              <li>Frame assembly changes finger stiffness and the forward limit for that task only.</li>
+              <li>The upgrades are on the AM-Bench branch <code>omnihexa-task-fixes</code> and are not committed yet.</li>
+              <li>Harvest lemon keeps one rare failure, 1 in 11 on FA-Hexa.</li>
+            </ul>
+          </article>
+          <article class="week this">
+            <div class="when">Next</div>
+            <h3>Record at scale, then LoRA</h3>
+            <ul>
+              <li>Record 80 successful demonstrations per task with these specialists, the count AM-Bench used for π0.5, with small waypoint noise.</li>
+              <li>Keep the end-effector camera, as in the paper, and also record the base camera for a camera ablation.</li>
+              <li>Export to OpenPI at 20 Hz, compute norm stats, and run π0.5 LoRA on one 24 GB card.</li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+    </details>
   </main>
 
   <footer>
     <div class="wrap">
-      <p>Updated 15 October 2026. The two-week plan is the current schedule.</p>
-      <p>Paper figures belong to their authors and are cited here with links to arXiv. The pipeline diagram, the adapter diagram, the simulation frames, and the controller log are project figures.</p>
+      <p>Updated 17 October 2026. The Introduction is the 12–15 October update. The Dataset page is new.</p>
+      <p>Paper figures belong to their authors and are cited here with links to arXiv. The pipeline diagram, the adapter diagram, the simulation frames, the controller log, and the Demo 1 / Demo 2 videos are project recordings.</p>
       <p>Open <code>index.html</code> locally. For GitHub Pages, publish the repository root from the main branch.</p>
     </div>
   </footer>

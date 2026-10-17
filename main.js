@@ -82,6 +82,66 @@
     }
   });
 
+  // A link to anything inside a collapsed page opens that page first.
+  function revealHash(hash) {
+    if (!hash || hash === "#") return;
+    let target = null;
+    try { target = document.querySelector(hash); } catch (err) { return; }
+    if (!target) return;
+    for (let node = target; node; node = node.parentElement) {
+      if (node.tagName === "DETAILS") node.open = true;
+    }
+    if (target.tagName === "DETAILS") target.open = true;
+  }
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest("a[href^='#']");
+    if (link) revealHash(link.getAttribute("href"));
+  });
+  window.addEventListener("hashchange", () => revealHash(location.hash));
+  if (location.hash) {
+    revealHash(location.hash);
+    const target = document.querySelector(location.hash);
+    if (target) target.scrollIntoView();
+  }
+
+  // Before / after: restart both videos together.
+  document.querySelectorAll("[data-sync]").forEach((button) => {
+    const pair = button.previousElementSibling;
+    button.addEventListener("click", () => {
+      pair.querySelectorAll("video").forEach((video) => {
+        video.currentTime = 0;
+        const played = video.play();
+        if (played && played.catch) played.catch(() => {});
+      });
+    });
+  });
+
+  // All-tasks gallery: switch every tile between Demo 1 and Demo 2.
+  const gallery = document.querySelector("[data-gallery]");
+  const seg = document.querySelector(".seg");
+  if (gallery && seg) {
+    const chipClass = (result) =>
+      result.startsWith("5/5") ? "ok" : parseInt(result, 10) > 0 ? "part" : "bad";
+    seg.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-demo]");
+      if (!button) return;
+      const demo = button.dataset.demo;
+      seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === button)));
+      gallery.querySelectorAll(".tile").forEach((tile) => {
+        const task = tile.dataset.task;
+        const video = tile.querySelector("video");
+        video.pause();
+        video.poster = `assets/dataset/poster/${demo}_${task}.jpg`;
+        video.querySelector("source").src = `assets/dataset/${demo}/${task}.mp4`;
+        video.load();
+        const result = demo === "demo1" ? tile.dataset.r1 : tile.dataset.r2;
+        const chip = tile.querySelector(".tile-result .chip");
+        chip.textContent = result;
+        chip.className = "chip " + chipClass(result);
+      });
+    });
+  }
+
   const links = [...document.querySelectorAll(".nav a[href^='#']")];
   const sections = links
     .map((link) => document.querySelector(link.getAttribute("href")))
