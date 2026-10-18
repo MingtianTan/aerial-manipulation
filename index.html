@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Aerial Manipulation · Flight DiT and π0.5</title>
-  <meta name="description" content="Aerial manipulation: keep a tabletop-pretrained VLA for the arm and model flight with a small Flight DiT. Includes the FA-Hexa specialist dataset, before and after the upgrades.">
+  <meta name="description" content="Aerial manipulation: keep a tabletop-pretrained VLA for the arm and model flight with a small Flight DiT. Includes the FA-Hexa specialist trajectories, before and after the upgrades.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23123a40' width='32' height='32' rx='6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ffffff'/%3E%3Cpath d='M6 16h6M20 16h6M16 6v6M16 20v6' stroke='%23cfe9ec' stroke-width='1.6'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +17,7 @@
       <a class="brand" href="#top">Aerial Manipulation</a>
       <ul>
         <li><a href="#introduction">Introduction</a></li>
-        <li><a href="#dataset">Dataset</a></li>
+        <li><a href="#dataset">Specialist trajectories</a></li>
         <li><a href="#upgrades">Before / after</a></li>
         <li><a href="#all-tasks">All tasks</a></li>
       </ul>
@@ -97,38 +97,13 @@
       </div>
     </section>
 
-    <section id="progress">
-      <div class="wrap">
-        <h2>Current work</h2>
-        <p class="sub">Zero-shot π0.5 in the simulator, 12 Oct 2026</p>
-        <ul class="points">
-          <li><b>Setup.</b> Frozen π0.5-DROID runs over a WebSocket. A virtual Franka sits in between: the policy thinks it moves a 7-DoF arm over a table, while the simulator flies a vehicle with a 4-DoF arm toward a button on a wall. Recorded on UA-Quad; the project platform is now FA-Hexa.</li>
-          <li><b>Loop.</b> Inputs are two RGB images, 7 joint angles, the gripper state and the instruction “press the button”. Each call returns 15 steps; the first 8 run (1/15 s), then the policy is queried again. Low level is IK plus PID at 120 Hz.</li>
-          <li><b>Result.</b> The loop closes and the vehicle moves toward the button, and the gripper opens near the end, so commands reach the low level. The policy does not understand the task yet.</li>
-          <li><b>Takeaways.</b> LoRA is needed before the policy understands the task. Deployment alone uses about 14.6 GB of GPU memory.</li>
-        </ul>
-        <div class="media-2">
-          <figure class="figure">
-            <video controls muted playsinline preload="metadata" poster="assets/sim/f5.jpg">
-              <source src="assets/approach.mp4" type="video/mp4">
-            </video>
-            <figcaption>The 12 Oct zero-shot run in Isaac Sim.</figcaption>
-          </figure>
-          <figure class="figure">
-            <img src="assets/transfer.jpg" alt="Closed-loop transfer from π0.5-DROID to the simulated vehicle through a virtual Franka adapter">
-            <figcaption>The virtual-Franka adapter between π0.5-DROID and the simulated vehicle.</figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
     <section id="plan">
       <div class="wrap">
         <h2>Plan</h2>
         <ul class="points">
           <li><b>Goal: ICML 2027.</b> Dates are not out yet; going by the 2026 cycle, the abstract is due around 23 Jan and the full paper around 28 Jan 2027 (<a href="https://icml.cc/Conferences/2026/Dates">2026 dates</a>). That is about 15 weeks from mid-October.</li>
-          <li><b>This week.</b> Record the specialist dataset (see Part 2), train π0.5 LoRA on it, and put the LoRA back into the simulator.</li>
-          <li><b>Next week.</b> Start Stage A: train RDT-170M on flight actions only and keep the pre-MLP token as F<sub>flight</sub>.</li>
+          <li><b>Next week: dataset and a π0.5 baseline.</b> Generate the training dataset with RL. Fine-tune π0.5 with LoRA on it and evaluate it as one of the baselines in the benchmark, to see how well a fine-tuned VLA does on its own.</li>
+          <li><b>After that: train the Flight DiT.</b> Start Stage A: train RDT-170M on flight actions only and keep the pre-MLP token as F<sub>flight</sub>.</li>
         </ul>
         <div class="table-wrap">
           <table>
@@ -138,8 +113,8 @@
             <tbody>
               <tr><td>Full AC-DiT</td><td>8×A100, about two weeks</td><td>Out of scope</td></tr>
               <tr><td>RDT-1B fine-tune</td><td>4×A100, about a week (≈ $500 per run)</td><td>Too expensive</td></tr>
-              <tr><td>π0.5 LoRA</td><td>One GPU, about 2–3 days</td><td>This week</td></tr>
-              <tr><td>RDT-170M</td><td>One 4090, about a week</td><td>Next week</td></tr>
+              <tr><td>π0.5 LoRA</td><td>One GPU, about 2–3 days</td><td>Next week, as a benchmark baseline</td></tr>
+              <tr><td>RDT-170M</td><td>One 4090, about a week</td><td>After the LoRA baseline</td></tr>
             </tbody>
           </table>
         </div>
@@ -150,7 +125,7 @@
     <section id="dataset" class="part">
       <div class="wrap">
         <p class="part-label">Part 2</p>
-        <h2 class="part-title">Dataset</h2>
+        <h2 class="part-title">Specialist trajectories</h2>
       </div>
     </section>
 
@@ -397,7 +372,7 @@
 
   <footer>
     <div class="wrap">
-      <p>Paper results are cited with links to the papers. The pipeline and adapter diagrams and all simulation videos are project material.</p>
+      <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
   <script src="main.js"></script>
