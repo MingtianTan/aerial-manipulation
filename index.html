@@ -134,6 +134,7 @@
       <div class="wrap">
         <h2>Specialist dataset on FA-Hexa</h2>
         <ul class="points">
+          <li><b>“Official” means AM-Bench.</b> Everything marked official or “before” is the unmodified code of <a href="https://ambench.github.io/">AM-Bench</a> (<a href="https://arxiv.org/abs/2609.00641">paper</a>, <a href="https://github.com/ambench/ambench">code</a>): its 12 tasks, scripted specialists and success checks. “Upgraded” is the same code with the changes below.</li>
           <li><b>Why check the specialists.</b> π0.5 LoRA is trained on successful demonstrations from AM-Bench's scripted specialists, one per task. A specialist that cheats a loose success check, or fails for reasons unrelated to the task, would go straight into the training data. So every task was recorded five times and watched before recording at scale.</li>
           <li><b>Platform and control.</b> FA-Hexa (fully actuated hexarotor, 4-DoF arm), absolute end-effector targets, IK plus PID at 120 Hz.</li>
           <li><b>Videos.</b> 1280×720, real time. Each clip stops 5 s after success, or at the end of the episode. The overlay shows the task, run, time and a green “SUCCESS at X.Xs”.</li>
@@ -146,7 +147,7 @@
         <div class="table-wrap">
           <table class="results">
             <thead>
-              <tr><th>Task</th><th>Official</th><th>Upgraded</th><th>Change</th></tr>
+              <tr><th>Task</th><th>Official (AM-Bench)</th><th>Upgraded</th><th>Change</th></tr>
             </thead>
             <tbody>
               <tr><td>01 Press button</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None</td></tr>
@@ -318,6 +319,17 @@
           <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_11_PullLever.jpg" src="assets/dataset/demo2/11_PullLever.mp4"></video><figcaption>11 Pull lever <span class="chip ok">5/5</span></figcaption></figure>
           <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg" src="assets/dataset/demo2/12_OpenDoor.mp4"></video><figcaption>12 Open door <span class="chip ok">5/5</span></figcaption></figure>
         </div>
+      </div>
+    </section>
+
+    <section id="dataset-refs">
+      <div class="wrap">
+        <h2>Related work</h2>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2609.00641">AM-Bench</a> <span>(Wang et al., 2026)</span>: a modular simulation suite and benchmark for aerial manipulation policy learning, built on Isaac Lab. It provides the vehicles (FA-Hexa among them), the 12 tasks, the scripted specialists and the π0.5 baseline used here. <a href="https://ambench.github.io/">Project page</a> · <a href="https://ambench.github.io/docs/">Documentation</a> · <a href="https://github.com/ambench/ambench">Code</a>.</li>
+          <li><a href="https://isaac-sim.github.io/IsaacLab/">Isaac Lab</a> <span>(NVIDIA)</span>: the GPU simulation framework AM-Bench runs on (Isaac Sim 5.1).</li>
+          <li><a href="https://arxiv.org/abs/2504.16054">π0.5</a> <span>(Physical Intelligence, 2025)</span>: the VLA these trajectories are for, fine-tuned with LoRA through <a href="https://github.com/Physical-Intelligence/openpi">OpenPI</a>.</li>
+        </ul>
       </div>
     </section>
 
