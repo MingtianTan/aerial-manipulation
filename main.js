@@ -1,6 +1,35 @@
 (function () {
-  // Before / after: every pair plays together on a loop; buttons restart or pause them all.
+  // Parts start collapsed. A link into a part opens it; closing a part pauses its videos.
+  const parts = [...document.querySelectorAll("details.part-block")];
+
+  function openPartOf(target) {
+    const part = target.closest("details.part-block");
+    if (part && !part.open) part.open = true;
+  }
+
+  document.querySelectorAll("a[href^='#']").forEach((link) => {
+    link.addEventListener("click", () => {
+      const target = document.getElementById(link.getAttribute("href").slice(1));
+      if (target) openPartOf(target);
+    });
+  });
+
+  // A shared link to something inside a part opens that part; a link to a part's own bar leaves it closed.
+  function revealHash() {
+    const target = location.hash && document.getElementById(location.hash.slice(1));
+    if (!target || target.tagName === "SUMMARY") return;
+    openPartOf(target);
+    target.scrollIntoView({ behavior: "instant" });
+  }
+  revealHash();
+  window.addEventListener("hashchange", () => {
+    const target = location.hash && document.getElementById(location.hash.slice(1));
+    if (target && target.tagName !== "SUMMARY") openPartOf(target);
+  });
+
+  // Before / after: every pair plays together on a loop while Part 2 is open; buttons restart or pause them all.
   const clips = [...document.querySelectorAll("#upgrades video")];
+  const clipsPart = clips.length ? clips[0].closest("details.part-block") : null;
   const pauseButton = document.querySelector("[data-pause-all]");
 
   function playAll() {
@@ -29,15 +58,31 @@
     });
   }
 
-  // Start all clips from zero together once each can play.
-  let ready = 0;
-  clips.forEach((video) => {
-    const onReady = () => {
-      ready += 1;
-      if (ready === clips.length) restartAll();
-    };
-    if (video.readyState >= 3) onReady();
-    else video.addEventListener("canplay", onReady, { once: true });
+  // Start all clips, then restart them from zero together once each can play.
+  let opening = 0;
+  function startClips() {
+    const run = ++opening;
+    playAll();
+    const waiting = clips.filter((video) => video.readyState < 3);
+    let left = waiting.length;
+    if (!left) return restartAll();
+    waiting.forEach((video) => {
+      video.addEventListener("canplay", () => {
+        left -= 1;
+        if (left === 0 && run === opening && clipsPart.open) restartAll();
+      }, { once: true });
+    });
+  }
+
+  parts.forEach((part) => {
+    part.addEventListener("toggle", () => {
+      if (part.open) {
+        if (part === clipsPart) startClips();
+      } else {
+        opening += 1;
+        part.querySelectorAll("video").forEach((video) => video.pause());
+      }
+    });
   });
 
   // Highlight the nav link of the part in view.

@@ -33,12 +33,16 @@
     </div>
 
     <!-- Introduction -->
-    <section id="introduction" class="part">
-      <div class="wrap">
-        <p class="part-label">Part 1</p>
-        <h2 class="part-title">Introduction</h2>
-      </div>
-    </section>
+    <details class="part-block">
+      <summary class="part" id="introduction">
+        <span class="wrap part-head">
+          <span>
+            <span class="part-label">Part 1</span>
+            <h2 class="part-title">Introduction</h2>
+          </span>
+          <span class="part-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
 
     <section id="problem">
       <div class="wrap">
@@ -122,13 +126,19 @@
       </div>
     </section>
 
+    </details>
+
     <!-- Dataset -->
-    <section id="dataset" class="part">
-      <div class="wrap">
-        <p class="part-label">Part 2</p>
-        <h2 class="part-title">Specialist trajectories</h2>
-      </div>
-    </section>
+    <details class="part-block">
+      <summary class="part" id="dataset">
+        <span class="wrap part-head">
+          <span>
+            <span class="part-label">Part 2</span>
+            <h2 class="part-title">Specialist trajectories</h2>
+          </span>
+          <span class="part-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
 
     <section id="dataset-overview">
       <div class="wrap">
@@ -183,11 +193,11 @@
           <div class="pair">
             <figure>
               <figcaption><span class="side before">Before</span><span class="chip bad">0/5</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/before/08_TossBall.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/before/08_TossBall.mp4"></video>
             </figure>
             <figure>
               <figcaption><span class="side after">After</span><span class="chip ok">5/5 · ~5.2 s</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/demo2/08_TossBall.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/demo2/08_TossBall.mp4"></video>
             </figure>
           </div>
           <div class="notes">
@@ -207,11 +217,11 @@
           <div class="pair">
             <figure>
               <figcaption><span class="side before">Before</span><span class="chip bad">0/5</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/before/04_WipeWindow.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/before/04_WipeWindow.mp4"></video>
             </figure>
             <figure>
               <figcaption><span class="side after">After</span><span class="chip ok">5/5 · 6–10 s</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/demo2/04_WipeWindow.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/demo2/04_WipeWindow.mp4"></video>
             </figure>
           </div>
           <div class="notes">
@@ -231,11 +241,11 @@
           <div class="pair">
             <figure>
               <figcaption><span class="side before">Before</span><span class="chip bad">0/5</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/before/06_FrameAssembly.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/before/06_FrameAssembly.mp4"></video>
             </figure>
             <figure>
               <figcaption><span class="side after">After</span><span class="chip ok">5/5 · seated flush</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/demo2/06_FrameAssembly.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/demo2/06_FrameAssembly.mp4"></video>
             </figure>
           </div>
           <div class="notes">
@@ -256,11 +266,11 @@
           <div class="pair">
             <figure>
               <figcaption><span class="side before">Before</span><span class="chip part">5/5* · pushes the door</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/before/12_OpenDoor.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/before/12_OpenDoor.mp4"></video>
             </figure>
             <figure>
               <figcaption><span class="side after">After</span><span class="chip ok">5/5 · via the handle</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/demo2/12_OpenDoor.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/demo2/12_OpenDoor.mp4"></video>
             </figure>
           </div>
           <div class="notes">
@@ -280,11 +290,11 @@
           <div class="pair">
             <figure>
               <figcaption><span class="side before">Before</span><span class="chip part">this run failed · 6/8 overall</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/before/02_PegInHole.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/before/02_PegInHole.mp4"></video>
             </figure>
             <figure>
               <figcaption><span class="side after">After</span><span class="chip ok">7/7 · ~8.9 s</span></figcaption>
-              <video muted autoplay loop playsinline preload="auto" src="assets/dataset/demo2/02_PegInHole.mp4"></video>
+              <video muted loop playsinline preload="none" src="assets/dataset/demo2/02_PegInHole.mp4"></video>
             </figure>
           </div>
           <div class="notes">
@@ -333,13 +343,19 @@
       </div>
     </section>
 
+    </details>
+
     <!-- Dataset generation -->
-    <section id="dataset-generation" class="part">
-      <div class="wrap">
-        <p class="part-label">Part 3</p>
-        <h2 class="part-title">Dataset generation</h2>
-      </div>
-    </section>
+    <details class="part-block">
+      <summary class="part" id="dataset-generation">
+        <span class="wrap part-head">
+          <span>
+            <span class="part-label">Part 3</span>
+            <h2 class="part-title">Dataset generation</h2>
+          </span>
+          <span class="part-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
 
     <section id="generation-sources">
       <div class="wrap">
@@ -374,6 +390,7 @@
         </ul>
       </div>
     </section>
+    </details>
   </main>
 
   <footer>
