@@ -18,18 +18,19 @@ recording and evaluation pipeline, and the recorded videos.
 | `pipeline/ambench_way/` | The AM-Bench π0.5 path: record, prepare data, serve, evaluate. |
 | `pipeline/am_ins.txt` | Launch notes. |
 | `data/videos/fahexa_demo2/` | FA-Hexa, 12 tasks × 5 runs, with the upgraded specialists (Part 2 "after" and the gallery). |
-| `data/videos/before_clips/` | The official specialists on the 5 changed tasks (Part 2 "before"). |
+| `data/videos/before_clips/` | The official specialists on the 6 changed tasks (Part 2 "before"). |
 | `data/videos/omnihexa_demo/` | The first recording on OmniHexa with the official specialists. |
 | `data/asset_backup/` | The original `omni_scorpion_physics.usd`, before the collider change. |
 
 ## Changed tasks
 
-The specialists and success checks changed for five tasks on `*-Am-FAHexa-Abs-PID-Direct-v0`:
+The specialists and success checks changed for six tasks on `*-Am-FAHexa-Abs-PID-Direct-v0`:
 
 - **Toss ball**: `TossBallLobPolicy` in `policies/scripted/toss_ball.py`.
 - **Wipe window**: `WipeWindowPressPolicy` in `policies/scripted/wipe_window.py`.
 - **Frame assembly**: `FrameAssemblyBarGraspPolicy` in `policies/scripted/frame_assembly.py`, and a seated success check in `tasks/frame_assembly/frame_assembly_env.py`.
 - **Open door**: `OpenDoorHandlePolicy` in `policies/scripted/open_door.py`, and a handle latch in `tasks/open_door/`.
+- **Harvest lemon**: `LemonHarvestingCenterDropPolicy` in `policies/scripted/lemon_harvesting.py`.
 - **Peg in hole**: a grasp-length fix in `tasks/base/base_env.py` and `robots/fa_hexa.py`.
 
 All paths above are under `ambench/source/ambench/ambench/`.
