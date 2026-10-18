@@ -85,6 +85,34 @@
     });
   });
 
+  // All tasks: switch the gallery between flight conditions. The default clips keep their original URLs.
+  const gallery = document.querySelector("[data-gallery]");
+  const conditionButtons = [...document.querySelectorAll("[data-condition]")].filter((el) => el.tagName === "BUTTON");
+  const conditionNote = document.querySelector("[data-condition-note]");
+  if (gallery && conditionButtons.length) {
+    const figures = [...gallery.querySelectorAll("figure[data-task]")];
+    figures.forEach((figure) => {
+      const video = figure.querySelector("video");
+      figure.dataset.defaultSrc = video.getAttribute("src");
+      figure.dataset.defaultPoster = video.getAttribute("poster");
+    });
+    conditionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const condition = button.dataset.condition;
+        conditionButtons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+        gallery.dataset.condition = condition;
+        figures.forEach((figure) => {
+          const video = figure.querySelector("video");
+          video.pause();
+          const task = figure.dataset.task;
+          video.poster = condition === "default" ? figure.dataset.defaultPoster : `assets/dataset/poster/${condition}_${task}.jpg`;
+          video.src = condition === "default" ? figure.dataset.defaultSrc : `assets/dataset/${condition}/${task}.mp4`;
+        });
+        if (conditionNote) conditionNote.textContent = button.dataset.note;
+      });
+    });
+  }
+
   // Highlight the nav link for what is in view: the section's own link if it has one, else its part's.
   const links = [...document.querySelectorAll(".nav a[href^='#']")];
   const linkFor = new Map();

@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261018b">
+  <link rel="stylesheet" href="styles.css?v=20261018c">
 </head>
 <body>
   <header class="nav">
@@ -337,21 +337,40 @@
     <section id="all-tasks">
       <div class="wrap wide">
         <h2>All twelve tasks</h2>
-        <p class="sub">FA-Hexa after the upgrades, run 1 of 5.</p>
-        <div class="gallery">
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_01_PressButton.jpg" src="assets/dataset/demo2/01_PressButton.mp4"></video><figcaption>01 Press button <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_02_PegInHole.jpg" src="assets/dataset/demo2/02_PegInHole.mp4"></video><figcaption>02 Peg in hole <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_03_NDT.jpg" src="assets/dataset/demo2/03_NDT.mp4"></video><figcaption>03 Inspect surface (NDT) <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_04_WipeWindow.jpg" src="assets/dataset/demo2/04_WipeWindow.mp4"></video><figcaption>04 Wipe window <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg" src="assets/dataset/demo2/05_CabinetPickPlace.mp4"></video><figcaption>05 Cabinet pick and place <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_06_FrameAssembly.jpg" src="assets/dataset/demo2/06_FrameAssembly.mp4"></video><figcaption>06 Frame assembly <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_07_LemonHarvesting.jpg?v=2" src="assets/dataset/demo2/07_LemonHarvesting.mp4?v=2"></video><figcaption>07 Harvest lemon <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_08_TossBall.jpg" src="assets/dataset/demo2/08_TossBall.mp4"></video><figcaption>08 Toss ball <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_09_RotateValve.jpg" src="assets/dataset/demo2/09_RotateValve.mp4"></video><figcaption>09 Rotate valve <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_10_PushSlider.jpg" src="assets/dataset/demo2/10_PushSlider.mp4"></video><figcaption>10 Push slider <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_11_PullLever.jpg" src="assets/dataset/demo2/11_PullLever.mp4"></video><figcaption>11 Pull lever <span class="chip ok">5/5</span></figcaption></figure>
-          <figure><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg" src="assets/dataset/demo2/12_OpenDoor.mp4"></video><figcaption>12 Open door <span class="chip ok">5/5</span></figcaption></figure>
+        <p class="sub">FA-Hexa after the upgrades, under five flight conditions. Wind blows toward the work surface.</p>
+        <div class="segmented" role="group" aria-label="Flight condition">
+          <button type="button" aria-pressed="true" data-condition="default" data-note="AM-Bench default: no thrust limits, no aerodynamic effects, no wind. Run 1 of 5.">AM-Bench default</button>
+          <button type="button" aria-pressed="false" data-condition="aero" data-note="Thrust limits (23 N per rotor), ground and near-wall effects, and drag. No wind.">Aero + thrust limits</button>
+          <button type="button" aria-pressed="false" data-condition="wind05" data-note="Aero + thrust limits, plus a constant 3.3 N wind: 5% of the 65 N weight.">Wind 5%</button>
+          <button type="button" aria-pressed="false" data-condition="wind10" data-note="Aero + thrust limits, plus a constant 6.5 N wind: 10% of the 65 N weight.">Wind 10%</button>
+          <button type="button" aria-pressed="false" data-condition="wind20" data-note="Aero + thrust limits, plus a constant 13.0 N wind: 20% of the 65 N weight.">Wind 20%</button>
         </div>
+        <p class="note condition-note" data-condition-note>AM-Bench default: no thrust limits, no aerodynamic effects, no wind. Run 1 of 5.</p>
+        <div class="gallery" data-gallery data-condition="default">
+          <figure data-task="01_PressButton"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_01_PressButton.jpg" src="assets/dataset/demo2/01_PressButton.mp4"></video><figcaption>01 Press button <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="02_PegInHole"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_02_PegInHole.jpg" src="assets/dataset/demo2/02_PegInHole.mp4"></video><figcaption>02 Peg in hole <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="03_NDT"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_03_NDT.jpg" src="assets/dataset/demo2/03_NDT.mp4"></video><figcaption>03 Inspect surface (NDT) <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="04_WipeWindow"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_04_WipeWindow.jpg" src="assets/dataset/demo2/04_WipeWindow.mp4"></video><figcaption>04 Wipe window <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="05_CabinetPickPlace"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg" src="assets/dataset/demo2/05_CabinetPickPlace.mp4"></video><figcaption>05 Cabinet pick and place <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="06_FrameAssembly"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_06_FrameAssembly.jpg" src="assets/dataset/demo2/06_FrameAssembly.mp4"></video><figcaption>06 Frame assembly <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="07_LemonHarvesting"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_07_LemonHarvesting.jpg?v=2" src="assets/dataset/demo2/07_LemonHarvesting.mp4?v=2"></video><figcaption>07 Harvest lemon <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="08_TossBall"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_08_TossBall.jpg" src="assets/dataset/demo2/08_TossBall.mp4"></video><figcaption>08 Toss ball <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="09_RotateValve"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_09_RotateValve.jpg" src="assets/dataset/demo2/09_RotateValve.mp4"></video><figcaption>09 Rotate valve <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="10_PushSlider"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_10_PushSlider.jpg" src="assets/dataset/demo2/10_PushSlider.mp4"></video><figcaption>10 Push slider <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="11_PullLever"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_11_PullLever.jpg" src="assets/dataset/demo2/11_PullLever.mp4"></video><figcaption>11 Pull lever <span class="chip ok">5/5</span></figcaption></figure>
+          <figure data-task="12_OpenDoor"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg" src="assets/dataset/demo2/12_OpenDoor.mp4"></video><figcaption>12 Open door <span class="chip ok">5/5</span></figcaption></figure>
+        </div>
+        <h3>Specialists under the disturbance conditions</h3>
+        <ul class="points">
+          <li><b>Peg in hole.</b> <code>PegInHoleAlignInsertPolicy</code>: lines the measured peg tip up with the hole axis, pushes it in, then lets go and backs away from the wall.</li>
+          <li><b>Frame assembly.</b> <code>FrameAssemblyBarGraspWindPolicy</code>: stops 30 cm back, then closes in and grasps at half speed (40 s episodes).</li>
+          <li><b>Harvest lemon.</b> <code>LemonHarvestingWindPolicy</code>: holds back, creeps in, grasps once settled, and tears the lemon off downward.</li>
+          <li><b>Toss ball.</b> <code>TossBallLobPolicy</code> up to 10% wind; at 20%, <code>TossBallReachDropPolicy</code> reaches over the bin and drops the ball, because the stop after a lob saturates every rotor.</li>
+          <li><b>Rotate valve.</b> <code>RotateValveTrackHandlePolicy</code>: follows the measured handle on its own circle and rolls the gripper with it.</li>
+          <li><b>Pull lever.</b> <code>PullLeverAlignPolicy</code>: aligns at a stand-off before moving in to grasp.</li>
+          <li><b>Open door.</b> <code>OpenDoorHandleWindPolicy</code>: keeps correcting while it closes, swings only once the latch releases, and retries otherwise.</li>
+          <li><b>The other five tasks</b> use their Part 2 specialists unchanged. Task IDs: <code>&lt;Task&gt;-Am-FAHexa-Abs-PID-{Aero,Wind05,Wind10,Wind20}-Direct-v0</code>.</li>
+        </ul>
       </div>
     </section>
 
@@ -409,6 +428,7 @@
           <li><b>AM-Bench with the fixes.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/ambench"><code>ambench/</code></a>: a snapshot of AM-Bench with the Part 2 specialists and checks; the changes alone are in <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/ambench/SPECIALIST_FIXES.diff"><code>SPECIALIST_FIXES.diff</code></a>.</li>
           <li><b>Pipeline.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/pipeline"><code>pipeline/</code></a>: the demo recorder, probes, and the π0.5 serve and evaluation scripts.</li>
           <li><b>Videos.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/data/videos"><code>data/videos/</code></a>: all 60 FA-Hexa runs and the before clips.</li>
+          <li><b>Disturbance variants.</b> 12 tasks × 4 conditions registered as <code>&lt;Task&gt;-Am-FAHexa-Abs-PID-{Aero,Wind05,Wind10,Wind20}-Direct-v0</code>, each with its specialist; see <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/disturbance-variants.md"><code>docs/disturbance-variants.md</code></a>.</li>
         </ul>
       </div>
     </section>
@@ -420,6 +440,6 @@
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261018b"></script>
+  <script src="main.js?v=20261018c"></script>
 </body>
 </html>
