@@ -85,31 +85,43 @@
     });
   });
 
-  // All tasks: switch the gallery between flight conditions. The default clips keep their original URLs.
-  const gallery = document.querySelector("[data-gallery]");
-  const conditionButtons = [...document.querySelectorAll("[data-condition]")].filter((el) => el.tagName === "BUTTON");
-  const conditionNote = document.querySelector("[data-condition-note]");
-  if (gallery && conditionButtons.length) {
-    const figures = [...gallery.querySelectorAll("figure[data-task]")];
-    figures.forEach((figure) => {
-      const video = figure.querySelector("video");
-      figure.dataset.defaultSrc = video.getAttribute("src");
-      figure.dataset.defaultPoster = video.getAttribute("poster");
+  // All tasks: hover a cell to play it, click to enlarge it.
+  const lightbox = document.querySelector(".lightbox");
+  const canHover = window.matchMedia && window.matchMedia("(hover: hover)").matches;
+  const play = (video) => {
+    const played = video.play();
+    if (played && played.catch) played.catch(() => {});
+  };
+  document.querySelectorAll(".matrix video").forEach((video) => {
+    if (canHover) {
+      video.addEventListener("mouseenter", () => play(video));
+      video.addEventListener("mouseleave", () => video.pause());
+    }
+    video.addEventListener("click", () => {
+      if (!lightbox || typeof lightbox.showModal !== "function") {
+        if (video.paused) play(video);
+        else video.pause();
+        return;
+      }
+      const big = lightbox.querySelector("video");
+      video.pause();
+      big.poster = video.getAttribute("poster");
+      big.src = video.getAttribute("src");
+      lightbox.querySelector("[data-lightbox-title]").textContent = video.getAttribute("aria-label");
+      lightbox.showModal();
+      play(big);
     });
-    conditionButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        const condition = button.dataset.condition;
-        conditionButtons.forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
-        gallery.dataset.condition = condition;
-        figures.forEach((figure) => {
-          const video = figure.querySelector("video");
-          video.pause();
-          const task = figure.dataset.task;
-          video.poster = condition === "default" ? figure.dataset.defaultPoster : `assets/dataset/poster/${condition}_${task}.jpg`;
-          video.src = condition === "default" ? figure.dataset.defaultSrc : `assets/dataset/${condition}/${task}.mp4`;
-        });
-        if (conditionNote) conditionNote.textContent = button.dataset.note;
-      });
+  });
+  if (lightbox) {
+    lightbox.querySelector("[data-lightbox-close]").addEventListener("click", () => lightbox.close());
+    lightbox.addEventListener("click", (event) => {
+      if (event.target === lightbox) lightbox.close();
+    });
+    lightbox.addEventListener("close", () => {
+      const big = lightbox.querySelector("video");
+      big.pause();
+      big.removeAttribute("src");
+      big.load();
     });
   }
 

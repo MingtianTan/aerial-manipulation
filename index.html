@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261018c">
+  <link rel="stylesheet" href="styles.css?v=20261018d">
 </head>
 <body>
   <header class="nav">
@@ -18,8 +18,8 @@
       <ul>
         <li><a href="#introduction">Introduction</a></li>
         <li><a href="#dataset">Specialist trajectories</a></li>
-        <li><a href="#upgrades">Before / after</a></li>
         <li><a href="#all-tasks">All tasks</a></li>
+        <li><a href="#upgrades">Before / after</a></li>
         <li><a href="#dataset-generation">Dataset generation</a></li>
       </ul>
     </div>
@@ -144,38 +144,44 @@
       <div class="wrap">
         <h2>Specialist dataset on FA-Hexa</h2>
         <ul class="points">
-          <li><b>“Official” means AM-Bench.</b> Everything marked official or “before” is the unmodified code of <a href="https://ambench.github.io/">AM-Bench</a> (<a href="https://arxiv.org/abs/2609.00641">paper</a>, <a href="https://github.com/ambench/ambench">code</a>): its 12 tasks, scripted specialists and success checks. “Upgraded” is the same code with the changes below.</li>
-          <li><b>Why check the specialists.</b> π0.5 LoRA is trained on successful demonstrations from AM-Bench's scripted specialists, one per task. A specialist that cheats a loose success check, or fails for reasons unrelated to the task, would go straight into the training data. So every task was recorded five times and watched before recording at scale.</li>
-          <li><b>Platform and control.</b> FA-Hexa (fully actuated hexarotor, 4-DoF arm), absolute end-effector targets, IK plus PID at 120 Hz.</li>
-          <li><b>Videos.</b> 1280×720, real time. Each clip stops 5 s after success, or at the end of the episode. The overlay shows the task, run, time and a green “SUCCESS at X.Xs”.</li>
+          <li><b>“Official” means AM-Bench.</b> The unmodified tasks, scripted specialists and success checks of <a href="https://ambench.github.io/">AM-Bench</a> (<a href="https://arxiv.org/abs/2609.00641">paper</a>, <a href="https://github.com/ambench/ambench">code</a>). “Upgraded” is the same code with the changes below.</li>
+          <li><b>Why check the specialists.</b> π0.5 is trained on their successful demonstrations, so a specialist that cheats a loose check or fails for unrelated reasons would go straight into the data. Every task was recorded and watched before recording at scale.</li>
+          <li><b>Setup.</b> FA-Hexa (fully actuated hexarotor, 4-DoF arm), absolute end-effector targets, IK plus PID at 120 Hz. Clips are 1280×720, real time, and stop 5 s after success.</li>
         </ul>
         <div class="stats">
           <div class="stat"><b>44 / 60</b><span>official AM-Bench code</span></div>
           <div class="stat"><b>60 / 60</b><span>after the upgrades</span></div>
-          <div class="stat"><b>6</b><span>tasks changed</span></div>
+          <div class="stat"><b>5 conditions</b><span>default, aero, wind 5 / 10 / 20%</span></div>
         </div>
-        <div class="table-wrap">
-          <table class="results">
+      </div>
+    </section>
+
+    <section id="all-tasks">
+      <div class="wrap wide">
+        <h2>All twelve tasks under five conditions</h2>
+        <p class="sub">FA-Hexa after the upgrades, one recorded run per cell. Hover to play, click to enlarge.</p>
+        <div class="matrix-wrap">
+          <table class="matrix">
             <thead>
-              <tr><th>Task</th><th>Official <span class="nowrap">(AM-Bench)</span></th><th>Upgraded</th><th>Change</th></tr>
+              <tr><th scope="col">Task<span>official → upgraded, default condition</span></th><th scope="col">AM-Bench default<span>no thrust limits, no wind</span></th><th scope="col">Aero + thrust limits<span>23 N/rotor, ground and wall effects, drag</span></th><th scope="col">Wind 5%<span>+ 3.3 N toward the surface</span></th><th scope="col">Wind 10%<span>+ 6.5 N</span></th><th scope="col">Wind 20%<span>+ 13.0 N</span></th></tr>
             </thead>
             <tbody>
-              <tr><td>01 Press button</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None</td></tr>
-              <tr><td>02 Peg in hole</td><td><span class="chip part">5/5†</span></td><td><span class="chip ok">5/5</span></td><td>Reset grasp fixed</td></tr>
-              <tr><td>03 Inspect surface (NDT)</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None (follow camera only)</td></tr>
-              <tr><td>04 Wipe window</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td>New specialist</td></tr>
-              <tr><td>05 Cabinet pick and place</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None</td></tr>
-              <tr><td>06 Frame assembly</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td>Stricter check, new specialist</td></tr>
-              <tr><td>07 Harvest lemon</td><td><span class="chip part">4/5</span></td><td><span class="chip ok">5/5</span></td><td>New specialist</td></tr>
-              <tr><td>08 Toss ball</td><td><span class="chip bad">0/5</span></td><td><span class="chip ok">5/5</span></td><td>New specialist</td></tr>
-              <tr><td>09 Rotate valve</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None</td></tr>
-              <tr><td>10 Push slider</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None</td></tr>
-              <tr><td>11 Pull lever</td><td><span class="chip ok">5/5</span></td><td><span class="chip ok">5/5</span></td><td>None</td></tr>
-              <tr><td>12 Open door</td><td><span class="chip part">5/5*</span></td><td><span class="chip ok">5/5</span></td><td>Handle latch in the check, new specialist</td></tr>
+              <tr><th scope="row"><b>01 Press button</b><span class="row-meta"><span class="chip ok">5/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Unchanged</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_01_PressButton.jpg" src="assets/dataset/demo2/01_PressButton.mp4" aria-label="01 Press button, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_01_PressButton.jpg" src="assets/dataset/aero/01_PressButton.mp4" aria-label="01 Press button, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_01_PressButton.jpg" src="assets/dataset/wind05/01_PressButton.mp4" aria-label="01 Press button, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_01_PressButton.jpg" src="assets/dataset/wind10/01_PressButton.mp4" aria-label="01 Press button, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_01_PressButton.jpg" src="assets/dataset/wind20/01_PressButton.mp4" aria-label="01 Press button, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>02 Peg in hole</b><span class="row-meta"><span class="chip part">5/5†</span> → <span class="chip ok">5/5</span></span><span class="row-change">Reset grasp fixed</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_02_PegInHole.jpg" src="assets/dataset/demo2/02_PegInHole.mp4" aria-label="02 Peg in hole, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_02_PegInHole.jpg" src="assets/dataset/aero/02_PegInHole.mp4" aria-label="02 Peg in hole, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_02_PegInHole.jpg" src="assets/dataset/wind05/02_PegInHole.mp4" aria-label="02 Peg in hole, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_02_PegInHole.jpg" src="assets/dataset/wind10/02_PegInHole.mp4" aria-label="02 Peg in hole, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_02_PegInHole.jpg" src="assets/dataset/wind20/02_PegInHole.mp4" aria-label="02 Peg in hole, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>03 Inspect surface (NDT)</b><span class="row-meta"><span class="chip ok">5/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Unchanged (follow camera)</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_03_NDT.jpg" src="assets/dataset/demo2/03_NDT.mp4" aria-label="03 Inspect surface (NDT), AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_03_NDT.jpg" src="assets/dataset/aero/03_NDT.mp4" aria-label="03 Inspect surface (NDT), Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_03_NDT.jpg" src="assets/dataset/wind05/03_NDT.mp4" aria-label="03 Inspect surface (NDT), Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_03_NDT.jpg" src="assets/dataset/wind10/03_NDT.mp4" aria-label="03 Inspect surface (NDT), Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_03_NDT.jpg" src="assets/dataset/wind20/03_NDT.mp4" aria-label="03 Inspect surface (NDT), Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>04 Wipe window</b><span class="row-meta"><span class="chip bad">0/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">New specialist</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_04_WipeWindow.jpg" src="assets/dataset/demo2/04_WipeWindow.mp4" aria-label="04 Wipe window, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_04_WipeWindow.jpg" src="assets/dataset/aero/04_WipeWindow.mp4" aria-label="04 Wipe window, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_04_WipeWindow.jpg" src="assets/dataset/wind05/04_WipeWindow.mp4" aria-label="04 Wipe window, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_04_WipeWindow.jpg" src="assets/dataset/wind10/04_WipeWindow.mp4" aria-label="04 Wipe window, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_04_WipeWindow.jpg" src="assets/dataset/wind20/04_WipeWindow.mp4" aria-label="04 Wipe window, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>05 Cabinet pick and place</b><span class="row-meta"><span class="chip ok">5/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Unchanged</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg" src="assets/dataset/demo2/05_CabinetPickPlace.mp4" aria-label="05 Cabinet pick and place, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_05_CabinetPickPlace.jpg" src="assets/dataset/aero/05_CabinetPickPlace.mp4" aria-label="05 Cabinet pick and place, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_05_CabinetPickPlace.jpg" src="assets/dataset/wind05/05_CabinetPickPlace.mp4" aria-label="05 Cabinet pick and place, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_05_CabinetPickPlace.jpg" src="assets/dataset/wind10/05_CabinetPickPlace.mp4" aria-label="05 Cabinet pick and place, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_05_CabinetPickPlace.jpg" src="assets/dataset/wind20/05_CabinetPickPlace.mp4" aria-label="05 Cabinet pick and place, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>06 Frame assembly</b><span class="row-meta"><span class="chip bad">0/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Stricter check, new specialist</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_06_FrameAssembly.jpg" src="assets/dataset/demo2/06_FrameAssembly.mp4" aria-label="06 Frame assembly, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_06_FrameAssembly.jpg" src="assets/dataset/aero/06_FrameAssembly.mp4" aria-label="06 Frame assembly, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_06_FrameAssembly.jpg" src="assets/dataset/wind05/06_FrameAssembly.mp4" aria-label="06 Frame assembly, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_06_FrameAssembly.jpg" src="assets/dataset/wind10/06_FrameAssembly.mp4" aria-label="06 Frame assembly, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_06_FrameAssembly.jpg" src="assets/dataset/wind20/06_FrameAssembly.mp4" aria-label="06 Frame assembly, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>07 Harvest lemon</b><span class="row-meta"><span class="chip part">4/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">New specialist</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_07_LemonHarvesting.jpg?v=2" src="assets/dataset/demo2/07_LemonHarvesting.mp4?v=2" aria-label="07 Harvest lemon, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_07_LemonHarvesting.jpg" src="assets/dataset/aero/07_LemonHarvesting.mp4" aria-label="07 Harvest lemon, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_07_LemonHarvesting.jpg" src="assets/dataset/wind05/07_LemonHarvesting.mp4" aria-label="07 Harvest lemon, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_07_LemonHarvesting.jpg" src="assets/dataset/wind10/07_LemonHarvesting.mp4" aria-label="07 Harvest lemon, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_07_LemonHarvesting.jpg" src="assets/dataset/wind20/07_LemonHarvesting.mp4" aria-label="07 Harvest lemon, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>08 Toss ball</b><span class="row-meta"><span class="chip bad">0/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">New specialist</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_08_TossBall.jpg" src="assets/dataset/demo2/08_TossBall.mp4" aria-label="08 Toss ball, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_08_TossBall.jpg" src="assets/dataset/aero/08_TossBall.mp4" aria-label="08 Toss ball, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_08_TossBall.jpg" src="assets/dataset/wind05/08_TossBall.mp4" aria-label="08 Toss ball, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_08_TossBall.jpg" src="assets/dataset/wind10/08_TossBall.mp4" aria-label="08 Toss ball, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_08_TossBall.jpg" src="assets/dataset/wind20/08_TossBall.mp4" aria-label="08 Toss ball, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>09 Rotate valve</b><span class="row-meta"><span class="chip ok">5/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Unchanged</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_09_RotateValve.jpg" src="assets/dataset/demo2/09_RotateValve.mp4" aria-label="09 Rotate valve, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_09_RotateValve.jpg" src="assets/dataset/aero/09_RotateValve.mp4" aria-label="09 Rotate valve, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_09_RotateValve.jpg" src="assets/dataset/wind05/09_RotateValve.mp4" aria-label="09 Rotate valve, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_09_RotateValve.jpg" src="assets/dataset/wind10/09_RotateValve.mp4" aria-label="09 Rotate valve, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_09_RotateValve.jpg" src="assets/dataset/wind20/09_RotateValve.mp4" aria-label="09 Rotate valve, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>10 Push slider</b><span class="row-meta"><span class="chip ok">5/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Unchanged</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_10_PushSlider.jpg" src="assets/dataset/demo2/10_PushSlider.mp4" aria-label="10 Push slider, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_10_PushSlider.jpg" src="assets/dataset/aero/10_PushSlider.mp4" aria-label="10 Push slider, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_10_PushSlider.jpg" src="assets/dataset/wind05/10_PushSlider.mp4" aria-label="10 Push slider, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_10_PushSlider.jpg" src="assets/dataset/wind10/10_PushSlider.mp4" aria-label="10 Push slider, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_10_PushSlider.jpg" src="assets/dataset/wind20/10_PushSlider.mp4" aria-label="10 Push slider, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>11 Pull lever</b><span class="row-meta"><span class="chip ok">5/5</span> → <span class="chip ok">5/5</span></span><span class="row-change">Unchanged</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_11_PullLever.jpg" src="assets/dataset/demo2/11_PullLever.mp4" aria-label="11 Pull lever, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_11_PullLever.jpg" src="assets/dataset/aero/11_PullLever.mp4" aria-label="11 Pull lever, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_11_PullLever.jpg" src="assets/dataset/wind05/11_PullLever.mp4" aria-label="11 Pull lever, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_11_PullLever.jpg" src="assets/dataset/wind10/11_PullLever.mp4" aria-label="11 Pull lever, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_11_PullLever.jpg" src="assets/dataset/wind20/11_PullLever.mp4" aria-label="11 Pull lever, Wind 20%"></video></td></tr>
+              <tr><th scope="row"><b>12 Open door</b><span class="row-meta"><span class="chip part">5/5*</span> → <span class="chip ok">5/5</span></span><span class="row-change">Handle latch in the check, new specialist</span></th><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg" src="assets/dataset/demo2/12_OpenDoor.mp4" aria-label="12 Open door, AM-Bench default"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/aero_12_OpenDoor.jpg" src="assets/dataset/aero/12_OpenDoor.mp4" aria-label="12 Open door, Aero + thrust limits"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind05_12_OpenDoor.jpg" src="assets/dataset/wind05/12_OpenDoor.mp4" aria-label="12 Open door, Wind 5%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind10_12_OpenDoor.jpg" src="assets/dataset/wind10/12_OpenDoor.mp4" aria-label="12 Open door, Wind 10%"></video></td><td><video muted loop playsinline preload="none" poster="assets/dataset/poster/wind20_12_OpenDoor.jpg" src="assets/dataset/wind20/12_OpenDoor.mp4" aria-label="12 Open door, Wind 20%"></video></td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note">Each cell counts successes over five runs. * passes only the old check, by pushing the door open with the vehicle. † unreliable: 6 of 8 across all runs with the official code.</p>
+        <p class="note">Counts are successes over five runs. * passes only the old check, by pushing the door with the vehicle. † 6 of 8 across all official runs. Wind is a constant force of 5, 10 or 20% of the 65 N weight. Specialists that differ under the disturbance conditions: peg <code>PegInHoleAlignInsertPolicy</code>, frame <code>FrameAssemblyBarGraspWindPolicy</code> (40 s episodes), lemon <code>LemonHarvestingWindPolicy</code>, toss at 20% <code>TossBallReachDropPolicy</code> (drops instead of throwing), valve <code>RotateValveTrackHandlePolicy</code>, lever <code>PullLeverAlignPolicy</code>, door <code>OpenDoorHandleWindPolicy</code>; see <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/disturbance-variants.md">docs/disturbance-variants.md</a>.</p>
       </div>
     </section>
 
@@ -334,43 +340,17 @@
       </div>
     </section>
 
-    <section id="all-tasks">
-      <div class="wrap wide">
-        <h2>All twelve tasks</h2>
-        <p class="sub">FA-Hexa after the upgrades, under five flight conditions. Wind blows toward the work surface.</p>
-        <div class="segmented" role="group" aria-label="Flight condition">
-          <button type="button" aria-pressed="true" data-condition="default" data-note="AM-Bench default: no thrust limits, no aerodynamic effects, no wind. Run 1 of 5.">AM-Bench default</button>
-          <button type="button" aria-pressed="false" data-condition="aero" data-note="Thrust limits (23 N per rotor), ground and near-wall effects, and drag. No wind.">Aero + thrust limits</button>
-          <button type="button" aria-pressed="false" data-condition="wind05" data-note="Aero + thrust limits, plus a constant 3.3 N wind: 5% of the 65 N weight.">Wind 5%</button>
-          <button type="button" aria-pressed="false" data-condition="wind10" data-note="Aero + thrust limits, plus a constant 6.5 N wind: 10% of the 65 N weight.">Wind 10%</button>
-          <button type="button" aria-pressed="false" data-condition="wind20" data-note="Aero + thrust limits, plus a constant 13.0 N wind: 20% of the 65 N weight.">Wind 20%</button>
-        </div>
-        <p class="note condition-note" data-condition-note>AM-Bench default: no thrust limits, no aerodynamic effects, no wind. Run 1 of 5.</p>
-        <div class="gallery" data-gallery data-condition="default">
-          <figure data-task="01_PressButton"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_01_PressButton.jpg" src="assets/dataset/demo2/01_PressButton.mp4"></video><figcaption>01 Press button <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="02_PegInHole"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_02_PegInHole.jpg" src="assets/dataset/demo2/02_PegInHole.mp4"></video><figcaption>02 Peg in hole <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="03_NDT"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_03_NDT.jpg" src="assets/dataset/demo2/03_NDT.mp4"></video><figcaption>03 Inspect surface (NDT) <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="04_WipeWindow"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_04_WipeWindow.jpg" src="assets/dataset/demo2/04_WipeWindow.mp4"></video><figcaption>04 Wipe window <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="05_CabinetPickPlace"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg" src="assets/dataset/demo2/05_CabinetPickPlace.mp4"></video><figcaption>05 Cabinet pick and place <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="06_FrameAssembly"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_06_FrameAssembly.jpg" src="assets/dataset/demo2/06_FrameAssembly.mp4"></video><figcaption>06 Frame assembly <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="07_LemonHarvesting"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_07_LemonHarvesting.jpg?v=2" src="assets/dataset/demo2/07_LemonHarvesting.mp4?v=2"></video><figcaption>07 Harvest lemon <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="08_TossBall"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_08_TossBall.jpg" src="assets/dataset/demo2/08_TossBall.mp4"></video><figcaption>08 Toss ball <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="09_RotateValve"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_09_RotateValve.jpg" src="assets/dataset/demo2/09_RotateValve.mp4"></video><figcaption>09 Rotate valve <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="10_PushSlider"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_10_PushSlider.jpg" src="assets/dataset/demo2/10_PushSlider.mp4"></video><figcaption>10 Push slider <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="11_PullLever"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_11_PullLever.jpg" src="assets/dataset/demo2/11_PullLever.mp4"></video><figcaption>11 Pull lever <span class="chip ok">5/5</span></figcaption></figure>
-          <figure data-task="12_OpenDoor"><video controls muted playsinline preload="none" poster="assets/dataset/poster/demo2_12_OpenDoor.jpg" src="assets/dataset/demo2/12_OpenDoor.mp4"></video><figcaption>12 Open door <span class="chip ok">5/5</span></figcaption></figure>
-        </div>
-        <h3>Specialists under the disturbance conditions</h3>
+
+
+    <section id="dataset-notes">
+      <div class="wrap">
+        <h2>Notes</h2>
         <ul class="points">
-          <li><b>Peg in hole.</b> <code>PegInHoleAlignInsertPolicy</code>: lines the measured peg tip up with the hole axis, pushes it in, then lets go and backs away from the wall.</li>
-          <li><b>Frame assembly.</b> <code>FrameAssemblyBarGraspWindPolicy</code>: stops 30 cm back, then closes in and grasps at half speed (40 s episodes).</li>
-          <li><b>Harvest lemon.</b> <code>LemonHarvestingWindPolicy</code>: holds back, creeps in, grasps once settled, and tears the lemon off downward.</li>
-          <li><b>Toss ball.</b> <code>TossBallLobPolicy</code> up to 10% wind; at 20%, <code>TossBallReachDropPolicy</code> reaches over the bin and drops the ball, because the stop after a lob saturates every rotor.</li>
-          <li><b>Rotate valve.</b> <code>RotateValveTrackHandlePolicy</code>: follows the measured handle on its own circle and rolls the gripper with it.</li>
-          <li><b>Pull lever.</b> <code>PullLeverAlignPolicy</code>: aligns at a stand-off before moving in to grasp.</li>
-          <li><b>Open door.</b> <code>OpenDoorHandleWindPolicy</code>: keeps correcting while it closes, swings only once the latch releases, and retries otherwise.</li>
-          <li><b>The other five tasks</b> use their Part 2 specialists unchanged. Task IDs: <code>&lt;Task&gt;-Am-FAHexa-Abs-PID-{Aero,Wind05,Wind10,Wind20}-Direct-v0</code>.</li>
+          <li><b>Disturbances.</b> AM-Bench offers thrust saturation, ground and near-wall effects, drag, a constant wind force and sensor/actuator noise, all off by default; no gusts, wind torque or payload changes.</li>
+          <li><b>π0.5 data.</b> 80 demonstrations per task at 20 Hz in LeRobot format (EE camera, 8- or 12-value state, 50-step action chunks); AM-Bench fine-tunes all parameters, which needs more than 70 GB of GPU memory (LoRA: more than 22.5 GB).</li>
+          <li><b>AC-DiT data.</b> RDT-170M mobility head plus RDT-1B whole-body head, trained on ManiSkill-HAB HDF5 at 20 Hz (three cameras, point cloud, 128-value state vector). An aerial base needs new state slots.</li>
         </ul>
+        <p class="note">Full notes with file paths and sources: <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/research/disturbances-pi05-acdit-data.md">docs/research/disturbances-pi05-acdit-data.md</a>.</p>
       </div>
     </section>
 
@@ -435,11 +415,16 @@
     </details>
   </main>
 
+  <dialog class="lightbox" aria-label="Enlarged clip">
+    <video controls muted loop playsinline></video>
+    <div class="lightbox-bar"><span data-lightbox-title></span><button type="button" class="btn ghost" data-lightbox-close>Close</button></div>
+  </dialog>
+
   <footer>
     <div class="wrap">
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261018c"></script>
+  <script src="main.js?v=20261018d"></script>
 </body>
 </html>

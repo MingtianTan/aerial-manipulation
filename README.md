@@ -23,6 +23,7 @@ recording and evaluation pipeline, and the recorded videos.
 | `data/videos/fahexa_disturbance/` | Logs and summaries of the disturbance recordings (videos: `assets/dataset/{aero,wind05,wind10,wind20}/`, all runs local in `~/Desktop/demo3`). |
 | `docs/disturbance-variants.md` | The 48 FA-Hexa disturbance variants: conditions, task IDs, specialists. |
 | `data/asset_backup/` | The original `omni_scorpion_physics.usd`, before the collider change. |
+| `docs/research/` | Research notes for agents and people: AM-Bench disturbances, π0.5 fine-tuning data, AC-DiT / RDT data format. |
 
 ## Changed tasks
 
