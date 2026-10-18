@@ -51,7 +51,7 @@ sub { font-size: 0.72em; }
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
 }
 .nav-inner {
@@ -147,6 +147,7 @@ th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--lin
 th { font-size: 14px; font-weight: 600; color: var(--soft); border-bottom: 2px solid var(--line); }
 td { font-variant-numeric: tabular-nums; }
 .note { margin: 12px 0 0; font-size: 15px; color: var(--soft); }
+.nowrap { white-space: nowrap; }
 
 /* Stat row */
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 22px; }
@@ -212,6 +213,15 @@ footer p { margin: 0; }
 }
 @media (max-width: 720px) {
   body { font-size: 17px; }
+  /* Results table: task and both scores on one line, the change underneath */
+  .results thead tr, .results tbody tr { display: grid; grid-template-columns: 1fr 76px 76px; column-gap: 8px; align-items: center; }
+  .results thead tr { border-bottom: 2px solid var(--line); }
+  .results tbody tr { row-gap: 2px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .results th, .results td { padding: 0; border: 0; }
+  .results th { padding: 6px 0; font-size: 13px; line-height: 1.3; }
+  .results th:nth-child(4) { display: none; }
+  .results td:first-child { font-weight: 600; line-height: 1.35; }
+  .results td:nth-child(4) { grid-column: 1 / -1; font-size: 15px; color: var(--soft); }
   .pair, .media-2 { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr; }

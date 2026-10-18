@@ -85,22 +85,29 @@
     });
   });
 
-  // Highlight the nav link of the part in view.
+  // Highlight the nav link for what is in view: the section's own link if it has one, else its part's.
   const links = [...document.querySelectorAll(".nav a[href^='#']")];
-  const targets = links.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
-  if ("IntersectionObserver" in window && targets.length) {
+  const linkFor = new Map();
+  document.querySelectorAll("main section, summary.part").forEach((el) => {
+    const own = links.find((link) => link.getAttribute("href") === "#" + el.id);
+    const summary = el.closest("details.part-block")?.querySelector("summary.part");
+    const link = own || links.find((l) => summary && l.getAttribute("href") === "#" + summary.id);
+    if (link) linkFor.set(el, link);
+  });
+  if ("IntersectionObserver" in window && linkFor.size) {
     const spy = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
+          const current = linkFor.get(entry.target);
           links.forEach((link) => {
-            if (link.getAttribute("href") === "#" + entry.target.id) link.setAttribute("aria-current", "true");
+            if (link === current) link.setAttribute("aria-current", "true");
             else link.removeAttribute("aria-current");
           });
         });
       },
       { rootMargin: "-30% 0px -60% 0px" }
     );
-    targets.forEach((target) => spy.observe(target));
+    linkFor.forEach((_, el) => spy.observe(el));
   }
 })();
