@@ -191,13 +191,6 @@
           </div>
           <div class="notes">
             <div>
-              <h4>What was wrong</h4>
-              <ul>
-                <li>The fingers started closed, so the ball was spawned overlapping them.</li>
-                <li>The specialist first pitches the gripper 36° down; the fingers hit the vehicle's own rotor arm and squeeze the ball out.</li>
-              </ul>
-            </div>
-            <div>
               <h4>What changed</h4>
               <ul>
                 <li>New specialist <code>TossBallLobPolicy</code>: carry the ball level to a point behind the bin and move forward smoothly.</li>
@@ -222,14 +215,6 @@
           </div>
           <div class="notes">
             <div>
-              <h4>What was wrong</h4>
-              <ul>
-                <li>The specialist assumes a fixed sponge offset and keeps moving up while the sponge is already on the glass.</li>
-                <li>Friction from the glass drags the sponge out of the fingers.</li>
-                <li>About 7 s per stain: four stains do not fit in the 20 s episode.</li>
-              </ul>
-            </div>
-            <div>
               <h4>What changed</h4>
               <ul>
                 <li>New specialist <code>WipeWindowPressPolicy</code>: line up 6 cm in front of each stain, press straight in, hold 0.3 s, back straight out.</li>
@@ -253,14 +238,6 @@
             </figure>
           </div>
           <div class="notes">
-            <div>
-              <h4>What was wrong</h4>
-              <ul>
-                <li>The success check was too loose: within 10 cm of the peg midpoint counted, even a frame hanging on the peg tips.</li>
-                <li>The level gripper's fingers close along the top bar, so the frame just hangs on them and swings.</li>
-                <li>The insertion stops around the middle of the pegs.</li>
-              </ul>
-            </div>
             <div>
               <h4>What changed</h4>
               <ul>
@@ -287,13 +264,6 @@
           </div>
           <div class="notes">
             <div>
-              <h4>What was wrong</h4>
-              <ul>
-                <li>The check only asked for the door to open past 20°.</li>
-                <li>The specialist pushed the door leaf open and never touched the handle.</li>
-              </ul>
-            </div>
-            <div>
               <h4>What changed</h4>
               <ul>
                 <li>New check: the door starts latched and unlocks only after the gripper closes at the handle for 0.2 s.</li>
@@ -317,13 +287,6 @@
             </figure>
           </div>
           <div class="notes">
-            <div>
-              <h4>What was wrong</h4>
-              <ul>
-                <li>Unreliable: the specialist brings the peg tip only to the hole plane, and the check needs it past that plane.</li>
-                <li>At reset the fingers were closed, so objects placed in the gripper overlapped them (shared with toss ball and wipe window).</li>
-              </ul>
-            </div>
             <div>
               <h4>What changed</h4>
               <ul>
