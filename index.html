@@ -20,6 +20,7 @@
         <li><a href="#dataset">Specialist trajectories</a></li>
         <li><a href="#upgrades">Before / after</a></li>
         <li><a href="#all-tasks">All tasks</a></li>
+        <li><a href="#dataset-generation">Dataset generation</a></li>
       </ul>
     </div>
   </header>
@@ -102,7 +103,7 @@
         <h2>Plan</h2>
         <ul class="points">
           <li><b>Goal: ICML 2027.</b> Dates are not out yet; going by the 2026 cycle, the abstract is due around 23 Jan and the full paper around 28 Jan 2027 (<a href="https://icml.cc/Conferences/2026/Dates">2026 dates</a>). That is about 15 weeks from mid-October.</li>
-          <li><b>Next week: dataset and a π0.5 baseline.</b> Generate the training dataset with RL. Fine-tune π0.5 with LoRA on it and evaluate it as one of the baselines in the benchmark, to see how well a fine-tuned VLA does on its own.</li>
+          <li><b>Next week: dataset and a π0.5 baseline.</b> Generate the training dataset with specialists / RL; we will try both. Fine-tune π0.5 with LoRA on it and evaluate it as one of the baselines in the benchmark, to see how well a fine-tuned VLA does on its own.</li>
           <li><b>After that: train the Flight DiT.</b> Start Stage A: train RDT-170M on flight actions only and keep the pre-MLP token as F<sub>flight</sub>.</li>
         </ul>
         <div class="table-wrap">
@@ -357,14 +358,44 @@
       </div>
     </section>
 
-    <section id="dataset-next">
+    <!-- Dataset generation -->
+    <section id="dataset-generation" class="part">
       <div class="wrap">
-        <h2>Next</h2>
+        <p class="part-label">Part 3</p>
+        <h2 class="part-title">Dataset generation</h2>
+      </div>
+    </section>
+
+    <section id="generation-sources">
+      <div class="wrap">
+        <h2>Specialist / RL</h2>
         <ul class="points">
-          <li><b>Record at scale.</b> 80 successful demonstrations per task with these specialists (the count AM-Bench used for π0.5), with small waypoint noise.</li>
-          <li><b>Cameras.</b> Keep the end-effector camera, as in the paper, and also record the base camera for an ablation.</li>
-          <li><b>Train.</b> Export to OpenPI at 20 Hz, compute norm stats, and run π0.5 LoRA.</li>
-          <li><b>Code.</b> The upgrades live on the AM-Bench branch <code>omnihexa-task-fixes</code> and are not committed yet.</li>
+          <li><b>Specialists.</b> The upgraded scripted specialists from Part 2, one per task; only successful episodes are kept.</li>
+          <li><b>RL.</b> Policies trained with RL in the same tasks, as a second source of trajectories.</li>
+          <li><b>We will try both.</b> How much data each task needs is still open, so both sources are generated and compared.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="generation-pipeline">
+      <div class="wrap">
+        <h2>Pipeline</h2>
+        <ul class="points">
+          <li><b>Record.</b> <code>record_demos_scripted.py</code> runs the specialist at the simulator's native 120 Hz on FA-Hexa and saves successful episodes in the LeRobot format: end-effector pose, gripper width, the end-effector camera, the base camera (for a camera ablation), and the task instruction.</li>
+          <li><b>Check.</b> <code>validate_lerobotdataset.py</code> resamples to 20 Hz and checks the episodes before export.</li>
+          <li><b>Export.</b> <code>export_lerobot_to_openpi.py</code> writes an OpenPI dataset at 20 Hz, with actions as end-effector targets relative to the current pose.</li>
+          <li><b>Normalise.</b> OpenPI's <code>compute_norm_stats</code> for the AM-Bench π0.5 config.</li>
+          <li><b>Train and evaluate.</b> LoRA-fine-tune π0.5, serve it, and evaluate it in AM-Bench as a baseline: actions run at 20 Hz and are interpolated to the 120 Hz controller.</li>
+        </ul>
+      </div>
+    </section>
+    <section id="generation-code">
+      <div class="wrap">
+        <h2>Code and data</h2>
+        <ul class="points">
+          <li><b>AM-Bench with the fixes.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/ambench"><code>ambench/</code></a>: a snapshot of AM-Bench with the Part 2 specialists and checks; the changes alone are in <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/ambench/SPECIALIST_FIXES.diff"><code>SPECIALIST_FIXES.diff</code></a>.</li>
+          <li><b>Pipeline.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/pipeline"><code>pipeline/</code></a>: the demo recorder, probes, and the π0.5 serve and evaluation scripts.</li>
+          <li><b>Videos.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/data/videos"><code>data/videos/</code></a>: all 60 FA-Hexa runs and the before clips.</li>
         </ul>
       </div>
     </section>
