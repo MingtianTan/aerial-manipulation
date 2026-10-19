@@ -12,11 +12,15 @@ recording and evaluation pipeline, and the recorded videos.
 | `index.html`, `styles.css`, `main.js`, `assets/` | The project page. |
 | `ambench/` | A snapshot of [AM-Bench](https://github.com/ambench/ambench) (Apache-2.0, upstream commit `60bf5b7`) with the FA-Hexa specialist fixes from Part 2 applied. |
 | `ambench/SPECIALIST_FIXES.diff` | The code changes against upstream (the USD collider change is in the snapshot, not in the diff). |
+| `ambench/DATAGEN_CHANGES.diff` | The recorder, recording-module and exporter changes for the training demos (`docs/training-data.md`). |
 | `ambench/SUBMODULES.txt` | The commits of the submodules `ext/acados`, `ext/openpi` and `ext/pyroki`, which are not copied. |
 | `pipeline/` | Launch, recording, probe and π0.5 serve/eval scripts. |
 | `pipeline/omni_demo/` | The demo recorder (`record_demo_videos.py`), the batch recording scripts and the probes. |
 | `pipeline/ambench_way/` | The AM-Bench π0.5 path: record, prepare data, serve, evaluate. |
 | `pipeline/am_ins.txt` | Launch notes. |
+| `pipeline/datagen/` | Training-data generation: the batch recorder (`record_training_data.py`), checks (`qa_training_data.py`), the pi0.5 export (`export_openpi.sh`) and the GPU slot lock (`gpu_slot.sh`). |
+| `docs/training-data.md` | The training demos: 12 tasks × 5 conditions × 80 episodes, layout, features, recording settings, checks. |
+| `datasets/` | The recorded training data (not in git): `raw/`, `qa/`, `openpi/`. |
 | `data/videos/fahexa_demo2/` | FA-Hexa, 12 tasks × 5 runs, with the upgraded specialists (Part 2 "after" and the gallery). |
 | `data/videos/before_clips/` | The official specialists on the 6 changed tasks (Part 2 "before"). |
 | `data/videos/omnihexa_demo/` | The first recording on OmniHexa with the official specialists. |
@@ -52,6 +56,8 @@ ROBOT=FAHexa OUT=~/Desktop/demo2 bash pipeline/omni_demo/record_all_demos.sh
 ```
 
 ## Not included
+
+- The training demos in `datasets/` (git-ignored; see `docs/training-data.md`).
 
 - π0.5 checkpoints and the OpenPI cache (about 24 GB).
 - Recorded LeRobot datasets from the π0.5 debugging runs (about 3 GB).
