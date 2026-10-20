@@ -137,6 +137,8 @@ h3 { margin: 26px 0 8px; font-size: 22px; line-height: 1.3; font-weight: 700; }
 .figure img, .figure video { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); background: #000; }
 .figure img { background: var(--bg); }
 .figure figcaption { margin-top: 8px; font-size: 15px; color: var(--soft); }
+/* Figures stay as wide as the text; a click opens the full-resolution file (pinch-zoom on phones). */
+.figure a { display: block; }
 .media-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .media-2 .figure { margin-top: 22px; min-width: 0; }
 
@@ -257,9 +259,5 @@ footer p { margin: 0; }
   .pair, .media-2 { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr; }
-  /* Wide figures pan sideways on phones instead of shrinking to an unreadable size */
-  .figure.wide-fig { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .figure.wide-fig img { min-width: 900px; }
-  .figure.wide-fig figcaption { position: sticky; left: 0; }
   .nav ul { gap: 2px 14px; }
 }

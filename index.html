@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261020d">
+  <link rel="stylesheet" href="styles.css?v=20261020e">
 </head>
 <body>
   <header class="nav">
@@ -72,7 +72,7 @@
       <div class="wrap">
         <h2>Pipeline</h2>
         <figure class="figure">
-          <img src="assets/pipeline.jpg" alt="Pipeline: inputs, encoding, Flight DiT, mature VLA arm policy, low-level tracking">
+          <a href="assets/pipeline.jpg" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/pipeline.jpg" alt="Pipeline: inputs, encoding, Flight DiT, mature VLA arm policy, low-level tracking"></a>
           <figcaption>Blue: Flight DiT. Green: the pretrained VLA. Orange: flight-to-arm conditioning. Inputs are a language instruction, forward / downward / wrist RGB, pose, velocity, arm joints and gripper. The figure still draws a quadrotor with a 3-DoF arm; the platform is now FA-Hexa with a 4-DoF arm.</figcaption>
         </figure>
         <ul class="points">
@@ -393,8 +393,8 @@
     <section id="generation-pipeline">
       <div class="wrap wide">
         <h2>Pipeline</h2>
-        <figure class="figure wide-fig">
-          <img src="assets/dataset/figures/pipeline.png" width="2360" height="660" alt="Six stages: scripted specialist, noise injection, FA-Hexa in Isaac Lab, recorder, verification, selection and export; rejected episodes are re-recorded.">
+        <figure class="figure">
+          <a href="assets/dataset/figures/pipeline.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/dataset/figures/pipeline.png" width="2360" height="660" alt="Six stages: scripted specialist, noise injection, FA-Hexa in Isaac Lab, recorder, verification, selection and export; rejected episodes are re-recorded."></a>
           <figcaption><b>Figure 1.</b> From specialist to training set. The specialist's target is perturbed before execution while the unperturbed target is recorded as the label; the recorder keeps successful episodes only; each episode passes a fixed set of checks, and rejected ones are replaced until every task–condition pair has 80.</figcaption>
         </figure>
       </div>
@@ -414,8 +414,8 @@
         <p>Following DART, the executed target is perturbed and the specialist's unperturbed target is kept as the label, so the demonstrations contain small deviations and the corrections back to the nominal path. Three noise processes with the same standard deviation (5 mm, 0.025 rad; half of AM-Bench's defaults) behave very differently on a hovering vehicle (Figure 2). AM-Bench's per-step noise shakes the tool without moving the robot off its path, and every toss failed; an Ornstein–Uhlenbeck drift still changes the target every step, which the PID's derivative term turns into thrust spikes, and in 20 % wind the rotors saturate (press button 0 / 8). The smooth drift used here draws a new offset every 0.5 s and joins consecutive offsets with a smootherstep, so the target never jumps.</p>
       </div>
       <div class="wrap wide">
-        <figure class="figure wide-fig">
-          <img src="assets/dataset/figures/noise.png" width="2360" height="600" alt="Three traces of the target offset over three seconds: independent per step, Ornstein-Uhlenbeck, and smooth drift.">
+        <figure class="figure">
+          <a href="assets/dataset/figures/noise.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/dataset/figures/noise.png" width="2360" height="600" alt="Three traces of the target offset over three seconds: independent per step, Ornstein-Uhlenbeck, and smooth drift."></a>
           <figcaption><b>Figure 2.</b> One axis of the position offset for the three noise processes, 3 s at 120 Hz, σ = 5 mm in each case. (a) Independent samples every step, as in AM-Bench's <code>--inject_noise</code>; (b) Ornstein–Uhlenbeck with a 0.5 s correlation time; (c) a new Gaussian offset every 0.5 s with smootherstep interpolation (used). The captions give the success counts that decided between them.</figcaption>
         </figure>
       </div>
@@ -453,8 +453,8 @@
         </ul>
       </div>
       <div class="wrap wide">
-        <figure class="figure wide-fig">
-          <img src="assets/dataset/figures/verification.png" width="2360" height="600" alt="Funnel from 5,810 attempts to 4,800 selected episodes, and the counts of the five rejection reasons.">
+        <figure class="figure">
+          <a href="assets/dataset/figures/verification.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/dataset/figures/verification.png" width="2360" height="600" alt="Funnel from 5,810 attempts to 4,800 selected episodes, and the counts of the five rejection reasons."></a>
           <figcaption><b>Figure 3.</b> Left: recorded attempts, successes saved by the recorder, episodes that passed every check, and the final selection. Right: why the 282 rejected successes were excluded.</figcaption>
         </figure>
       </div>
