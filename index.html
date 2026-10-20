@@ -181,7 +181,7 @@
             </tbody>
           </table>
         </div>
-        <p class="note">Counts are successes over five runs. * passes only the old check, by pushing the door with the vehicle. † 6 of 8 across all official runs. Wind is a constant force of 5, 10 or 20% of the 65 N weight. Specialists that differ under the disturbance conditions: peg <code>PegInHoleAlignInsertPolicy</code>, frame <code>FrameAssemblyBarGraspWindPolicy</code> (40 s episodes), lemon <code>LemonHarvestingWindPolicy</code>, toss at 20% <code>TossBallReachDropPolicy</code> (drops instead of throwing), valve <code>RotateValveTrackHandlePolicy</code>, lever <code>PullLeverAlignPolicy</code>, door <code>OpenDoorHandleWindPolicy</code>; see <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/disturbance-variants.md">docs/disturbance-variants.md</a>.</p>
+        <p class="note">Counts are successes over five runs. * passes only the old check, by pushing the door with the vehicle. † 6 of 8 across all official runs. Wind is a constant force of 5, 10 or 20% of the 65 N weight. Specialists that differ under the disturbance conditions: peg <code>PegInHoleAlignInsertPolicy</code>, frame <code>FrameAssemblyBarGraspWindPolicy</code> (40 s episodes), lemon <code>LemonHarvestingWindPolicy</code>, toss at 20% <code>TossBallReachDropPolicy</code> (drops instead of throwing), valve <code>RotateValveTrackHandlePolicy</code>, lever <code>PullLeverAlignPolicy</code>, door <code>OpenDoorHandleWindPolicy</code>; see <a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/docs/disturbance-variants.md">docs/disturbance-variants.md</a>.</p>
       </div>
     </section>
 
@@ -350,7 +350,7 @@
           <li><b>π0.5 data.</b> 80 demonstrations per task at 20 Hz in LeRobot format (EE camera, 8- or 12-value state, 50-step action chunks); AM-Bench fine-tunes all parameters, which needs more than 70 GB of GPU memory (LoRA: more than 22.5 GB).</li>
           <li><b>AC-DiT data.</b> RDT-170M mobility head plus RDT-1B whole-body head, trained on ManiSkill-HAB HDF5 at 20 Hz (three cameras, point cloud, 128-value state vector). An aerial base needs new state slots.</li>
         </ul>
-        <p class="note">Full notes with file paths and sources: <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/research/disturbances-pi05-acdit-data.md">docs/research/disturbances-pi05-acdit-data.md</a>.</p>
+        <p class="note">Full notes with file paths and sources: <a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/docs/research/disturbances-pi05-acdit-data.md">docs/research/disturbances-pi05-acdit-data.md</a>.</p>
       </div>
     </section>
 
@@ -510,10 +510,11 @@
     <section id="generation-code">
       <div class="wrap">
         <h2>Code</h2>
+        <p class="sub">Everything that produced the results lives in the private repository <a href="https://github.com/MingtianTan/Aerial_Manipulation_Code"><code>Aerial_Manipulation_Code</code></a>; this page only shows the results.</p>
         <ul class="points">
-          <li><a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/pipeline/datagen"><code>pipeline/datagen/</code></a>: the batch recorder with GPU slot locks and re-recording, the per-episode verifier and selection, the OpenPI export and its check, and the one-command finish script.</li>
-          <li><a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/ambench/DATAGEN_CHANGES.diff"><code>ambench/DATAGEN_CHANGES.diff</code></a>: the recorder and exporter changes on top of AM-Bench (video storage, 20 Hz images with a 120 Hz companion, clean labels, smooth noise, one-pass export).</li>
-          <li><a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/training-data.md"><code>docs/training-data.md</code></a>: layout, features, rules and the full numbers. The data itself (303 GB) is not in the repository.</li>
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/main/pipeline/datagen"><code>pipeline/datagen/</code></a>: the batch recorder with GPU slot locks and re-recording, the per-episode verifier and selection, the OpenPI export and its check, and the one-command finish script.</li>
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/ambench/DATAGEN_CHANGES.diff"><code>ambench/DATAGEN_CHANGES.diff</code></a>: the recorder and exporter changes on top of AM-Bench (video storage, 20 Hz images with a 120 Hz companion, clean labels, smooth noise, one-pass export).</li>
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/docs/training-data.md"><code>docs/training-data.md</code></a>: layout, features, rules and the full numbers. The data itself (303 GB) is not in the repository.</li>
         </ul>
       </div>
     </section>
