@@ -16,7 +16,6 @@
   --sans: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --wide: 1180px;      /* one container for everything: text, tables, figures, part cards */
-  --measure: 960px;    /* running text stays at a readable line length, left-aligned in the container */
 }
 
 * { box-sizing: border-box; }
@@ -45,8 +44,7 @@ sub { font-size: 0.72em; }
   padding-right: max(20px, env(safe-area-inset-right, 0px));
 }
 .wrap.wide { max-width: var(--wide); }
-/* Paragraphs, lists, small tables and stat cards keep a readable measure; headings, figures and the task matrix use the full width. */
-.wrap > p, .wrap > .points, .wrap > .refs, .wrap > .note, .wrap > .sub, .wrap > .stats, .wrap > .table-wrap, .title-block > .lede, .title-block > h1 { max-width: var(--measure); }
+/* Text, tables, figures and the task matrix all span the container, so their edges line up. */
 
 /* Navigation */
 .nav {
