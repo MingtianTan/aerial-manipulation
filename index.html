@@ -21,15 +21,17 @@
         <li><a href="#all-tasks">All tasks</a></li>
         <li><a href="#upgrades">Before / after</a></li>
         <li><a href="#dataset-generation">Dataset generation</a></li>
+        <li><a href="#dit-training">DiT training</a></li>
+        <li><a href="#benchmarking">Benchmarking</a></li>
       </ul>
     </div>
   </header>
 
   <main id="top">
     <div class="wrap title-block">
-      <p class="byline">Mingtian Tan · updated 17 Oct 2026</p>
+      <p class="byline">Mingtian Tan · updated 20 Oct 2026</p>
       <h1>Aerial manipulation: keep the arm pretrained, learn flight separately</h1>
-      <p class="lede">Reuse a vision-language-action model (VLA) that already knows how to use an arm, and let a small Flight DiT learn flight from the scarce aerial data.</p>
+      <p class="lede">Reuse a vision-language-action model (VLA) that already knows how to use an arm, let a small Flight DiT learn flight from the scarce aerial data, and fine-tune the VLA to listen to it.</p>
     </div>
 
     <!-- Introduction -->
@@ -59,10 +61,10 @@
       <div class="wrap">
         <h2>Idea</h2>
         <ul class="points">
-          <li><b>Two policies.</b> A small Flight DiT handles flight. A mature VLA (π0.5) handles the arm. Flight data only trains the small model.</li>
+          <li><b>Two policies.</b> A small Flight DiT handles flight. A mature VLA (π0.5) handles the arm. Flight is learned by the small model; the VLA only learns to take the flight into account.</li>
           <li><b>Flight DiT.</b> A lightweight diffusion Transformer, sized like RDT-170M to train on one 4090. It reads language, images and proprioception, and outputs a flight chunk a<sub>flight</sub> = [Δx, Δy, Δz, Δψ] plus a flight-intent token F<sub>flight</sub>.</li>
-          <li><b>Arm VLA.</b> π0.5 stays mostly frozen, with LoRA and a conditioning interface. It reads F<sub>flight</sub> as a condition at every generation step and outputs a<sub>arm</sub> = [q1, q2, q3, q4, gripper] (FA-Hexa's arm: three pitch joints and a wrist roll).</li>
-          <li><b>Easy to swap.</b> The two policies share only F<sub>flight</sub>. Replacing the arm VLA means reconnecting that interface, not retraining the flight–arm coupling.</li>
+          <li><b>Arm VLA.</b> F<sub>flight</sub> is encoded by a small projector and injected into π0.5, at an intermediate transformer layer or at the action expert, so the flight intent is present at every denoising step. π0.5 is then fine-tuned with all of its parameters (not LoRA) on the aerial demonstrations with the token in place, and outputs a<sub>arm</sub> = [q1, q2, q3, q4, gripper] (FA-Hexa's arm: three pitch joints and a wrist roll).</li>
+          <li><b>Easy to swap.</b> The two policies meet only at the injected token. Replacing the arm VLA means re-training the projector and the fine-tune on the new backbone; the Flight DiT and its data stay as they are.</li>
           <li><b>Low level stays split.</b> The flight controller tracks the flight chunk; joint servos track the arm.</li>
         </ul>
       </div>
@@ -73,11 +75,11 @@
         <h2>Pipeline</h2>
         <figure class="figure">
           <a href="assets/pipeline.jpg" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/pipeline.jpg" alt="Pipeline: inputs, encoding, Flight DiT, mature VLA arm policy, low-level tracking"></a>
-          <figcaption>Blue: Flight DiT. Green: the pretrained VLA. Orange: flight-to-arm conditioning. Inputs are a language instruction, forward / downward / wrist RGB, pose, velocity, arm joints and gripper. The figure still draws a quadrotor with a 3-DoF arm; the platform is now FA-Hexa with a 4-DoF arm.</figcaption>
+          <figcaption>Blue: Flight DiT. Green: the pretrained VLA. Orange: flight-to-arm conditioning. Inputs are a language instruction, forward / downward / wrist RGB, pose, velocity, arm joints and gripper. The figure still draws a quadrotor with a 3-DoF arm and labels Stage B as LoRA; the platform is now FA-Hexa with a 4-DoF arm and π0.5 is fully fine-tuned.</figcaption>
         </figure>
         <ul class="points">
           <li><b>Stage A: flight only.</b> Train the Flight DiT on a<sub>flight</sub> and extract F<sub>flight</sub>.</li>
-          <li><b>Stage B: condition the arm.</b> Keep most of the VLA frozen; train LoRA and the interface against F<sub>flight</sub>.</li>
+          <li><b>Stage B: inject and fine-tune.</b> Encode F<sub>flight</sub>, inject it into π0.5 (intermediate layer or action expert) and fine-tune all of π0.5 on the same demonstrations.</li>
           <li><b>Stage C: deploy.</b> Run both chunks in sync; flight and arm are tracked by their own low-level controllers.</li>
         </ul>
       </div>
@@ -107,8 +109,9 @@
         <h2>Plan</h2>
         <ul class="points">
           <li><b>Goal: ICML 2027.</b> Dates are not out yet; going by the 2026 cycle, the abstract is due around 23 Jan and the full paper around 28 Jan 2027 (<a href="https://icml.cc/Conferences/2026/Dates">2026 dates</a>). That is about 15 weeks from mid-October.</li>
-          <li><b>Next week: dataset and a π0.5 baseline.</b> Generate the training dataset with specialists / RL; we will try both. Fine-tune π0.5 with LoRA on it and evaluate it as one of the baselines in the benchmark, to see how well a fine-tuned VLA does on its own.</li>
-          <li><b>After that: train the Flight DiT.</b> Start Stage A: train RDT-170M on flight actions only and keep the pre-MLP token as F<sub>flight</sub>.</li>
+          <li><b>Done: the dataset.</b> 4,800 verified demonstrations, 12 tasks × 5 conditions × 80, recorded with the upgraded specialists (Parts 2 and 3).</li>
+          <li><b>Next: the Flight DiT (Part 4).</b> Stage A on the 120 Hz flight data, then Stage B: inject F<sub>flight</sub> into π0.5 and fine-tune it fully.</li>
+          <li><b>Then: the benchmark (Part 5).</b> Diffusion Policy, π0.5 fine-tuned with LoRA, and the Flight DiT + fully fine-tuned π0.5, all trained on the same demonstrations and evaluated with AM-Bench's success checks.</li>
         </ul>
         <div class="table-wrap">
           <table>
@@ -118,8 +121,10 @@
             <tbody>
               <tr><td>Full AC-DiT</td><td>8×A100, about two weeks</td><td>Out of scope</td></tr>
               <tr><td>RDT-1B fine-tune</td><td>4×A100, about a week (≈ $500 per run)</td><td>Too expensive</td></tr>
-              <tr><td>π0.5 LoRA</td><td>One GPU, about 2–3 days</td><td>Next week, as a benchmark baseline</td></tr>
-              <tr><td>RDT-170M</td><td>One 4090, about a week</td><td>After the LoRA baseline</td></tr>
+              <tr><td>Diffusion Policy</td><td>One 4090, hours to a day</td><td>Baseline</td></tr>
+              <tr><td>π0.5 LoRA</td><td>One GPU with ≥ 24 GB, about 2–3 days</td><td>Baseline</td></tr>
+              <tr><td>Flight DiT (RDT-170M size), Stage A</td><td>One 4090, about a week</td><td>Ours</td></tr>
+              <tr><td>π0.5 full fine-tune with F<sub>flight</sub>, Stage B</td><td>One 80 GB GPU (A100 / H100), about a day per run</td><td>Ours</td></tr>
             </tbody>
           </table>
         </div>
@@ -527,6 +532,80 @@
           <li><a href="https://arxiv.org/abs/2410.24164">π0: A Vision-Language-Action Flow Model for General Robot Control</a> <span>(Black et al., 2024)</span>: the flow-matching action expert that π0.5 builds on.</li>
           <li><a href="https://arxiv.org/abs/1703.09327">DART: Noise Injection for Robust Imitation Learning</a> <span>(Laskey et al., CoRL 2017)</span>: noise is injected into the supervisor's executed actions while the unperturbed action is recorded as the label, so the data covers the states a learner will drift into; the scheme used here.</li>
           <li><a href="https://github.com/huggingface/lerobot">LeRobot</a> <span>(Cadene et al., 2024)</span>: the dataset format (v3.0 for recording, v2.1 for OpenPI) and the video encoding.</li>
+        </ul>
+      </div>
+    </section>
+    </details>
+
+    <!-- DiT training -->
+    <details class="part-block">
+      <summary class="part" id="dit-training">
+        <span class="part-head">
+          <span>
+            <span class="part-label">Part 4</span>
+            <h2 class="part-title">DiT training</h2>
+          </span>
+          <span class="part-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
+
+    <section id="dit-plan">
+      <div class="wrap">
+        <h2>Flight DiT: plan</h2>
+        <p class="sub">Planned; the data is in place (Part 3). This part will be filled in as the training runs.</p>
+        <ul class="points">
+          <li><b>Training data.</b> The 4,800 selected episodes through <code>datasets/qa/manifest.json</code>: the 120 Hz low-dimensional set gives the base pose, velocities, arm joints and gripper at every control step, the 20 Hz set the two camera images. The flight chunk a<sub>flight</sub> = [Δx, Δy, Δz, Δψ] is taken from the base trajectory, the arm chunk from the arm joints and gripper, both at 20 Hz with 50-step horizons, the same clock as the π0.5 export.</li>
+          <li><b>Model.</b> A diffusion Transformer of RDT-170M size (hidden 1024, depth 14). Inputs: the language instruction, the two images and the proprioceptive state; output: the flight chunk. The token before the output projection is F<sub>flight</sub>.</li>
+          <li><b>Stage A: flight only.</b> Train the Flight DiT on the flight chunks of all 5 conditions on one 4090 (about a week). Check it on its own by flying the specialists' arm commands with the DiT's flight.</li>
+          <li><b>Stage B: inject and fine-tune.</b> A small projector maps F<sub>flight</sub> into π0.5's hidden size; the token is injected at an intermediate transformer layer or at the action expert, and all of π0.5's parameters are fine-tuned on the same demonstrations with OpenPI's AM-Bench configuration (20 Hz, 50-step chunks, one 80 GB GPU). The two injection points are compared.</li>
+          <li><b>Deployment.</b> Both chunks run in sync at 20 Hz; the flight controller tracks the flight chunk and the joint servos the arm, interpolated to the 120 Hz controller as in AM-Bench's π0.5 evaluation.</li>
+        </ul>
+      </div>
+    </section>
+    </details>
+
+    <!-- Benchmarking -->
+    <details class="part-block">
+      <summary class="part" id="benchmarking">
+        <span class="part-head">
+          <span>
+            <span class="part-label">Part 5</span>
+            <h2 class="part-title">Benchmarking</h2>
+          </span>
+          <span class="part-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
+
+    <section id="benchmark-protocol">
+      <div class="wrap">
+        <h2>Protocol</h2>
+        <p class="sub">Planned; results will appear here as they come in.</p>
+        <ul class="points">
+          <li><b>Methods.</b> (1) Diffusion Policy, AM-Bench's baseline, trained on the same demonstrations; (2) π0.5 fine-tuned with LoRA; (3) Flight DiT + fully fine-tuned π0.5 (ours). π0.5 fully fine-tuned without the flight token is the ablation that isolates the DiT's contribution.</li>
+          <li><b>Data.</b> All methods train on the same 4,800 episodes (Part 3), with the same prompts, 20 Hz observations and 50-step action chunks.</li>
+          <li><b>Evaluation.</b> AM-Bench's success checks on FA-Hexa, 12 tasks × 5 conditions, the same episode limits as the recordings, a fixed set of seeds per task–condition pair. Success rate per task and condition and the mean over all pairs, in the layout of Table 1 of Part 3.</li>
+          <li><b>Unseen disturbance.</b> A second run trains on four conditions and tests on the fifth (Wind 20 %), to measure how each method generalises to a wind it has not seen.</li>
+        </ul>
+        <div class="table-wrap">
+          <table class="rates">
+            <thead><tr><th scope="col">Method</th><th scope="col">Default</th><th scope="col">Aero</th><th scope="col">Wind 5 %</th><th scope="col">Wind 10 %</th><th scope="col">Wind 20 %</th><th scope="col">Mean</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Diffusion Policy</th><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+              <tr><th scope="row">π0.5, LoRA fine-tune</th><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+              <tr><th scope="row">π0.5, full fine-tune (ablation)</th><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+              <tr><th scope="row">Flight DiT + π0.5, full fine-tune (ours)</th><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td><td>–</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Table 2. Success rate in percent, mean over the 12 tasks of each condition; to be filled in.</p>
+      </div>
+    </section>
+
+    <section id="benchmark-refs">
+      <div class="wrap">
+        <h2>Related work</h2>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2303.04137">Diffusion Policy: Visuomotor Policy Learning via Action Diffusion</a> <span>(Chi et al., RSS 2023)</span>: the diffusion-based visuomotor policy that AM-Bench ships as a baseline and that serves as the first comparison here.</li>
         </ul>
       </div>
     </section>
