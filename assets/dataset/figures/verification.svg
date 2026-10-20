@@ -15,17 +15,17 @@
 <text x="492" y="226" font-size="14" fill="#4f5862" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">selected, 80 per task and condition</text>
 <text x="700" y="32" font-size="15" font-weight="600" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">Rejected by the checks (282 of 5,085, replaced)</text>
 <text x="940" y="72" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">reset collision (door spawned on the robot)</text>
-<rect x="950" y="54" width="230.0" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
-<text x="1188.0" y="72" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">159</text>
+<rect x="950" y="54" width="190.0" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="1148.0" y="72" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">159</text>
 <text x="940" y="112" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">video frame dropped by the encoder</text>
-<rect x="950" y="94" width="112.8" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
-<text x="1070.8" y="112" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">78</text>
+<rect x="950" y="94" width="93.2" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="1051.2" y="112" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">78</text>
 <text x="940" y="152" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">length outside 0.6–1.5× the median</text>
-<rect x="950" y="134" width="46.3" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
-<text x="1004.3" y="152" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">32</text>
+<rect x="950" y="134" width="38.2" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="996.2" y="152" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">32</text>
 <text x="940" y="192" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">sub-criterion false at success</text>
-<rect x="950" y="174" width="17.4" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
-<text x="975.4" y="192" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">12</text>
+<rect x="950" y="174" width="14.3" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="972.3" y="192" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">12</text>
 <text x="940" y="232" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">other</text>
 <rect x="950" y="214" width="2.0" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
 <text x="960.0" y="232" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">1</text>

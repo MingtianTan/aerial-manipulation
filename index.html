@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261020a">
+  <link rel="stylesheet" href="styles.css?v=20261020c">
 </head>
 <body>
   <header class="nav">
@@ -394,7 +394,7 @@
       <div class="wrap wide">
         <h2>Pipeline</h2>
         <figure class="figure wide-fig">
-          <img src="assets/dataset/figures/pipeline.svg" alt="Six stages: scripted specialist, noise injection, FA-Hexa in Isaac Lab, recorder, verification, selection and export; rejected episodes are re-recorded.">
+          <img src="assets/dataset/figures/pipeline.png" width="2360" height="660" alt="Six stages: scripted specialist, noise injection, FA-Hexa in Isaac Lab, recorder, verification, selection and export; rejected episodes are re-recorded.">
           <figcaption><b>Figure 1.</b> From specialist to training set. The specialist's target is perturbed before execution while the unperturbed target is recorded as the label; the recorder keeps successful episodes only; each episode passes a fixed set of checks, and rejected ones are replaced until every task–condition pair has 80.</figcaption>
         </figure>
       </div>
@@ -415,7 +415,7 @@
       </div>
       <div class="wrap wide">
         <figure class="figure wide-fig">
-          <img src="assets/dataset/figures/noise.svg" alt="Three traces of the target offset over three seconds: independent per step, Ornstein-Uhlenbeck, and smooth drift.">
+          <img src="assets/dataset/figures/noise.png" width="2360" height="600" alt="Three traces of the target offset over three seconds: independent per step, Ornstein-Uhlenbeck, and smooth drift.">
           <figcaption><b>Figure 2.</b> One axis of the position offset for the three noise processes, 3 s at 120 Hz, σ = 5 mm in each case. (a) Independent samples every step, as in AM-Bench's <code>--inject_noise</code>; (b) Ornstein–Uhlenbeck with a 0.5 s correlation time; (c) a new Gaussian offset every 0.5 s with smootherstep interpolation (used). The captions give the success counts that decided between them.</figcaption>
         </figure>
       </div>
@@ -454,7 +454,7 @@
       </div>
       <div class="wrap wide">
         <figure class="figure wide-fig">
-          <img src="assets/dataset/figures/verification.svg" alt="Funnel from 5,810 attempts to 4,800 selected episodes, and the counts of the five rejection reasons.">
+          <img src="assets/dataset/figures/verification.png" width="2360" height="600" alt="Funnel from 5,810 attempts to 4,800 selected episodes, and the counts of the five rejection reasons.">
           <figcaption><b>Figure 3.</b> Left: recorded attempts, successes saved by the recorder, episodes that passed every check, and the final selection. Right: why the 282 rejected successes were excluded.</figcaption>
         </figure>
       </div>
