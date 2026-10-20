@@ -70,10 +70,11 @@ sub { font-size: 0.72em; }
 .nav a:hover, .nav a[aria-current="true"] { color: var(--accent); }
 
 /* Banner: the concept illustration runs edge to edge under the navigation, cropped to a wide strip */
-.banner { margin: 0; }
+.banner { margin: 0; position: relative; }
 .banner a { display: block; background: #0b1a24; }
 .banner img { display: block; width: 100%; height: clamp(200px, 44vh, 560px); object-fit: cover; object-position: center 42%; border: 0; border-radius: 0; }
-.banner figcaption { margin-top: 8px; font-size: 14px; color: var(--faint); text-align: right; }
+/* The caption sits in a translucent box in the picture's lower-right corner */
+.banner figcaption { position: absolute; right: 16px; bottom: 14px; max-width: min(62%, 560px); margin: 0; padding: 6px 10px; border-radius: 6px; background: rgba(8, 14, 20, 0.62); color: #f2f5f7; font-size: 13px; line-height: 1.4; text-align: left; backdrop-filter: blur(2px); }
 
 /* Title */
 .title-block { padding-top: 28px; padding-bottom: 8px; }
@@ -266,4 +267,5 @@ footer p { margin: 0; }
   .gallery { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr; }
   .nav ul { gap: 2px 14px; }
+  .banner figcaption { right: 10px; bottom: 10px; max-width: 78%; font-size: 12px; padding: 5px 8px; }
 }
