@@ -69,8 +69,14 @@ sub { font-size: 0.72em; }
 .nav a { font-size: 15px; color: var(--soft); text-decoration: none; }
 .nav a:hover, .nav a[aria-current="true"] { color: var(--accent); }
 
+/* Banner: the concept illustration runs edge to edge under the navigation, cropped to a wide strip */
+.banner { margin: 0; }
+.banner a { display: block; background: #0b1a24; }
+.banner img { display: block; width: 100%; height: clamp(200px, 44vh, 560px); object-fit: cover; object-position: center 42%; border: 0; border-radius: 0; }
+.banner figcaption { margin-top: 8px; font-size: 14px; color: var(--faint); text-align: right; }
+
 /* Title */
-.title-block { padding-top: 48px; padding-bottom: 8px; }
+.title-block { padding-top: 28px; padding-bottom: 8px; }
 .byline { margin: 0 0 8px; color: var(--faint); font-size: 15px; }
 h1 {
   margin: 0;
@@ -137,8 +143,6 @@ h3 { margin: 26px 0 8px; font-size: 22px; line-height: 1.3; font-weight: 700; }
 .figure img, .figure video { width: 100%; height: auto; border-radius: 6px; border: 1px solid var(--line); background: #000; }
 .figure img { background: var(--bg); }
 .figure figcaption { margin-top: 8px; font-size: 15px; color: var(--soft); }
-.figure.hero { margin-top: 28px; }
-.figure.hero img { background: #000; }
 /* Figures stay as wide as the text; a click opens the full-resolution file (pinch-zoom on phones). */
 .figure a { display: block; }
 .media-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
