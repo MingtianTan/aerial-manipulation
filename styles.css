@@ -147,6 +147,16 @@ th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--lin
 th { font-size: 14px; font-weight: 600; color: var(--soft); border-bottom: 2px solid var(--line); }
 td { font-variant-numeric: tabular-nums; }
 .note { margin: 12px 0 0; font-size: 15px; color: var(--soft); }
+/* Part 3 tables: settings (row headers) and success rates (numeric) */
+table.plain th[scope="row"] { width: 160px; text-align: left; vertical-align: top; padding: 8px 10px 8px 0; font-size: 15px; color: var(--ink); border-bottom: 1px solid var(--line); }
+table.plain td { padding: 8px 0; font-size: 16px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table.plain thead th { text-align: left; padding: 0 10px 6px 0; }
+table.rates th, table.rates td { padding: 6px 8px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+table.rates th[scope="row"] { text-align: left; font-weight: 500; color: var(--ink); font-size: 16px; }
+table.rates thead th { text-align: right; }
+table.rates thead th:first-child { text-align: left; }
+table.rates td { text-align: right; }
+table.rates tbody tr:nth-child(odd) td, table.rates tbody tr:nth-child(odd) th { background: var(--band); }
 .nowrap { white-space: nowrap; }
 
 /* Stat row */
@@ -247,5 +257,9 @@ footer p { margin: 0; }
   .pair, .media-2 { grid-template-columns: 1fr; }
   .gallery { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr; }
+  /* Wide figures pan sideways on phones instead of shrinking to an unreadable size */
+  .figure.wide-fig { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .figure.wide-fig img { min-width: 900px; }
+  .figure.wide-fig figcaption { position: sticky; left: 0; }
   .nav ul { gap: 2px 14px; }
 }

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 300" width="1180" height="300" role="img" aria-label="Verification funnel and rejection reasons">
+<rect width="1180" height="300" fill="#ffffff"/>
+<text x="60" y="32" font-size="15" font-weight="600" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">Episodes</text>
+<rect x="60" y="54" width="420.0" height="34" fill="#9fc3c8" rx="2"/>
+<text x="68" y="76" font-size="14" fill="#ffffff" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">5,810</text>
+<text x="492" y="76" font-size="14" fill="#4f5862" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">recorded attempts</text>
+<rect x="60" y="104" width="367.6" height="34" fill="#9fc3c8" rx="2"/>
+<text x="68" y="126" font-size="14" fill="#ffffff" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">5,085</text>
+<text x="492" y="126" font-size="14" fill="#4f5862" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">successful episodes saved</text>
+<rect x="60" y="154" width="347.2" height="34" fill="#9fc3c8" rx="2"/>
+<text x="68" y="176" font-size="14" fill="#ffffff" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">4,803</text>
+<text x="492" y="176" font-size="14" fill="#4f5862" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">passed every check</text>
+<rect x="60" y="204" width="347.0" height="34" fill="#0d6772" rx="2"/>
+<text x="68" y="226" font-size="14" fill="#ffffff" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">4,800</text>
+<text x="492" y="226" font-size="14" fill="#4f5862" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">selected, 80 per task and condition</text>
+<text x="700" y="32" font-size="15" font-weight="600" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">Rejected by the checks (282 of 5,085, replaced)</text>
+<text x="940" y="72" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">reset collision (door spawned on the robot)</text>
+<rect x="950" y="54" width="230.0" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="1188.0" y="72" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">159</text>
+<text x="940" y="112" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">video frame dropped by the encoder</text>
+<rect x="950" y="94" width="112.8" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="1070.8" y="112" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">78</text>
+<text x="940" y="152" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">length outside 0.6–1.5× the median</text>
+<rect x="950" y="134" width="46.3" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="1004.3" y="152" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">32</text>
+<text x="940" y="192" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">sub-criterion false at success</text>
+<rect x="950" y="174" width="17.4" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="975.4" y="192" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">12</text>
+<text x="940" y="232" font-size="13" fill="#4f5862" text-anchor="end" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">other</text>
+<rect x="950" y="214" width="2.0" height="26" fill="#9a3412" opacity="0.85" rx="2"/>
+<text x="960.0" y="232" font-size="14" fill="#1b1f24" font-family="'Source Sans 3','Segoe UI',system-ui,-apple-system,sans-serif">1</text>
+</svg>

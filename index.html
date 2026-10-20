@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261018d">
+  <link rel="stylesheet" href="styles.css?v=20261020a">
 </head>
 <body>
   <header class="nav">
@@ -378,37 +378,158 @@
         </span>
       </summary>
 
-    <section id="generation-sources">
+    <section id="generation-overview">
       <div class="wrap">
-        <h2>Specialist / RL</h2>
-        <ul class="points">
-          <li><b>Specialists.</b> The upgraded scripted specialists from Part 2, one per task; only successful episodes are kept.</li>
-          <li><b>RL.</b> Policies trained with RL in the same tasks, as a second source of trajectories.</li>
-          <li><b>We will try both.</b> How much data each task needs is still open, so both sources are generated and compared.</li>
-        </ul>
+        <h2>Demonstration dataset</h2>
+        <p>We record 80 successful demonstrations for each of the 12 AM-Bench tasks under each of the 5 conditions of Part 2 (AM-Bench default; thrust limits with aerodynamic effects; the same with a wind of 5, 10 or 20 % of the vehicle's weight), using the upgraded scripted specialists on FA-Hexa. Every episode is verified individually before it enters the training set. The set is exported for π0.5 fine-tuning in the OpenPI format and kept, with a 120 Hz low-dimensional companion, for the Flight DiT. All data was recorded in one day on a single RTX 4080 SUPER.</p>
+        <div class="stats">
+          <div class="stat"><b>4,800</b><span>episodes: 12 tasks × 5 conditions × 80</span></div>
+          <div class="stat"><b>1.24 M</b><span>image frames at 20 Hz, two cameras</span></div>
+          <div class="stat"><b>19 GB · 284 GB</b><span>raw (AV1 video) · π0.5 export (PNG)</span></div>
+        </div>
       </div>
     </section>
 
     <section id="generation-pipeline">
-      <div class="wrap">
+      <div class="wrap wide">
         <h2>Pipeline</h2>
+        <figure class="figure wide-fig">
+          <img src="assets/dataset/figures/pipeline.svg" alt="Six stages: scripted specialist, noise injection, FA-Hexa in Isaac Lab, recorder, verification, selection and export; rejected episodes are re-recorded.">
+          <figcaption><b>Figure 1.</b> From specialist to training set. The specialist's target is perturbed before execution while the unperturbed target is recorded as the label; the recorder keeps successful episodes only; each episode passes a fixed set of checks, and rejected ones are replaced until every task–condition pair has 80.</figcaption>
+        </figure>
+      </div>
+      <div class="wrap">
         <ul class="points">
-          <li><b>Record.</b> <code>record_demos_scripted.py</code> runs the specialist at the simulator's native 120 Hz on FA-Hexa and saves successful episodes in the LeRobot format: end-effector pose, gripper width, the end-effector camera, the base camera (for a camera ablation), and the task instruction.</li>
-          <li><b>Check.</b> <code>validate_lerobotdataset.py</code> resamples to 20 Hz and checks the episodes before export.</li>
-          <li><b>Export.</b> <code>export_lerobot_to_openpi.py</code> writes an OpenPI dataset at 20 Hz, with actions as end-effector targets relative to the current pose.</li>
-          <li><b>Normalise.</b> OpenPI's <code>compute_norm_stats</code> for the AM-Bench π0.5 config.</li>
-          <li><b>Train and evaluate.</b> LoRA-fine-tune π0.5, serve it, and evaluate it in AM-Bench as a baseline: actions run at 20 Hz and are interpolated to the 120 Hz controller.</li>
+          <li><b>Specialists.</b> The Part 2 specialists, one per task, run closed loop on the measured object state (peg tip, handle, lemon, ball) and output an absolute end-effector target and a gripper command. Two Wind 20 % variants were added for the recording noise (PushSlider pushes the knob with the side of the closed gripper; WipeWindow aligns before a gentle press); RotateValve gets 30 s episodes under the disturbance conditions.</li>
+          <li><b>Simulation.</b> Isaac Lab at 120 Hz with inverse kinematics and PID control; cameras render every sixth step, so a 20 Hz image is the exact render of the state it is paired with. Four environments per process, 20 m apart, two processes per GPU.</li>
+          <li><b>Recording.</b> LeRobot v3.0, successful episodes only: a 20 Hz set with both 384 × 384 cameras (AV1 video), the 35-D state, the label and the executed action, and a 120 Hz set with state and labels at every control step. The task prompt is stored with every frame.</li>
+          <li><b>Verification and selection.</b> Each episode is checked (below); the first 80 valid episodes per pair are selected and the rest excluded. The π0.5 export (LeRobot v2.1, 20 Hz, lossless PNG) is itself checked frame by frame against the selected source episodes.</li>
         </ul>
       </div>
     </section>
+
+    <section id="generation-noise">
+      <div class="wrap">
+        <h2>Noise injection</h2>
+        <p>Following DART, the executed target is perturbed and the specialist's unperturbed target is kept as the label, so the demonstrations contain small deviations and the corrections back to the nominal path. Three noise processes with the same standard deviation (5 mm, 0.025 rad; half of AM-Bench's defaults) behave very differently on a hovering vehicle (Figure 2). AM-Bench's per-step noise shakes the tool without moving the robot off its path, and every toss failed; an Ornstein–Uhlenbeck drift still changes the target every step, which the PID's derivative term turns into thrust spikes, and in 20 % wind the rotors saturate (press button 0 / 8). The smooth drift used here draws a new offset every 0.5 s and joins consecutive offsets with a smootherstep, so the target never jumps.</p>
+      </div>
+      <div class="wrap wide">
+        <figure class="figure wide-fig">
+          <img src="assets/dataset/figures/noise.svg" alt="Three traces of the target offset over three seconds: independent per step, Ornstein-Uhlenbeck, and smooth drift.">
+          <figcaption><b>Figure 2.</b> One axis of the position offset for the three noise processes, 3 s at 120 Hz, σ = 5 mm in each case. (a) Independent samples every step, as in AM-Bench's <code>--inject_noise</code>; (b) Ornstein–Uhlenbeck with a 0.5 s correlation time; (c) a new Gaussian offset every 0.5 s with smootherstep interpolation (used). The captions give the success counts that decided between them.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="generation-settings">
+      <div class="wrap">
+        <h2>Recording settings</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <tbody>
+              <tr><th scope="row">Vehicle, control</th><td>FA-Hexa (fully actuated hexarotor, 6.6 kg, 4-DoF arm), absolute end-effector targets, Pyroki IK + PID at 120 Hz</td></tr>
+              <tr><th scope="row">Conditions</th><td>default (all disturbance models off); aero (thrust limited to 0–23 N per rotor, ground and wall effects, drag); aero + constant wind of 3.3, 6.5 or 13.0 N along +x (5, 10, 20 % of the weight)</td></tr>
+              <tr><th scope="row">Episode limit</th><td>the task's own limit (10–60 s); FrameAssembly 40 s and RotateValve 30 s under the disturbance conditions</td></tr>
+              <tr><th scope="row">Noise</th><td>smooth drift on the executed target, σ = 5 mm and 0.025 rad, knot every 0.5 s; labels unperturbed</td></tr>
+              <tr><th scope="row">Observations</th><td>end-effector and body cameras, 384 × 384 RGB at 20 Hz; 35-D state (EE pose, gripper, arm joints, base pose, EE and base velocities, joint velocities) at 20 and 120 Hz</td></tr>
+              <tr><th scope="row">Actions</th><td>8-D absolute EE target (position, quaternion, gripper); the executed, noisy target is stored alongside</td></tr>
+              <tr><th scope="row">Throughput</th><td>two Isaac Sim processes with 4 environments each on one 16 GB GPU; 5,810 attempts in about 18 hours including re-recording</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="generation-verification">
+      <div class="wrap">
+        <h2>Verification</h2>
+        <p>Every saved episode has to pass all of the following, and the two LeRobot sets are compared step by step. Rejected episodes stay on disk but are excluded from the selection and replaced by new recordings.</p>
+        <ul class="points">
+          <li><b>Success.</b> The task's success check fired and every sub-criterion was true at termination (a lemon that reached the bin without a registered grasp is rejected).</li>
+          <li><b>Integrity.</b> The 120 Hz episode has exactly the logged number of steps, the 20 Hz episode one frame per grid step, every video segment holds exactly its frames (LeRobot's streaming encoder silently drops a frame when its queue is full; the queue was enlarged after this was found), and the first, middle and last frames decode and differ.</li>
+          <li><b>Clean start.</b> The robot does not move by itself in the first 0.2 s. OpenDoor's door is sometimes spawned inside the robot's reset footprint and knocks the arm at its velocity limit; about a quarter of its episodes were rejected for this.</li>
+          <li><b>Length.</b> Within 0.6–1.5× the median of its task–condition pair, which excludes late or accidental successes.</li>
+          <li><b>Metadata.</b> The prompt, the disturbance switches and the wind force match the condition; the noise spread matches the setting.</li>
+        </ul>
+      </div>
+      <div class="wrap wide">
+        <figure class="figure wide-fig">
+          <img src="assets/dataset/figures/verification.svg" alt="Funnel from 5,810 attempts to 4,800 selected episodes, and the counts of the five rejection reasons.">
+          <figcaption><b>Figure 3.</b> Left: recorded attempts, successes saved by the recorder, episodes that passed every check, and the final selection. Right: why the 282 rejected successes were excluded.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="generation-results">
+      <div class="wrap">
+        <h2>Specialist success under the recording noise</h2>
+        <p class="sub">Successes over attempts per task and condition, all recordings included. The median episode lasts 8.8 s in the default condition and 11.2 s in 20 % wind.</p>
+        <div class="table-wrap">
+          <table class="rates">
+            <thead><tr><th scope="col">Task</th><th scope="col">Default</th><th scope="col">Aero</th><th scope="col">Wind 5 %</th><th scope="col">Wind 10 %</th><th scope="col">Wind 20 %</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Press button</th><td>100</td><td>100</td><td>99</td><td>99</td><td>88</td></tr>
+              <tr><th scope="row">Peg in hole</th><td>88</td><td>100</td><td>98</td><td>98</td><td>91</td></tr>
+              <tr><th scope="row">Inspect surface (NDT)</th><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Wipe window</th><td>100</td><td>100</td><td>99</td><td>99</td><td>58</td></tr>
+              <tr><th scope="row">Cabinet pick and place</th><td>100</td><td>100</td><td>100</td><td>100</td><td>61</td></tr>
+              <tr><th scope="row">Frame assembly</th><td>89</td><td>88</td><td>94</td><td>96</td><td>82</td></tr>
+              <tr><th scope="row">Harvest lemon</th><td>74</td><td>63</td><td>61</td><td>72</td><td>52</td></tr>
+              <tr><th scope="row">Toss ball</th><td>100</td><td>100</td><td>100</td><td>98</td><td>73</td></tr>
+              <tr><th scope="row">Rotate valve</th><td>86</td><td>100</td><td>100</td><td>98</td><td>82</td></tr>
+              <tr><th scope="row">Push slider</th><td>100</td><td>92</td><td>83</td><td>58</td><td>56</td></tr>
+              <tr><th scope="row">Pull lever</th><td>100</td><td>98</td><td>94</td><td>91</td><td>87</td></tr>
+              <tr><th scope="row">Open door</th><td>92</td><td>100</td><td>100</td><td>100</td><td>78</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Table 1. Success rate in percent. Only successful episodes are stored; a low rate costs recording time, not data quality.</p>
+      </div>
+    </section>
+
+    <section id="generation-format">
+      <div class="wrap">
+        <h2>Data format</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Feature</th><th scope="col">Shape</th><th scope="col">Content</th></tr></thead>
+            <tbody>
+              <tr><td><code>observation.images.ee_camera</code>, <code>base_camera</code></td><td>384 × 384 × 3</td><td>end-effector and body cameras, 20 Hz (AV1 in the raw set, PNG in the export)</td></tr>
+              <tr><td><code>observation.state</code></td><td>35</td><td>EE position and quaternion, gripper width, 4 arm joints, base position and quaternion, EE and base linear and angular velocities, joint velocities</td></tr>
+              <tr><td><code>action</code></td><td>8</td><td>the specialist's unperturbed EE target (position, quaternion, gripper): the training label</td></tr>
+              <tr><td><code>action_executed</code></td><td>8</td><td>the perturbed target that was executed</td></tr>
+              <tr><td><code>step_index</code></td><td>1</td><td>the frame's step in the matching 120 Hz episode</td></tr>
+              <tr><td><code>task</code></td><td>text</td><td>the AM-Bench language instruction</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Table 2. Features of the 20 Hz set; the 120 Hz set holds the same episodes without images. The export keeps <code>ee_image</code>, <code>base_image</code>, <code>ee_pos</code>, <code>ee_quat</code>, <code>gripper_width</code>, <code>actions</code> and <code>task</code>, the schema of OpenPI's AM-Bench configuration, where actions become end-effector-relative 50-step chunks.</p>
+      </div>
+    </section>
+
     <section id="generation-code">
       <div class="wrap">
-        <h2>Code and data</h2>
+        <h2>Code</h2>
         <ul class="points">
-          <li><b>AM-Bench with the fixes.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/ambench"><code>ambench/</code></a>: a snapshot of AM-Bench with the Part 2 specialists and checks; the changes alone are in <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/ambench/SPECIALIST_FIXES.diff"><code>SPECIALIST_FIXES.diff</code></a>.</li>
-          <li><b>Pipeline.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/pipeline"><code>pipeline/</code></a>: the demo recorder, probes, and the π0.5 serve and evaluation scripts.</li>
-          <li><b>Videos.</b> <a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/data/videos"><code>data/videos/</code></a>: all 60 FA-Hexa runs and the before clips.</li>
-          <li><b>Disturbance variants.</b> 12 tasks × 4 conditions registered as <code>&lt;Task&gt;-Am-FAHexa-Abs-PID-{Aero,Wind05,Wind10,Wind20}-Direct-v0</code>, each with its specialist; see <a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/disturbance-variants.md"><code>docs/disturbance-variants.md</code></a>.</li>
+          <li><a href="https://github.com/MingtianTan/aerial-manipulation/tree/main/pipeline/datagen"><code>pipeline/datagen/</code></a>: the batch recorder with GPU slot locks and re-recording, the per-episode verifier and selection, the OpenPI export and its check, and the one-command finish script.</li>
+          <li><a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/ambench/DATAGEN_CHANGES.diff"><code>ambench/DATAGEN_CHANGES.diff</code></a>: the recorder and exporter changes on top of AM-Bench (video storage, 20 Hz images with a 120 Hz companion, clean labels, smooth noise, one-pass export).</li>
+          <li><a href="https://github.com/MingtianTan/aerial-manipulation/blob/main/docs/training-data.md"><code>docs/training-data.md</code></a>: layout, features, rules and the full numbers. The data itself (303 GB) is not in the repository.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="generation-refs">
+      <div class="wrap">
+        <h2>Related work</h2>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2504.16054">π0.5: a Vision-Language-Action Model with Open-World Generalization</a> <span>(Physical Intelligence, 2025)</span>: the VLA fine-tuned on this data. <a href="https://github.com/Physical-Intelligence/openpi">OpenPI</a> provides the training code and the AM-Bench data configuration used by the export (LeRobot v2.1, 20 Hz, 50-step action chunks).</li>
+          <li><a href="https://arxiv.org/abs/2410.24164">π0: A Vision-Language-Action Flow Model for General Robot Control</a> <span>(Black et al., 2024)</span>: the flow-matching action expert that π0.5 builds on.</li>
+          <li><a href="https://arxiv.org/abs/1703.09327">DART: Noise Injection for Robust Imitation Learning</a> <span>(Laskey et al., CoRL 2017)</span>: noise is injected into the supervisor's executed actions while the unperturbed action is recorded as the label, so the data covers the states a learner will drift into; the scheme used here.</li>
+          <li><a href="https://github.com/huggingface/lerobot">LeRobot</a> <span>(Cadene et al., 2024)</span>: the dataset format (v3.0 for recording, v2.1 for OpenPI) and the video encoding.</li>
+          <li><a href="https://arxiv.org/abs/2507.01961">AC-DiT: Adaptive Coordination Diffusion Transformer for Mobile Manipulation</a> <span>(2025)</span>: a diffusion transformer that coordinates a mobile base and an arm, trained on 20 Hz demonstrations; the model the planned Flight DiT follows. <a href="https://github.com/PKU-HMI-Lab/AC-DiT">Code</a>.</li>
+          <li><a href="https://arxiv.org/abs/2410.07864">RDT-1B: a Diffusion Foundation Model for Bimanual Manipulation</a> <span>(Liu et al., 2024)</span>: the diffusion-transformer backbone and unified state vector AC-DiT is built on.</li>
+          <li><a href="https://arxiv.org/abs/2609.00641">AM-Bench</a> <span>(Wang et al., 2026)</span>: the simulation suite, tasks, specialists, disturbance models and recording tools this dataset extends. <a href="https://ambench.github.io/">Project page</a> · <a href="https://github.com/ambench/ambench">Code</a>.</li>
+          <li><a href="https://isaac-sim.github.io/IsaacLab/">Isaac Lab</a> <span>(NVIDIA)</span>: the GPU simulation framework (Isaac Sim 5.1).</li>
         </ul>
       </div>
     </section>
@@ -425,6 +546,6 @@
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261018d"></script>
+  <script src="main.js?v=20261020a"></script>
 </body>
 </html>

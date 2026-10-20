@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 # Generated training data (LeRobot datasets, exports, QA output); too large for git.
 datasets/
+.claude/
