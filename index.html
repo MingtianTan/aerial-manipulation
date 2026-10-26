@@ -395,7 +395,7 @@
         <div class="stats">
           <div class="stat"><b>4,800</b><span>episodes: 12 tasks × 5 conditions × 80</span></div>
           <div class="stat"><b>1.33 M</b><span>image frames at 20 Hz, two cameras</span></div>
-          <div class="stat"><b>19 GB · 297 GB</b><span>raw (AV1 video) · π0.5 export (PNG)</span></div>
+          <div class="stat"><b>19 GB · 294 GB</b><span>raw (AV1 video) · π0.5 export (PNG)</span></div>
         </div>
       </div>
     </section>
@@ -443,7 +443,7 @@
               <tr><th scope="row">Noise</th><td>smooth drift on the executed target, σ = 5 mm and 0.025 rad, knot every 0.5 s; labels unperturbed</td></tr>
               <tr><th scope="row">Observations</th><td>end-effector and body cameras, 384 × 384 RGB at 20 Hz; 35-D state (EE pose, gripper, arm joints, base pose, EE and base velocities, joint velocities) at 20 and 120 Hz</td></tr>
               <tr><th scope="row">Actions</th><td>8-D absolute EE target (position, quaternion, gripper); the executed, noisy target is stored alongside</td></tr>
-              <tr><th scope="row">Throughput</th><td>two Isaac Sim processes with 4 environments each on one 16 GB GPU; 5,540 attempts in about 22 hours, including the re-recordings of OpenDoor, RotateValve and TossBall with their rewritten specialists</td></tr>
+              <tr><th scope="row">Throughput</th><td>two Isaac Sim processes with 4 environments each on one 16 GB GPU; 5,559 attempts in about 22 hours, including the re-recordings of OpenDoor, RotateValve and TossBall with their rewritten specialists and the replacements for rejected episodes</td></tr>
             </tbody>
           </table>
         </div>
@@ -458,15 +458,16 @@
           <li><b>Success.</b> The task's success check fired and every sub-criterion was true at termination (a lemon that reached the bin without a registered grasp is rejected).</li>
           <li><b>Integrity.</b> The 120 Hz episode has exactly the logged number of steps, the 20 Hz episode one frame per grid step, every video segment holds exactly its frames (LeRobot's streaming encoder silently drops a frame when its queue is full; the queue was enlarged after this was found), and the first, middle and last frames decode and differ.</li>
           <li><b>Clean start.</b> The robot does not move by itself in the first 0.2 s. In the first recording about a quarter of the OpenDoor episodes failed this: AM-Bench's IK keeps the base 0.875 m behind the door leaf, which for a door spawned close to the robot lies behind its reset position, so the base was pulled back on the first step. The rewritten door specialist sets its own base limit, and the transient no longer occurs.</li>
-          <li><b>Level base.</b> The base never rolls or pitches beyond 25° (70° for TossBall, whose lob tilts it on purpose). A drone that flips or falls into the object is not a demonstration even if the object still passed the success check; 23 such episodes were replaced.</li>
+          <li><b>Level base.</b> The base never rolls or pitches beyond 25°, in every task. A drone that flips or falls into the object is not a demonstration even if the object still passed the success check; 23 such episodes were replaced.</li>
+          <li><b>Plausible labels.</b> The target never runs more than 0.8 m past the usual extremes of its task–condition pair, and the end effector never gets more than 0.6 m farther from its target than usual. The first rule caught 8 default-condition lemon episodes whose target flew 2–5 m off after the lemon had slipped into the bin (the specialist kept steering it; now fixed), the second 11 episodes in 20 % wind in which the drone was thrown down to about 0.3 m above the floor before it recovered.</li>
           <li><b>Length.</b> Within 0.6–1.5× the median of its task–condition pair, which excludes late or accidental successes.</li>
           <li><b>Metadata.</b> The prompt, the disturbance switches and the wind force match the condition; the noise spread matches the setting.</li>
         </ul>
       </div>
       <div class="wrap wide">
         <figure class="figure">
-          <a href="assets/dataset/figures/verification.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/dataset/figures/verification.png" width="2360" height="600" alt="Funnel from 5,540 attempts to 4,800 selected episodes, and the counts of the four rejection reasons."></a>
-          <figcaption><b>Figure 3.</b> Left: recorded attempts, successes saved by the recorder, episodes that passed every check, and the final selection. Right: why the 108 rejected successes were excluded.</figcaption>
+          <a href="assets/dataset/figures/verification.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/dataset/figures/verification.png" width="2360" height="600" alt="Funnel from 5,559 attempts to 4,800 selected episodes, and the counts of the six rejection reasons."></a>
+          <figcaption><b>Figure 3.</b> Left: recorded attempts, successes saved by the recorder, episodes that passed every check, and the final selection. Right: why the 127 rejected successes were excluded.</figcaption>
         </figure>
       </div>
     </section>
@@ -480,16 +481,16 @@
             <thead><tr><th scope="col">Task</th><th scope="col">Default</th><th scope="col">Aero</th><th scope="col">Wind 5 %</th><th scope="col">Wind 10 %</th><th scope="col">Wind 20 %</th></tr></thead>
             <tbody>
               <tr><th scope="row">Press button</th><td>100</td><td>100</td><td>99</td><td>99</td><td>88</td></tr>
-              <tr><th scope="row">Peg in hole</th><td>88</td><td>100</td><td>98</td><td>98</td><td>91</td></tr>
+              <tr><th scope="row">Peg in hole</th><td>88</td><td>100</td><td>98</td><td>98</td><td>90</td></tr>
               <tr><th scope="row">Inspect surface (NDT)</th><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td></tr>
               <tr><th scope="row">Wipe window</th><td>100</td><td>100</td><td>99</td><td>99</td><td>58</td></tr>
               <tr><th scope="row">Cabinet pick and place</th><td>100</td><td>100</td><td>100</td><td>100</td><td>61</td></tr>
               <tr><th scope="row">Frame assembly</th><td>89</td><td>88</td><td>94</td><td>96</td><td>82</td></tr>
-              <tr><th scope="row">Harvest lemon</th><td>74</td><td>63</td><td>61</td><td>72</td><td>52</td></tr>
+              <tr><th scope="row">Harvest lemon</th><td>75</td><td>63</td><td>61</td><td>72</td><td>52</td></tr>
               <tr><th scope="row">Toss ball</th><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td></tr>
               <tr><th scope="row">Rotate valve</th><td>98</td><td>99</td><td>99</td><td>99</td><td>94</td></tr>
               <tr><th scope="row">Push slider</th><td>100</td><td>92</td><td>83</td><td>58</td><td>56</td></tr>
-              <tr><th scope="row">Pull lever</th><td>100</td><td>98</td><td>94</td><td>91</td><td>86</td></tr>
+              <tr><th scope="row">Pull lever</th><td>100</td><td>98</td><td>94</td><td>91</td><td>87</td></tr>
               <tr><th scope="row">Open door</th><td>100</td><td>100</td><td>100</td><td>100</td><td>100</td></tr>
             </tbody>
           </table>
@@ -525,7 +526,7 @@
         <ul class="points">
           <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/main/pipeline/datagen"><code>pipeline/datagen/</code></a>: the batch recorder with GPU slot locks and re-recording, the per-episode verifier and selection, the OpenPI export and its check, and the one-command finish script.</li>
           <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/ambench/DATAGEN_CHANGES.diff"><code>ambench/DATAGEN_CHANGES.diff</code></a>: the recorder and exporter changes on top of AM-Bench (video storage, 20 Hz images with a 120 Hz companion, clean labels, smooth noise, one-pass export).</li>
-          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/docs/training-data.md"><code>docs/training-data.md</code></a>: layout, features, rules and the full numbers. The data itself (303 GB) is not in the repository.</li>
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/blob/main/docs/training-data.md"><code>docs/training-data.md</code></a>: layout, features, rules and the full numbers. The data itself (313 GB) is not in the repository.</li>
         </ul>
       </div>
     </section>
