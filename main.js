@@ -41,9 +41,9 @@
     return boxes;
   };
   const groups = ["#upgrades", "#benchmark-demos", "#benchmark-hardest"]
-    .map((selector) => [...document.querySelectorAll(selector + " video")])
-    .filter((videos) => videos.length)
-    .map((videos) => ({ videos, boxes: boxesOf(videos[0]), run: 0 }));
+    .map((selector) => ({ id: selector.slice(1), videos: [...document.querySelectorAll(selector + " video")] }))
+    .filter((group) => group.videos.length)
+    .map((group) => ({ ...group, boxes: boxesOf(group.videos[0]), section: document.getElementById(group.id), run: 0, started: false }));
   const isOpen = (group) => group.boxes.every((box) => box.open);
   const clipsGroup = groups.find((group) => group.videos[0].closest("#upgrades")) || null;
   const pauseButton = document.querySelector("[data-pause-all]");
@@ -62,6 +62,7 @@
   // Start every clip of the group, then restart them from zero together once each can play.
   function startGroup(group) {
     const run = ++group.run;
+    group.started = true;
     playGroup(group);
     const waiting = group.videos.filter((video) => video.readyState < 3);
     let left = waiting.length;
@@ -76,7 +77,40 @@
 
   function stopGroup(group) {
     group.run += 1;
+    group.started = false;
     group.videos.forEach((video) => video.pause());
+  }
+
+  // Part 5 toolbars: "Play all together" opens the boxes if needed and restarts the group in sync; "Pause all" stops it.
+  groups.forEach((group) => {
+    document.querySelectorAll(`[data-play-group="${group.id}"]`).forEach((button) => {
+      button.addEventListener("click", () => { openPartOf(group.videos[0]); startGroup(group); });
+    });
+    document.querySelectorAll(`[data-pause-group="${group.id}"]`).forEach((button) => {
+      button.addEventListener("click", () => stopGroup(group));
+    });
+  });
+
+  // The benchmark groups loop as a unit: a clip holds its last frame until the longest one ends, then all restart
+  // together (Part 2's pairs keep looping on their own).
+  groups.filter((group) => group.id !== "upgrades").forEach((group) => {
+    group.videos.forEach((video) => {
+      video.loop = false;
+      video.addEventListener("ended", () => {
+        if (isOpen(group) && group.videos.every((v) => v.ended)) restartGroup(group);
+      });
+    });
+  });
+
+  // A group whose boxes are already open (a link straight into Part 5) starts when it scrolls into view.
+  if ("IntersectionObserver" in window) {
+    const starter = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const group = groups.find((g) => g.section === entry.target);
+        if (group && entry.isIntersecting && isOpen(group) && !group.started) startGroup(group);
+      });
+    }, { rootMargin: "0px 0px -10% 0px" });
+    groups.forEach((group) => { if (group.section) starter.observe(group.section); });
   }
 
   if (restartButton && clipsGroup) restartButton.addEventListener("click", () => restartGroup(clipsGroup));

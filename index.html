@@ -641,7 +641,11 @@
     <section id="benchmark-demos">
       <div class="wrap wide">
         <h2>Rollouts of the 30k policy</h2>
-        <p class="sub">One successful rollout per task, side camera, real time, recorded with the evaluator under default physics. The clips start together when the box is open; click one to enlarge it. The success rate is over the 30 scored rollouts.</p>
+        <p class="sub">One successful rollout per task, side camera, real time, recorded with the evaluator under default physics. The clips play together; click one to enlarge it. The success rate is over the 30 scored rollouts.</p>
+        <div class="toolbar">
+          <button type="button" class="btn" data-play-group="benchmark-demos">Play all together</button>
+          <button type="button" class="btn ghost" data-pause-group="benchmark-demos">Pause all</button>
+        </div>
         <div class="gallery">
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/01_PressButton.jpg" src="assets/benchmark/pi05_30k/01_PressButton.mp4" aria-label="01 Press button, π0.5 30k, default physics"></video><figcaption>01 Press button <span class="chip ok">30/30</span></figcaption></figure>
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/02_PegInHole.jpg" src="assets/benchmark/pi05_30k/02_PegInHole.mp4" aria-label="02 Peg in hole, π0.5 30k, default physics"></video><figcaption>02 Peg in hole <span class="chip part">21/30</span></figcaption></figure>
@@ -661,6 +665,10 @@
       <div class="wrap wide">
         <h2>The hardest task it solves: open door</h2>
         <p class="sub">11 of 30 for the 30k checkpoint, the lowest rate among the eleven solved tasks (toss ball is never solved). The door has to be unlatched through its handle, swung past 20° and let go, all while hovering beside the leaf. A successful rollout takes 17 s on average; the slowest needed 22.5 of the 25 s allowed. One successful rollout from three cameras: the side view, and the two images the policy sees.</p>
+        <div class="toolbar">
+          <button type="button" class="btn" data-play-group="benchmark-hardest">Play the three views together</button>
+          <button type="button" class="btn ghost" data-pause-group="benchmark-hardest">Pause</button>
+        </div>
         <div class="gallery">
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/12_OpenDoor.jpg" src="assets/benchmark/pi05_30k/12_OpenDoor.mp4" aria-label="Open door, side camera"></video><figcaption>Side camera <span class="chip part">11/30</span></figcaption></figure>
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/12_OpenDoor_ee.jpg" src="assets/benchmark/pi05_30k/12_OpenDoor_ee.mp4" aria-label="Open door, end-effector camera (policy input)"></video><figcaption>End-effector camera <span class="chip ok">policy input</span></figcaption></figure>
@@ -701,6 +709,6 @@
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261030c"></script>
+  <script src="main.js?v=20261030e"></script>
 </body>
 </html>
