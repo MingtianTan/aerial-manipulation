@@ -1,10 +1,12 @@
 (function () {
   // Parts start collapsed. A link into a part opens it; closing a part pauses its videos.
-  const parts = [...document.querySelectorAll("details.part-block")];
+  const parts = [...document.querySelectorAll("details.part-block, details.method-block")];
 
+  // Open every collapsible box around the target: the part and, inside Part 5, the model's own box.
   function openPartOf(target) {
-    const part = target.closest("details.part-block");
-    if (part && !part.open) part.open = true;
+    for (let box = target.closest("details"); box; box = box.parentElement?.closest("details")) {
+      if (!box.open) box.open = true;
+    }
   }
 
   document.querySelectorAll("a[href^='#']").forEach((link) => {

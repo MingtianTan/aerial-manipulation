@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261020h">
+  <link rel="stylesheet" href="styles.css?v=20261030a">
 </head>
 <body>
   <header class="nav">
@@ -577,6 +577,18 @@
         </span>
       </summary>
 
+    <!-- One collapsible box per evaluated model -->
+    <details class="method-block" id="pi05-block" open>
+      <summary class="method" id="method-pi05">
+        <span class="method-head">
+          <span>
+            <span class="method-label">Model 1 · baseline</span>
+            <h3 class="method-title">π0.5, fully fine-tuned, both cameras</h3>
+          </span>
+          <span class="method-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
+
     <section id="benchmark-setup">
       <div class="wrap">
         <h2>π0.5 on the twelve tasks</h2>
@@ -646,19 +658,9 @@
 
     <section id="benchmark-hardest">
       <div class="wrap">
-        <h2>The hardest task it solves: peg in hole</h2>
-        <p class="sub">21 of 30. The peg has to enter a hole in the wall while the whole vehicle hovers; a few centimetres of drift and the peg lands on the plate. Left: side camera. Right: the end-effector camera, one of the two images the policy sees.</p>
-        <div class="pair">
-          <figure>
-            <figcaption><span class="side after">Scene</span><span class="chip part">21/30</span></figcaption>
-            <video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/02_PegInHole.jpg" src="assets/benchmark/pi05_30k/02_PegInHole.mp4" aria-label="Peg in hole, side camera"></video>
-          </figure>
-          <figure>
-            <figcaption><span class="side after">End-effector camera</span><span class="chip part">policy input</span></figcaption>
-            <video class="bench-clip" muted loop playsinline preload="none" src="assets/benchmark/pi05_30k/02_PegInHole_ee.mp4" aria-label="Peg in hole, end-effector camera"></video>
-          </figure>
-        </div>
-        <p class="note">Open door is harder still (11 of 30) and the cabinet is the longest task (three stages, 24 s on average); their clips follow once recorded under the task limits.</p>
+        <h2>The hardest task it solves: open door</h2>
+        <p class="sub">11 of 30 for the 30k checkpoint, the lowest rate among the eleven solved tasks (toss ball is never solved). The door has to be unlatched through its handle, swung past 20° and let go, all while hovering beside the leaf. A successful rollout takes 17 s on average; the slowest needed 22.5 of the 25 s allowed.</p>
+        <p class="note">Where it fails: in 15 of 30 rollouts the policy never operates the handle and hovers at the leaf until time runs out; once the handle is operated it finishes 11 times out of 15. A successful rollout is being recorded under the task's time limit and will appear here with the end-effector view.</p>
       </div>
     </section>
 
@@ -668,6 +670,8 @@
         <p class="sub">Running: the 30k checkpoint under aero (thrust limits, ground and wall effects, drag) and aero with wind of 5, 10 and 20 % of the weight, 30 rollouts per task each, same seeds. The table will appear here.</p>
       </div>
     </section>
+
+    </details>
 
     <section id="benchmark-code">
       <div class="wrap">
@@ -691,6 +695,6 @@
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261030a"></script>
+  <script src="main.js?v=20261030b"></script>
 </body>
 </html>
