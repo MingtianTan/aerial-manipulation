@@ -581,7 +581,7 @@
       <div class="wrap">
         <h2>π0.5 on the twelve tasks</h2>
         <ul class="points">
-          <li><b>Model.</b> π0.5, all weights fine-tuned from the public π0.5 base with AM-Bench's recipe: batch 32, 40,000 steps, peak learning rate 2.5·10<sup>−5</sup> with 1,000 warm-up steps, AdamW, EMA 0.99, 50-step action chunks at 20 Hz, actions relative to the end effector. Training data: the 960 default-condition demonstrations of Part 3 (12 tasks × 80). Both cameras go into the model; AM-Bench's own π0.5 sees the end-effector camera only. One H100, 17 h, about $75. Checkpoints after 20k, 30k and 40k steps.</li>
+          <li><b>Model.</b> π0.5, all weights fine-tuned from the public π0.5 base with AM-Bench's recipe: batch 32, 40,000 steps, peak learning rate 2.5·10<sup>−5</sup> with 1,000 warm-up steps, AdamW, EMA 0.99, 50-step action chunks at 20 Hz, actions relative to the end effector. Training data: the 960 default-condition demonstrations of Part 3 (12 tasks × 80). Both cameras go into the model (end-effector and body camera); AM-Bench's own π0.5 sees the end-effector camera only (its config masks the body camera out). One H100, 17 h, about $75. Checkpoints after 20k, 30k and 40k steps.</li>
           <li><b>Protocol.</b> AM-Bench's evaluator and success checks, default physics, 30 rollouts per task, each task's own time limit (10 s for toss ball, 60 s for the cabinet, 20–30 s otherwise). Rollout <i>i</i> of a task always uses environment seed <i>i</i>, for every checkpoint and condition, so the numbers are paired. The policy runs at 20 Hz and re-plans every 8 executed steps; one environment at a time, headless, on one RTX 4080 (5–6 h per 360-rollout sweep).</li>
           <li><b>Result.</b> The 30k checkpoint succeeds in 292 of 360 rollouts, a macro-averaged success rate of 81.1 %, against 49.2 % for the π0.5 MT-FT row of AM-Bench's Table 10 (same tasks, same rollout count; the paper's demonstrations and camera). Eleven tasks are solved; toss ball never is: the policy carries the ball to the bin and does not let go (the release criterion is met in 0 of 30 rollouts). The 40k checkpoint reaches 73.3 %.</li>
         </ul>
@@ -598,7 +598,7 @@
         <h2>Success rate per task</h2>
         <div class="table-wrap">
           <table class="rates">
-            <thead><tr><th scope="col">Task</th><th scope="col">AM-Bench π0.5 MT-FT</th><th scope="col">Ours, 30k</th><th scope="col">Ours, 40k</th></tr></thead>
+            <thead><tr><th scope="col">Task</th><th scope="col">AM-Bench π0.5 MT-FT<br>(EE camera)</th><th scope="col">Ours, 30k<br>(EE + body camera)</th><th scope="col">Ours, 40k<br>(EE + body camera)</th></tr></thead>
             <tbody>
               <tr><th scope="row">Press button</th><td>100</td><td>100</td><td>100</td></tr>
               <tr><th scope="row">Peg in hole</th><td>100</td><td>70</td><td>70</td></tr>
