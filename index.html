@@ -595,7 +595,7 @@
         <ul class="points">
           <li><b>Model.</b> π0.5, all weights fine-tuned from the public π0.5 base with AM-Bench's recipe: batch 32, 40,000 steps, peak learning rate 2.5·10<sup>−5</sup> with 1,000 warm-up steps, AdamW, EMA 0.99, 50-step action chunks at 20 Hz, actions relative to the end effector. Training data: the 960 default-condition demonstrations of Part 3 (12 tasks × 80). Both cameras go into the model (end-effector and body camera); AM-Bench's own π0.5 sees the end-effector camera only (its config masks the body camera out). One H100, 17 h, about $75. Checkpoints after 20k, 30k and 40k steps.</li>
           <li><b>Protocol.</b> AM-Bench's evaluator and success checks, default physics, 30 rollouts per task, each task's own time limit (10 s for toss ball, 60 s for the cabinet, 20–30 s otherwise). Rollout <i>i</i> of a task always uses environment seed <i>i</i>, for every checkpoint and condition, so the numbers are paired. The policy runs at 20 Hz and re-plans every 8 executed steps; one environment at a time, headless, on one RTX 4080 (5–6 h per 360-rollout sweep).</li>
-          <li><b>Result.</b> The 30k checkpoint succeeds in 292 of 360 rollouts, a macro-averaged success rate of 81.1 %, against 49.2 % for the π0.5 MT-FT row of AM-Bench's Table 10 (same tasks, same rollout count; the paper's demonstrations and camera). Eleven tasks are solved; toss ball never is: the policy carries the ball to the bin and does not let go (the release criterion is met in 0 of 30 rollouts). The 40k checkpoint reaches 73.3 %.</li>
+          <li><b>Result.</b> The 30k checkpoint succeeds in 292 of 360 rollouts, a macro-averaged success rate of 81.1 %, against 49.2 % for the π0.5 MT-FT row of AM-Bench's Table 10 (same tasks, same rollout count; the paper's demonstrations and camera). Eleven tasks are solved; toss ball never is: the policy carries the ball to the bin and does not let go (the release criterion is met in 0 of 30 rollouts). The 20k and 40k checkpoints reach 61.7 % and 73.3 %.</li>
         </ul>
         <div class="stats">
           <div class="stat"><b>81.1 %</b><span>macro success, 30k checkpoint, default physics</span></div>
@@ -610,25 +610,25 @@
         <h2>Success rate per task</h2>
         <div class="table-wrap">
           <table class="rates">
-            <thead><tr><th scope="col">Task</th><th scope="col">AM-Bench π0.5 MT-FT<br>(EE camera)</th><th scope="col">Ours, 30k<br>(EE + body camera)</th><th scope="col">Ours, 40k<br>(EE + body camera)</th></tr></thead>
+            <thead><tr><th scope="col">Task</th><th scope="col">AM-Bench π0.5 MT-FT<br>(EE camera)</th><th scope="col">Ours, 20k<br>(EE + body camera)</th><th scope="col">Ours, 30k<br>(EE + body camera)</th><th scope="col">Ours, 40k<br>(EE + body camera)</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Press button</th><td>100</td><td>100</td><td>100</td></tr>
-              <tr><th scope="row">Peg in hole</th><td>100</td><td>70</td><td>70</td></tr>
-              <tr><th scope="row">Inspect surface (NDT)</th><td>57</td><td>93</td><td>97</td></tr>
-              <tr><th scope="row">Wipe window</th><td>0</td><td>93</td><td>87</td></tr>
-              <tr><th scope="row">Cabinet pick and place</th><td>0</td><td>100</td><td>100</td></tr>
-              <tr><th scope="row">Frame assembly</th><td>0</td><td>90</td><td>10</td></tr>
-              <tr><th scope="row">Harvest lemon</th><td>67</td><td>93</td><td>100</td></tr>
-              <tr><th scope="row">Toss ball</th><td>0</td><td>0</td><td>0</td></tr>
-              <tr><th scope="row">Rotate valve</th><td>0</td><td>100</td><td>100</td></tr>
-              <tr><th scope="row">Push slider</th><td>100</td><td>100</td><td>100</td></tr>
-              <tr><th scope="row">Pull lever</th><td>67</td><td>97</td><td>100</td></tr>
-              <tr><th scope="row">Open door</th><td>100 <span class="aside">(door pushed open, no handle)</span></td><td>37</td><td>17</td></tr>
-              <tr><th scope="row"><b>Macro average</b></th><td><b>49.2</b></td><td><b>81.1</b></td><td><b>73.3</b></td></tr>
+              <tr><th scope="row">Press button</th><td>100</td><td>100</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Peg in hole</th><td>100</td><td>50</td><td>70</td><td>70</td></tr>
+              <tr><th scope="row">Inspect surface (NDT)</th><td>57</td><td>17</td><td>93</td><td>97</td></tr>
+              <tr><th scope="row">Wipe window</th><td>0</td><td>80</td><td>93</td><td>87</td></tr>
+              <tr><th scope="row">Cabinet pick and place</th><td>0</td><td>100</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Frame assembly</th><td>0</td><td>0</td><td>90</td><td>10</td></tr>
+              <tr><th scope="row">Harvest lemon</th><td>67</td><td>93</td><td>93</td><td>100</td></tr>
+              <tr><th scope="row">Toss ball</th><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Rotate valve</th><td>0</td><td>87</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Push slider</th><td>100</td><td>100</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Pull lever</th><td>67</td><td>100</td><td>97</td><td>100</td></tr>
+              <tr><th scope="row">Open door</th><td>100 <span class="aside">(door pushed open, no handle)</span></td><td>13</td><td>37</td><td>17</td></tr>
+              <tr><th scope="row"><b>Macro average</b></th><td><b>49.2</b></td><td><b>61.7</b></td><td><b>81.1</b></td><td><b>73.3</b></td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note">Table 3. Success rate in percent, 30 rollouts per task, each task's own time limit, the same 30 seeds in every column of ours. The AM-Bench column is the π0.5 MT-FT row of the paper's Table 10. The 40k checkpoint (264 of 360) keeps the cabinet and gains on lemon and pull lever, but seats the frame in only 3 rollouts and opens the door in 5; its training loss had been flat since about 25k steps. The 20k checkpoint is being evaluated and will be added. Open door is not the same task in the two columns: AM-Bench's check counts a door pushed past 20° by any means, which is how its specialist and policy do it; ours (Part 2) starts the door latched and only counts a door opened through its handle and released.</p>
+        <p class="note">Table 3. Success rate in percent, 30 rollouts per task, each task's own time limit, the same 30 seeds in every column of ours. The AM-Bench column is the π0.5 MT-FT row of the paper's Table 10. The 20k checkpoint (222 of 360) has not learned the precise tasks yet (NDT 5 of 30, peg in hole 15, frame assembly 0); the 40k checkpoint (264 of 360) keeps the cabinet and gains on lemon and pull lever, but seats the frame in only 3 rollouts and opens the door in 5; its training loss had been flat since about 25k steps. Open door is not the same task in the two columns: AM-Bench's check counts a door pushed past 20° by any means, which is how its specialist and policy do it; ours (Part 2) starts the door latched and only counts a door opened through its handle and released.</p>
         <ul class="points" style="margin-top:18px">
           <li><b>Open door (37 %).</b> The handle is operated in 15 of 30 rollouts and the door then swings past 20° in 11 of them; the other rollouts hover at the leaf without finding the handle.</li>
           <li><b>Peg in hole (70 %).</b> The nine failures time out without the peg seated; this is the only task on the same check where AM-Bench's π0.5 is clearly better than ours (100 %).</li>
