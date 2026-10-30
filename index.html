@@ -651,16 +651,22 @@
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/09_RotateValve.jpg" src="assets/benchmark/pi05_30k/09_RotateValve.mp4" aria-label="09 Rotate valve, π0.5 30k, default physics"></video><figcaption>09 Rotate valve <span class="chip ok">30/30</span></figcaption></figure>
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/10_PushSlider.jpg" src="assets/benchmark/pi05_30k/10_PushSlider.mp4" aria-label="10 Push slider, π0.5 30k, default physics"></video><figcaption>10 Push slider <span class="chip ok">30/30</span></figcaption></figure>
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/11_PullLever.jpg" src="assets/benchmark/pi05_30k/11_PullLever.mp4" aria-label="11 Pull lever, π0.5 30k, default physics"></video><figcaption>11 Pull lever <span class="chip ok">29/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/12_OpenDoor.jpg" src="assets/benchmark/pi05_30k/12_OpenDoor.mp4" aria-label="12 Open door, π0.5 30k, default physics"></video><figcaption>12 Open door <span class="chip part">11/30</span></figcaption></figure>
         </div>
-        <p class="note">Cabinet pick-and-place, frame assembly and open door are being recorded under their own time limits and will be added; toss ball has no successful rollout to show.</p>
+        <p class="note">Cabinet pick-and-place and frame assembly are being recorded under their own time limits and will be added; toss ball has no successful rollout to show.</p>
       </div>
     </section>
 
     <section id="benchmark-hardest">
-      <div class="wrap">
+      <div class="wrap wide">
         <h2>The hardest task it solves: open door</h2>
-        <p class="sub">11 of 30 for the 30k checkpoint, the lowest rate among the eleven solved tasks (toss ball is never solved). The door has to be unlatched through its handle, swung past 20° and let go, all while hovering beside the leaf. A successful rollout takes 17 s on average; the slowest needed 22.5 of the 25 s allowed.</p>
-        <p class="note">Where it fails: in 15 of 30 rollouts the policy never operates the handle and hovers at the leaf until time runs out; once the handle is operated it finishes 11 times out of 15. A successful rollout is being recorded under the task's time limit and will appear here with the end-effector view.</p>
+        <p class="sub">11 of 30 for the 30k checkpoint, the lowest rate among the eleven solved tasks (toss ball is never solved). The door has to be unlatched through its handle, swung past 20° and let go, all while hovering beside the leaf. A successful rollout takes 17 s on average; the slowest needed 22.5 of the 25 s allowed. One successful rollout from three cameras: the side view, and the two images the policy sees.</p>
+        <div class="gallery">
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/12_OpenDoor.jpg" src="assets/benchmark/pi05_30k/12_OpenDoor.mp4" aria-label="Open door, side camera"></video><figcaption>Side camera <span class="chip part">11/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/12_OpenDoor_ee.jpg" src="assets/benchmark/pi05_30k/12_OpenDoor_ee.mp4" aria-label="Open door, end-effector camera (policy input)"></video><figcaption>End-effector camera <span class="chip ok">policy input</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/12_OpenDoor_base.jpg" src="assets/benchmark/pi05_30k/12_OpenDoor_base.mp4" aria-label="Open door, body camera (policy input)"></video><figcaption>Body camera <span class="chip ok">policy input</span></figcaption></figure>
+        </div>
+        <p class="note">Where it fails: in 15 of 30 rollouts the policy never operates the handle and hovers at the leaf until time runs out; once the handle is operated it finishes 11 times out of 15.</p>
       </div>
     </section>
 
