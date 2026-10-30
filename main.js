@@ -92,7 +92,7 @@
     const played = video.play();
     if (played && played.catch) played.catch(() => {});
   };
-  document.querySelectorAll(".matrix video").forEach((video) => {
+  document.querySelectorAll(".matrix video, .bench-clip").forEach((video) => {
     if (canHover) {
       video.addEventListener("mouseenter", () => play(video));
       video.addEventListener("mouseleave", () => video.pause());

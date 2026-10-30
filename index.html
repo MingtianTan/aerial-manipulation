@@ -33,7 +33,7 @@
       <figcaption>Concept: small aerial manipulators repairing a transport aircraft in flight. AI-generated illustration (ChatGPT), not a result.</figcaption>
     </figure>
     <div class="wrap title-block">
-      <p class="byline">Mingtian Tan · updated 20 Oct 2026</p>
+      <p class="byline">Mingtian Tan · updated 30 Oct 2026</p>
       <h1>Aerial manipulation: keep the arm pretrained, learn flight separately</h1>
       <p class="lede">Reuse a vision-language-action model (VLA) that already knows how to use an arm, let a small Flight DiT learn flight from the scarce aerial data, and fine-tune the VLA to listen to it.</p>
     </div>
@@ -114,6 +114,7 @@
         <ul class="points">
           <li><b>Goal: ICML 2027.</b> Dates are not out yet; going by the 2026 cycle, the abstract is due around 23 Jan and the full paper around 28 Jan 2027 (<a href="https://icml.cc/Conferences/2026/Dates">2026 dates</a>). That is about 15 weeks from mid-October.</li>
           <li><b>Done: the dataset.</b> 4,800 verified demonstrations, 12 tasks × 5 conditions × 80, recorded with the upgraded specialists (Parts 2 and 3).</li>
+          <li><b>Done: the π0.5 baseline (Part 5).</b> Fully fine-tuned on the 960 default demonstrations with both cameras: 81.1 % macro success on AM-Bench's twelve tasks against 49.2 % in the paper; robustness runs under way.</li>
           <li><b>Next: the Flight DiT (Part 4).</b> Stage A on the 120 Hz flight data, then Stage B: inject F<sub>flight</sub> into π0.5 and fine-tune it fully.</li>
           <li><b>Then: the benchmark (Part 5).</b> Diffusion Policy, π0.5 fine-tuned with LoRA, and the Flight DiT + fully fine-tuned π0.5, all trained on the same demonstrations and evaluated with AM-Bench's success checks.</li>
         </ul>
@@ -576,10 +577,105 @@
         </span>
       </summary>
 
-    <section id="benchmark-coming">
+    <section id="benchmark-setup">
       <div class="wrap">
-        <h2>Benchmark</h2>
-        <p class="sub">Coming soon.</p>
+        <h2>π0.5 on the twelve tasks</h2>
+        <ul class="points">
+          <li><b>Model.</b> π0.5, all weights fine-tuned from the public π0.5 base with AM-Bench's recipe: batch 32, 40,000 steps, peak learning rate 2.5·10<sup>−5</sup> with 1,000 warm-up steps, AdamW, EMA 0.99, 50-step action chunks at 20 Hz, actions relative to the end effector. Training data: the 960 default-condition demonstrations of Part 3 (12 tasks × 80). Both cameras go into the model; AM-Bench's own π0.5 sees the end-effector camera only. One H100, 17 h, about $75. Checkpoints after 20k, 30k and 40k steps.</li>
+          <li><b>Protocol.</b> AM-Bench's evaluator and success checks, default physics, 30 rollouts per task, each task's own time limit (10 s for toss ball, 60 s for the cabinet, 20–30 s otherwise). Rollout <i>i</i> of a task always uses environment seed <i>i</i>, for every checkpoint and condition, so the numbers are paired. The policy runs at 20 Hz and re-plans every 8 executed steps; one environment at a time, headless, on one RTX 4080 (5–6 h per 360-rollout sweep).</li>
+          <li><b>Result.</b> The 30k checkpoint succeeds in 292 of 360 rollouts, a macro-averaged success rate of 81.1 %, against 49.2 % for the π0.5 MT-FT row of AM-Bench's Table 10 (same tasks, same rollout count; the paper's demonstrations and camera). Eleven tasks are solved; toss ball never is: the policy carries the ball to the bin and does not let go (the release criterion is met in 0 of 30 rollouts).</li>
+        </ul>
+        <div class="stats">
+          <div class="stat"><b>81.1 %</b><span>macro success, 30k checkpoint, default physics</span></div>
+          <div class="stat"><b>49.2 %</b><span>AM-Bench's π0.5 MT-FT, same protocol</span></div>
+          <div class="stat"><b>9 / 12</b><span>tasks at 90 % or better</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="benchmark-results">
+      <div class="wrap">
+        <h2>Success rate per task</h2>
+        <div class="table-wrap">
+          <table class="rates">
+            <thead><tr><th scope="col">Task</th><th scope="col">AM-Bench π0.5 MT-FT</th><th scope="col">Ours, 30k</th><th scope="col">Ours, 30k, every task cut at 20 s</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Press button</th><td>100</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Peg in hole</th><td>100</td><td>70</td><td>70</td></tr>
+              <tr><th scope="row">Inspect surface (NDT)</th><td>57</td><td>93</td><td>93</td></tr>
+              <tr><th scope="row">Wipe window</th><td>0</td><td>93</td><td>93</td></tr>
+              <tr><th scope="row">Cabinet pick and place</th><td>0</td><td>100</td><td>3</td></tr>
+              <tr><th scope="row">Frame assembly</th><td>0</td><td>90</td><td>0</td></tr>
+              <tr><th scope="row">Harvest lemon</th><td>67</td><td>93</td><td>93</td></tr>
+              <tr><th scope="row">Toss ball</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Rotate valve</th><td>0</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Push slider</th><td>100</td><td>100</td><td>100</td></tr>
+              <tr><th scope="row">Pull lever</th><td>67</td><td>97</td><td>97</td></tr>
+              <tr><th scope="row">Open door</th><td>100</td><td>37</td><td>27</td></tr>
+              <tr><th scope="row"><b>Macro average</b></th><td><b>49.2</b></td><td><b>81.1</b></td><td><b>64.7</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Table 3. Success rate in percent, 30 rollouts per task. The AM-Bench column is the π0.5 MT-FT row of the paper's Table 10. The last column is the same checkpoint and seeds with every episode cut at 20 s, the setting of our first sweep: the three long tasks (cabinet 60 s, frame assembly and lemon 30 s) need the time their definitions give them, and nothing else changes. The 20k and 40k checkpoints are being re-evaluated under the task limits; under the 20 s cut they reached 52.5 % and 60.6 %, with the 40k model losing open door entirely (0 of 30).</p>
+        <ul class="points" style="margin-top:18px">
+          <li><b>Open door (37 %).</b> The handle is operated in 15 of 30 rollouts and the door then swings past 20° in 11 of them; the other rollouts hover at the leaf without finding the handle.</li>
+          <li><b>Peg in hole (70 %).</b> The nine failures time out without the peg seated; this is the only task where AM-Bench's π0.5 is clearly better than ours (100 %).</li>
+          <li><b>Toss ball (0 %).</b> The policy flies the ball to the bin but never opens the gripper. The demonstrations lob the ball from a hover 0.9 m behind the bin; the approach is reproduced, the release is not.</li>
+          <li><b>Long tasks.</b> Cabinet pick-and-place takes 24 s on average (open the sliding door, lift the can, place it on top), frame assembly 26.5 s; within their 60 s and 30 s limits both are near-perfect, cut at 20 s they fail.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="benchmark-demos">
+      <div class="wrap wide">
+        <h2>Rollouts of the 30k policy</h2>
+        <p class="sub">One successful rollout per task, side camera, real time, recorded with the evaluator under default physics. Hover to play, click to enlarge. The success rate is over the 30 scored rollouts.</p>
+        <div class="gallery">
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/01_PressButton.jpg" src="assets/benchmark/pi05_30k/01_PressButton.mp4" aria-label="01 Press button, π0.5 30k, default physics"></video><figcaption>01 Press button <span class="chip ok">30/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/02_PegInHole.jpg" src="assets/benchmark/pi05_30k/02_PegInHole.mp4" aria-label="02 Peg in hole, π0.5 30k, default physics"></video><figcaption>02 Peg in hole <span class="chip part">21/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/03_NDT.jpg" src="assets/benchmark/pi05_30k/03_NDT.mp4" aria-label="03 Inspect surface (NDT), π0.5 30k, default physics"></video><figcaption>03 Inspect surface (NDT) <span class="chip ok">28/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/04_WipeWindow.jpg" src="assets/benchmark/pi05_30k/04_WipeWindow.mp4" aria-label="04 Wipe window, π0.5 30k, default physics"></video><figcaption>04 Wipe window <span class="chip ok">28/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/07_LemonHarvesting.jpg" src="assets/benchmark/pi05_30k/07_LemonHarvesting.mp4" aria-label="07 Harvest lemon, π0.5 30k, default physics"></video><figcaption>07 Harvest lemon <span class="chip ok">28/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/09_RotateValve.jpg" src="assets/benchmark/pi05_30k/09_RotateValve.mp4" aria-label="09 Rotate valve, π0.5 30k, default physics"></video><figcaption>09 Rotate valve <span class="chip ok">30/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/10_PushSlider.jpg" src="assets/benchmark/pi05_30k/10_PushSlider.mp4" aria-label="10 Push slider, π0.5 30k, default physics"></video><figcaption>10 Push slider <span class="chip ok">30/30</span></figcaption></figure>
+          <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/11_PullLever.jpg" src="assets/benchmark/pi05_30k/11_PullLever.mp4" aria-label="11 Pull lever, π0.5 30k, default physics"></video><figcaption>11 Pull lever <span class="chip ok">29/30</span></figcaption></figure>
+        </div>
+        <p class="note">Cabinet pick-and-place, frame assembly and open door are being recorded under their own time limits and will be added; toss ball has no successful rollout to show.</p>
+      </div>
+    </section>
+
+    <section id="benchmark-hardest">
+      <div class="wrap">
+        <h2>The hardest task it solves: peg in hole</h2>
+        <p class="sub">21 of 30. The peg has to enter a hole in the wall while the whole vehicle hovers; a few centimetres of drift and the peg lands on the plate. Left: side camera. Right: the end-effector camera, one of the two images the policy sees.</p>
+        <div class="pair">
+          <figure>
+            <figcaption><span class="side after">Scene</span><span class="chip part">21/30</span></figcaption>
+            <video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/02_PegInHole.jpg" src="assets/benchmark/pi05_30k/02_PegInHole.mp4" aria-label="Peg in hole, side camera"></video>
+          </figure>
+          <figure>
+            <figcaption><span class="side after">End-effector camera</span><span class="chip part">policy input</span></figcaption>
+            <video class="bench-clip" muted loop playsinline preload="none" src="assets/benchmark/pi05_30k/02_PegInHole_ee.mp4" aria-label="Peg in hole, end-effector camera"></video>
+          </figure>
+        </div>
+        <p class="note">Open door is harder still (11 of 30) and the cabinet is the longest task (three stages, 24 s on average); their clips follow once recorded under the task limits.</p>
+      </div>
+    </section>
+
+    <section id="benchmark-robustness">
+      <div class="wrap">
+        <h2>Robustness to disturbances</h2>
+        <p class="sub">Running: the 30k checkpoint under aero (thrust limits, ground and wall effects, drag) and aero with wind of 5, 10 and 20 % of the weight, 30 rollouts per task each, same seeds. The table will appear here.</p>
+      </div>
+    </section>
+
+    <section id="benchmark-code">
+      <div class="wrap">
+        <h2>Code</h2>
+        <ul class="points">
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/main/pipeline/cloud"><code>pipeline/cloud/</code></a>: the RunPod training path (data export, π0.5 fine-tuning with both cameras, checkpoint handling).</li>
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/main/pipeline/ambench_way"><code>pipeline/ambench_way/</code></a>: serving a checkpoint, AM-Bench's evaluator with the task time limits, the 12-task sweeps, the benchmark driver and the tables.</li>
+        </ul>
       </div>
     </section>
     </details>
@@ -595,6 +691,6 @@
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261020a"></script>
+  <script src="main.js?v=20261030a"></script>
 </body>
 </html>
