@@ -29,73 +29,87 @@
     if (target && target.tagName !== "SUMMARY") openPartOf(target);
   });
 
-  // Before / after: every pair plays together on a loop while Part 2 is open; buttons restart or pause them all.
-  const clips = [...document.querySelectorAll("#upgrades video")];
-  const clipsPart = clips.length ? clips[0].closest("details.part-block") : null;
+  // Clip groups that play together on a loop while every box around them is open: Part 2's before / after pairs
+  // (with the restart / pause buttons) and, in Part 5, the 3 × 3 gallery and the three cameras of the hardest task.
+  const play = (video) => {
+    const played = video.play();
+    if (played && played.catch) played.catch(() => {});
+  };
+  const boxesOf = (el) => {
+    const boxes = [];
+    for (let box = el.closest("details"); box; box = box.parentElement?.closest("details")) boxes.push(box);
+    return boxes;
+  };
+  const groups = ["#upgrades", "#benchmark-demos", "#benchmark-hardest"]
+    .map((selector) => [...document.querySelectorAll(selector + " video")])
+    .filter((videos) => videos.length)
+    .map((videos) => ({ videos, boxes: boxesOf(videos[0]), run: 0 }));
+  const isOpen = (group) => group.boxes.every((box) => box.open);
+  const clipsGroup = groups.find((group) => group.videos[0].closest("#upgrades")) || null;
   const pauseButton = document.querySelector("[data-pause-all]");
-
-  function playAll() {
-    clips.forEach((video) => {
-      const played = video.play();
-      if (played && played.catch) played.catch(() => {});
-    });
-    if (pauseButton) pauseButton.textContent = "Pause all";
-  }
-
-  function restartAll() {
-    clips.forEach((video) => { video.currentTime = 0; });
-    playAll();
-  }
-
   const restartButton = document.querySelector("[data-restart-all]");
-  if (restartButton) restartButton.addEventListener("click", restartAll);
-  if (pauseButton) {
-    pauseButton.addEventListener("click", () => {
-      if (clips.some((video) => !video.paused)) {
-        clips.forEach((video) => video.pause());
-        pauseButton.textContent = "Play all";
-      } else {
-        playAll();
-      }
-    });
+
+  function playGroup(group) {
+    group.videos.forEach(play);
+    if (group === clipsGroup && pauseButton) pauseButton.textContent = "Pause all";
   }
 
-  // Start all clips, then restart them from zero together once each can play.
-  let opening = 0;
-  function startClips() {
-    const run = ++opening;
-    playAll();
-    const waiting = clips.filter((video) => video.readyState < 3);
+  function restartGroup(group) {
+    group.videos.forEach((video) => { video.currentTime = 0; });
+    playGroup(group);
+  }
+
+  // Start every clip of the group, then restart them from zero together once each can play.
+  function startGroup(group) {
+    const run = ++group.run;
+    playGroup(group);
+    const waiting = group.videos.filter((video) => video.readyState < 3);
     let left = waiting.length;
-    if (!left) return restartAll();
+    if (!left) return restartGroup(group);
     waiting.forEach((video) => {
       video.addEventListener("canplay", () => {
         left -= 1;
-        if (left === 0 && run === opening && clipsPart.open) restartAll();
+        if (left === 0 && run === group.run && isOpen(group)) restartGroup(group);
       }, { once: true });
+    });
+  }
+
+  function stopGroup(group) {
+    group.run += 1;
+    group.videos.forEach((video) => video.pause());
+  }
+
+  if (restartButton && clipsGroup) restartButton.addEventListener("click", () => restartGroup(clipsGroup));
+  if (pauseButton && clipsGroup) {
+    pauseButton.addEventListener("click", () => {
+      if (clipsGroup.videos.some((video) => !video.paused)) {
+        clipsGroup.videos.forEach((video) => video.pause());
+        pauseButton.textContent = "Play all";
+      } else {
+        playGroup(clipsGroup);
+      }
     });
   }
 
   parts.forEach((part) => {
     part.addEventListener("toggle", () => {
-      if (part.open) {
-        if (part === clipsPart) startClips();
-      } else {
-        opening += 1;
-        part.querySelectorAll("video").forEach((video) => video.pause());
-      }
+      groups.forEach((group) => {
+        if (!group.boxes.includes(part)) return;
+        if (isOpen(group)) startGroup(group);
+        else stopGroup(group);
+      });
+      if (!part.open) part.querySelectorAll("video").forEach((video) => video.pause());
     });
   });
 
-  // All tasks: hover a cell to play it, click to enlarge it.
+  // All tasks (Part 2): hover a cell to play it. Every clip: click to enlarge it; the benchmark clips keep playing
+  // in their group afterwards.
   const lightbox = document.querySelector(".lightbox");
   const canHover = window.matchMedia && window.matchMedia("(hover: hover)").matches;
-  const play = (video) => {
-    const played = video.play();
-    if (played && played.catch) played.catch(() => {});
-  };
+  let lightboxSource = null;
   document.querySelectorAll(".matrix video, .bench-clip").forEach((video) => {
-    if (canHover) {
+    const isBenchClip = video.classList.contains("bench-clip");
+    if (canHover && !isBenchClip) {
       video.addEventListener("mouseenter", () => play(video));
       video.addEventListener("mouseleave", () => video.pause());
     }
@@ -106,8 +120,9 @@
         return;
       }
       const big = lightbox.querySelector("video");
+      lightboxSource = video;
       video.pause();
-      big.poster = video.getAttribute("poster");
+      big.poster = video.getAttribute("poster") || "";
       big.src = video.getAttribute("src");
       lightbox.querySelector("[data-lightbox-title]").textContent = video.getAttribute("aria-label");
       lightbox.showModal();
@@ -124,6 +139,11 @@
       big.pause();
       big.removeAttribute("src");
       big.load();
+      if (lightboxSource && lightboxSource.classList.contains("bench-clip")) {
+        const group = groups.find((g) => g.videos.includes(lightboxSource));
+        if (!group || isOpen(group)) play(lightboxSource);
+      }
+      lightboxSource = null;
     });
   }
 

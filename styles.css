@@ -296,3 +296,8 @@ footer p { margin: 0; }
 .method-block[open] .method-toggle { transform: translateY(3px) rotate(-135deg); }
 .method-block > section:first-of-type { padding-top: 28px; }
 @media (prefers-reduced-motion: reduce) { .method-toggle { transition: none; } }
+
+/* Benchmark clips play together; a click still enlarges one */
+.bench-clip { cursor: zoom-in; }
+.bench-clip:hover { outline: 2px solid var(--accent); outline-offset: 1px; }
+.rates .aside { display: block; font-size: 12px; font-weight: 500; color: var(--faint); white-space: nowrap; }

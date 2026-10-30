@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261030a">
+  <link rel="stylesheet" href="styles.css?v=20261030b">
 </head>
 <body>
   <header class="nav">
@@ -623,15 +623,15 @@
               <tr><th scope="row">Rotate valve</th><td>0</td><td>100</td><td>100</td></tr>
               <tr><th scope="row">Push slider</th><td>100</td><td>100</td><td>100</td></tr>
               <tr><th scope="row">Pull lever</th><td>67</td><td>97</td><td>100</td></tr>
-              <tr><th scope="row">Open door</th><td>100</td><td>37</td><td>17</td></tr>
+              <tr><th scope="row">Open door</th><td>100 <span class="aside">(door pushed open, no handle)</span></td><td>37</td><td>17</td></tr>
               <tr><th scope="row"><b>Macro average</b></th><td><b>49.2</b></td><td><b>81.1</b></td><td><b>73.3</b></td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note">Table 3. Success rate in percent, 30 rollouts per task, each task's own time limit, the same 30 seeds in every column of ours. The AM-Bench column is the π0.5 MT-FT row of the paper's Table 10. The 40k checkpoint (264 of 360) keeps the cabinet and gains on lemon and pull lever, but seats the frame in only 3 rollouts and opens the door in 5; its training loss had been flat since about 25k steps. The 20k checkpoint is being evaluated and will be added.</p>
+        <p class="note">Table 3. Success rate in percent, 30 rollouts per task, each task's own time limit, the same 30 seeds in every column of ours. The AM-Bench column is the π0.5 MT-FT row of the paper's Table 10. The 40k checkpoint (264 of 360) keeps the cabinet and gains on lemon and pull lever, but seats the frame in only 3 rollouts and opens the door in 5; its training loss had been flat since about 25k steps. The 20k checkpoint is being evaluated and will be added. Open door is not the same task in the two columns: AM-Bench's check counts a door pushed past 20° by any means, which is how its specialist and policy do it; ours (Part 2) starts the door latched and only counts a door opened through its handle and released.</p>
         <ul class="points" style="margin-top:18px">
           <li><b>Open door (37 %).</b> The handle is operated in 15 of 30 rollouts and the door then swings past 20° in 11 of them; the other rollouts hover at the leaf without finding the handle.</li>
-          <li><b>Peg in hole (70 %).</b> The nine failures time out without the peg seated; this is the only task where AM-Bench's π0.5 is clearly better than ours (100 %).</li>
+          <li><b>Peg in hole (70 %).</b> The nine failures time out without the peg seated; this is the only task on the same check where AM-Bench's π0.5 is clearly better than ours (100 %).</li>
           <li><b>Toss ball (0 %).</b> The policy flies the ball to the bin but never opens the gripper. The demonstrations lob the ball from a hover 0.9 m behind the bin; the approach is reproduced, the release is not.</li>
           <li><b>Long tasks.</b> Cabinet pick-and-place takes 24 s on average (open the sliding door, lift the can, place it on top) and frame assembly 26.5 s: both use most of the time their definitions allow (60 s and 30 s), and both are near-perfect for the 30k model.</li>
         </ul>
@@ -641,7 +641,7 @@
     <section id="benchmark-demos">
       <div class="wrap wide">
         <h2>Rollouts of the 30k policy</h2>
-        <p class="sub">One successful rollout per task, side camera, real time, recorded with the evaluator under default physics. Hover to play, click to enlarge. The success rate is over the 30 scored rollouts.</p>
+        <p class="sub">One successful rollout per task, side camera, real time, recorded with the evaluator under default physics. The clips start together when the box is open; click one to enlarge it. The success rate is over the 30 scored rollouts.</p>
         <div class="gallery">
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/01_PressButton.jpg" src="assets/benchmark/pi05_30k/01_PressButton.mp4" aria-label="01 Press button, π0.5 30k, default physics"></video><figcaption>01 Press button <span class="chip ok">30/30</span></figcaption></figure>
           <figure><video class="bench-clip" muted loop playsinline preload="none" poster="assets/benchmark/poster/02_PegInHole.jpg" src="assets/benchmark/pi05_30k/02_PegInHole.mp4" aria-label="02 Peg in hole, π0.5 30k, default physics"></video><figcaption>02 Peg in hole <span class="chip part">21/30</span></figcaption></figure>
@@ -701,6 +701,6 @@
       <p>Paper results are cited with links to the papers. The pipeline diagram and all simulation videos are project material.</p>
     </div>
   </footer>
-  <script src="main.js?v=20261030b"></script>
+  <script src="main.js?v=20261030c"></script>
 </body>
 </html>
