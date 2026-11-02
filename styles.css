@@ -333,3 +333,14 @@ footer p { margin: 0; }
 .dev-part .part-label { margin: 0; }
 .dev-part-title { margin: 2px 0 0; font-size: clamp(26px, 4vw, 36px); font-weight: 700; line-height: 1.2; }
 .dev-part .dev-intro { margin-top: 6px; font-size: 16px; }
+/* Develop mode: the arm-body communication table */
+.comm-wrap { margin: 18px 0 8px; border: 1px solid var(--line); border-radius: 8px; }
+table.comm { min-width: 1100px; font-size: 14px; line-height: 1.45; }
+table.comm th, table.comm td { padding: 7px 8px; }
+table.comm thead th { position: sticky; top: 0; background: var(--bg); font-size: 13px; white-space: nowrap; }
+table.comm th[scope="row"] { font-size: 14px; font-weight: 600; color: var(--ink); min-width: 120px; }
+table.comm tr.comm-group th { padding-top: 14px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); background: var(--band); }
+table.comm tr.ours td, table.comm tr.ours th { background: var(--ok-bg); }
+table.comm tr.ours th a { color: var(--ok); }
+.dev-summary .points { gap: 8px; }
+.dev-summary .points li { font-size: 16px; }
