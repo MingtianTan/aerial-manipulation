@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Develop mode · Aerial Manipulation reading list</title>
+  <meta name="description" content="Working direction and reading list for the aerial manipulation project: starting points, contact and force in VLAs, multi-rate coupling, aerial, legged and wheeled loco-manipulation, and the references cited on the main page.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23123a40' width='32' height='32' rx='6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ffffff'/%3E%3Cpath d='M6 16h6M20 16h6M16 6v6M16 20v6' stroke='%23cfe9ec' stroke-width='1.6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=20261102b">
+</head>
+<body>
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">Aerial Manipulation</a>
+      <ul>
+        <li><a href="index.html">← Back to the page</a></li>
+        <li><a href="#direction">Direction</a></li>
+        <li><a href="#core">Starting points</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#rates">Rates</a></li>
+        <li><a href="#aerial">Aerial</a></li>
+        <li><a href="#legged">Legged</a></li>
+        <li><a href="#wheeled">Wheeled</a></li>
+        <li><a href="#cited">Cited</a></li>
+      </ul>
+      <a class="nav-mode active" href="develop.html" aria-current="true">Develop mode</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="wrap title-block">
+      <p class="byline">Mingtian Tan · updated 2 Nov 2026</p>
+      <h1>Develop mode: direction and reading list</h1>
+      <p class="dev-intro">Where the project is heading next, the papers that bear on it, and the references the main page already cites. Each entry says what the paper does and what it means for the Flight DiT and π0.5. Entries marked <span class="chip ok">closest to us</span> are the nearest to our design.</p>
+    </div>
+
+    <section class="dev-group" id="direction">
+      <div class="wrap">
+        <h2>Working direction, November 2026</h2>
+        <p class="where">Plan for the next phase, as of 2 Nov 2026.</p>
+        <ul class="points">
+          <li><b>Contact into the Flight DiT.</b> The body-level wrench and contact state go into the Flight DiT, so the token F<sub>flight</sub> carries flight intent and contact together; TAP-style drawing into π0.5's images is the comparison route.</li>
+          <li><b>The Flight DiT runs faster than π0.5.</b> π0.5 plans at 20 Hz and re-plans every 8 steps; the DiT and any contact loop update in between.</li>
+          <li><b>Couple the rates.</b> Follow T-Rex: π0.5 runs the first part of denoising and caches it, and the fast module finishes the rest from the newest contact signal several times per chunk.</li>
+          <li><b>Track loco-manipulation.</b> Quadrupeds and wheeled robots with arms, especially work that starts to use VLAs for the arm.</li>
+          <li><b>Open gaps found in the search.</b> No learned aerial manipulation policy takes force as input, and no work on legged, wheeled or aerial robots keeps a pretrained arm VLA while a separately learned body module conditions it through a token.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="wrap dev-part" id="reading">
+      <p class="part-label">Part A</p>
+      <p class="dev-part-title">Reading list for the next phase · 71 papers</p>
+      <p class="dev-intro">Collected on 2 Nov 2026; every arXiv link was checked against the arXiv listing.</p>
+    </div>
+
+    <section class="dev-group" id="core">
+      <div class="wrap">
+        <h2>Starting points <span class="count">5 items</span></h2>
+        <p class="where">The five papers the next phase builds on directly: the annotation method, how to wire a signal into the action expert, a contact gate, three integration options, and a rate-coupling scheme.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2606.29089">TAP-VLA: Tactile Annotation Prompting for Vision Language Action Models</a> <span>(Van der Merwe et al., arXiv 2026)</span> <span class="links"><a href="https://tap-vla.github.io/">Project page</a></span> <span class="chip part">image route</span>: the GelSight shear field is projected into the shoulder and wrist images as colored segments and π0.5 is fine-tuned with no change to the model. 94 of 120 trials on four tasks; vision only, raw GelSight as an extra view and a CNN encoder all stay below 50%. <span class="us"><b>For us:</b> the starting point for Phase 1 and the image route into π0.5. It is bound to the camera rate, so it complements rather than replaces a fast wrench path in the Flight DiT.</span></li>
+          <li><a href="https://arxiv.org/abs/2610.06318">Wiring Matters: Injection Topology and Initialization of Affordance Heads in Vision-Language-Action Policies</a> <span>(An et al., arXiv 2026)</span> <span class="chip part">injection</span>: a dense affordance head reads a π0-style VLA through a stop-gradient and writes its features into every conditioning layer of the action expert. Residual wiring with random (active) initialisation reaches 96.2% on LIBERO against 93.1% without the head; without the stop-gradient it falls to 85.5%. Zeroing an active bridge at test time costs 28 points on LIBERO-Goal, zeroing a zero-initialised one costs nothing. <span class="us"><b>For us:</b> the recipe for injecting F<sub>flight</sub>: stop-gradient on auxiliary losses, residual wiring, non-zero initialisation, and a zero-the-token probe to check that the path carries information.</span></li>
+          <li><a href="https://arxiv.org/abs/2603.12665">TacVLA: Contact-Aware Tactile Fusion for Robust Vision-Language-Action Manipulation</a> <span>(Zhang et al., arXiv 2026)</span> <span class="links"><a href="https://sites.google.com/view/tacvla">Project page</a></span> <span class="chip part">contact gate</span>: LoRA on π0.5. A 15×8 piezoresistive array is encoded by an MLP into 36 tactile tokens in the VLM prefix, and a contact gate masks them while nothing touches. 83.75% against 63.75% on disassembly and 70% against 10% on in-box grasping; without the gate 71.25% and 40%. <span class="us"><b>For us:</b> the contact gate carries over directly to a wrench token in the Flight DiT, so free flight adds no noise. Its tokens run at 10 Hz in the prefix and do not address the rate question.</span></li>
+          <li><a href="https://arxiv.org/abs/2603.04639">RoboMME: Benchmarking and Understanding Memory for Robotic Generalist Policies</a> <span>(Dai et al., ICML 2026)</span> <span class="links"><a href="https://robomme.github.io">Project page</a></span> <span class="chip part">see Figure 2</span>: Figure 2 lays out three ways to add a signal to π0.5: as context (tokens joined to the VLM input), as modulator (action features cross-attend to the signal and produce AdaLN scale and shift in the action expert), or as a separate expert with block-wise causal attention. The modulator was best: 44.5% averaged over 16 tasks, and 25 of 40 real trials against 4 for π0.5. <span class="us"><b>For us:</b> the three candidate ways for F<sub>flight</sub> to enter π0.5. Today's single token sits between context and modulator, so the modulator is the comparison to run.</span></li>
+          <li><a href="https://arxiv.org/abs/2606.17055">T-Rex: Tactile-Reactive Dexterous Manipulation</a> <span>(Niu et al., arXiv 2026)</span> <span class="links"><a href="https://tactile-rex.github.io/">Project page</a> <a href="https://arxiv.org/html/2606.17055v2">HTML v2</a></span> <span class="chip part">rate coupling</span>: a 10-step flow denoise is split at τ = 0.4. The slow stream (vision, latent and action experts) runs the first 6 steps once per 16-step chunk and caches its keys and values; a 0.62 B tactile expert finishes the last 4 steps four times per chunk from the newest fingertip-force tokens, without re-running vision. 65% against 35% for the strongest baseline over 12 tasks; in a six-task ablation, removing touch gives 42% and removing the asynchronous split 60%. <span class="us"><b>For us:</b> a concrete template for coupling the rates. π0.5 would run the first part of denoising and cache it, and the Flight DiT would finish the rest several times per chunk from the newest wrench and contact tokens, so F<sub>flight</sub> becomes shared keys and values plus split denoising.</span></li>
+        </ul>
+      </div>
+    </section>
+    <section class="dev-group" id="contact">
+      <div class="wrap">
+        <h2>Contact, force and touch in VLAs <span class="count">16 items</span></h2>
+        <p class="where">Background for Phase 1 (contact drawn into π0.5's images) and Phase 2 (wrench into the Flight DiT).</p>
+        <p class="dev-summary">Three findings matter for the design. Force works best on the action side (TA-VLA). Drawing force into π0.5's images beats feeding it as state (VisForce). Since 2026 the common pattern is a faster, force-reading branch next to π0 or π0.5's action expert over a cached VLM (LIFT, FAVLA).</p>
+        <h3>Signal as tokens or an encoder</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2509.07962">TA-VLA: Elucidating the Design Space of Torque-aware Vision-Language-Action Models</a> <span>(Zhang et al., CoRL 2025)</span> <span class="links"><a href="https://zzongzheng0918.github.io/Torque-Aware-VLA.github.io/">Project page</a></span> <span class="chip ok">closest to us</span>: a systematic study of where torque enters a VLA. Adapters on the decoder (action) side beat adapters on the encoder side, and an auxiliary torque-prediction output helps further. <span class="us"><b>For us:</b> supports feeding the wrench to the action-side Flight DiT rather than to π0.5's VLM, with an auxiliary head that predicts future wrench.</span></li>
+          <li><a href="https://arxiv.org/abs/2505.22159">ForceVLA: Enhancing VLA Models with a Force-aware MoE for Contact-rich Manipulation</a> <span>(Yu et al., NeurIPS 2025)</span> <span class="links"><a href="https://sites.google.com/view/forcevla2025">Project page</a></span>: on π0, a mixture-of-experts module fuses 6-axis force with the VLM embedding at the action decoder. <span class="us"><b>For us:</b> the standard baseline; it fuses at a single rate, which is the contrast to a two-rate design.</span></li>
+          <li><a href="https://arxiv.org/abs/2603.15169">ForceVLA2: Unleashing Hybrid Force-Position Control with Force Awareness for Contact-Rich Manipulation</a> <span>(Li et al., arXiv 2026)</span>: a text force prompt tells the VLM the contact phase, while raw 6D force enters the action expert as one token through a visual, state and force mixture of experts; outputs are pose increments plus a target force. Reported 48% above π0 and 35% above π0.5. <span class="us"><b>For us:</b> the same division of labour as ours: slow semantics of the contact phase in the VLM, raw force on the fast action side.</span></li>
+          <li><a href="https://arxiv.org/abs/2501.04693">Beyond Sight: Finetuning Generalist Robot Policies with Heterogeneous Sensors via Language Grounding</a> <span>(Jones et al., ICRA 2025)</span> <span class="links"><a href="https://fuse-model.github.io">Project page</a></span>: FuSe fine-tunes Octo and a 3 B PaliGemma VLA with touch and audio, using contrastive and language-generation losses to tie the new modalities to pretrained semantics. <span class="us"><b>For us:</b> if force ever enters π0.5's VLM, language-grounding losses like these limit forgetting.</span></li>
+          <li><a href="https://arxiv.org/abs/2508.08706">OmniVTLA: Vision-Tactile-Language-Action Models with Semantic-Aligned Tactile Sensing</a> <span>(Cheng et al., RA-L)</span>: on π0, touch goes through two encoders, a pretrained ViT and a tactile ViT aligned by contrastive learning, and actions come from flow matching. <span class="us"><b>For us:</b> the dedicated-encoder route; it needs its own tactile dataset, which is costly to build in simulation.</span></li>
+          <li><a href="https://arxiv.org/abs/2507.09160">Tactile-VLA: Unlocking Vision-Language-Action Model's Physical Knowledge for Tactile Generalization</a> <span>(Huang et al., arXiv 2025)</span>: an MLP turns the last H frames of tactile force into one token in the VLM prefix; the action expert outputs target position and target contact force for a hybrid position-force controller. <span class="us"><b>For us:</b> a minimal baseline, and a hint that the action space could include a target wrench.</span></li>
+          <li><a href="https://arxiv.org/abs/2601.20321">TaF-VLA: Tactile-Force Alignment in Vision-Language-Action Models for Force-aware Manipulation</a> <span>(Huang et al., arXiv 2026)</span>: aligns tactile and force signals inside a VLA for force-aware manipulation. <span class="us"><b>For us:</b> another encoder-route reference; not read in detail.</span></li>
+        </ul>
+        <h3>Signal drawn into the image</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2609.25785">VisForce: Visual Grounding of Current and Desired Forces for Goal-Conditioned Dexterous Manipulation</a> <span>(Lee et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: fingertip forces are drawn as 3D arrows (length by magnitude, one color per finger, hidden below a threshold) into the real wrist image through a calibrated virtual camera, and π0.5 is fine-tuned with LoRA. Drawing beats feeding force as state by a wide margin: 65% against 20% and 40% against 5%. <span class="us"><b>For us:</b> almost exactly our Phase 1 arm, on π0.5. It never compares with force entering a fast DiT, which is the gap our experiment fills.</span></li>
+          <li><a href="https://arxiv.org/abs/2505.09577">VTLA: Vision-Tactile-Language-Action Model with Preference Learning for Insertion Manipulation</a> <span>(Zhang et al., arXiv 2025)</span> <span class="links"><a href="https://sites.google.com/view/vtla">Project page</a></span>: tactile image sequences from both fingertips are tiled 2×2 and given to Qwen2-VL 7B next to the camera images, then refined with DPO; data come from Isaac Gym. <span class="us"><b>For us:</b> another way of handing a non-visual signal to the VLM as an image, also built in Isaac simulation.</span></li>
+        </ul>
+        <h3>Fast contact loop next to a slow policy</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2607.14236">Never Too Late for Force: Accelerating VLA Post-Training with Reactive Force Injection</a> <span>(Wang et al., CoRL 2026)</span> <span class="links"><a href="https://lift-policy.github.io/">Project page</a></span> <span class="chip ok">closest to us</span>: LIFT grafts a reactive action expert, initialised from the pretrained one, beside the action expert; recent 6D force enters through a causal force memory and zero-initialised cross-attention, the VLM stays fixed, and training mixes in DAgger-style corrections. <span class="us"><b>For us:</b> the same shape as a wrench-reading Flight DiT conditioning π0.5's action expert. Zero initialisation keeps the starting behaviour identical to the base model.</span></li>
+          <li><a href="https://arxiv.org/abs/2602.23648">FAVLA: A Force-Adaptive Fast-Slow VLA model for Contact-Rich Robotic Manipulation</a> <span>(Li et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: on π0, the slow VLM runs at a fixed low rate and predicts upcoming force change; the fast action expert reads the newest force token by cross-attention in every layer over the cached VLM keys and values, and runs 1, 2 or 4 times per VLM step depending on the predicted change. <span class="us"><b>For us:</b> a ready pattern for how much faster the Flight DiT should run than π0.5's 20 Hz, and whether the rate should adapt to contact.</span></li>
+          <li><a href="https://arxiv.org/abs/2503.02881">Reactive Diffusion Policy: Slow-Fast Visual-Tactile Policy Learning for Contact-Rich Manipulation</a> <span>(Xue et al., RSS 2025)</span> <span class="links"><a href="https://reactive-diffusion-policy.github.io">Project page</a></span>: a slow latent diffusion policy predicts latent action chunks at 1–2 Hz and a fast asymmetric tokenizer decodes them at 20–30 Hz with the newest tactile or force reading; force enters only the decoder. <span class="us"><b>For us:</b> the prototype of a slow-fast split, and of a third, wrench-only layer below the Flight DiT.</span></li>
+          <li><a href="https://arxiv.org/abs/2512.10946">ImplicitRDP: An End-to-End Visual-Force Diffusion Policy with Structural Slow-Fast Learning</a> <span>(Chen et al., RA-L 2026)</span> <span class="links"><a href="https://implicit-rdp.github.io">Project page</a></span>: one network handles slow visual tokens and fast force tokens with causal attention, plus a virtual-target loss that maps force into the action space so the model cannot ignore it. <span class="us"><b>For us:</b> a remedy if the Flight DiT learns to ignore the wrench.</span></li>
+          <li><a href="https://arxiv.org/abs/2603.01700">TacMamba: A Tactile History Compression Adapter Bridging Fast Reflexes and Slow VLA Reasoning</a> <span>(Wang et al., arXiv 2026)</span>: a Mamba adapter compresses the force history into a compact state in 0.45 ms and plugs into a VLA without joint pretraining; π0.5 is the vision baseline. <span class="us"><b>For us:</b> a light encoder for wrench history above 100 Hz feeding the Flight DiT.</span></li>
+          <li><a href="https://arxiv.org/abs/2609.18242">ForceDelta-VLA: Distilling Force-Conditioned Action Corrections for Contact-Rich Manipulation</a> <span>(Dong et al., arXiv 2026)</span>: a frozen teacher predicts with and without force; the difference is distilled into a light student that corrects actions between chunk updates from the force history. 82.2% against 54.4% for ForceVLA. <span class="us"><b>For us:</b> a way to add force corrections between π0.5's 50-step chunks without touching π0.5.</span></li>
+          <li><a href="https://arxiv.org/abs/2610.25981">FR-VLA: Implicit Force Reasoning VLA for Contact-Rich Manipulation</a> <span>(He et al., CoRL 2026)</span>: learns a force-admission signal that sets how strongly the wrench influences the action. <span class="us"><b>For us:</b> a learned gate, an alternative to TacVLA's fixed contact threshold.</span></li>
+        </ul>
+      </div>
+    </section>
+    <section class="dev-group" id="rates">
+      <div class="wrap">
+        <h2>Coupling different rates <span class="count">15 items</span></h2>
+        <p class="where">For running the Flight DiT faster than π0.5 (20 Hz, re-planning every 8 steps) and a contact loop faster still.</p>
+        <p class="dev-summary">A three-layer reading of these works: π0.5 slow, with real-time chunking at the seams; the Flight DiT at a middle rate, exchanging a time-stamped, delay-aware latent (DuoCore-FS, TIC-VLA) and entering the action expert through gated cross-attention (RAVEL); a wrench or MPC loop fastest, reading force only (RDP) or tracking end-effector targets (Flying Hand). T-Rex, in the first group, is the variant that splits one denoising pass across the rates.</p>
+        <h3>Dual-system VLAs: a slow model conditions a fast one</h3>
+        <ul class="refs">
+          <li><a href="https://www.figure.ai/news/helix">Helix: A Vision-Language-Action Model for Generalist Humanoid Control</a> <span>(Figure AI, technical report 2025)</span>: a 7–9 Hz VLM (System 2) compresses the task into one continuous latent vector that conditions a 200 Hz visuomotor policy (System 1). <span class="us"><b>For us:</b> the same interface as our single F<sub>flight</sub> token, with the roles reversed; one latent is enough to carry the slow-to-fast condition.</span></li>
+          <li><a href="https://arxiv.org/abs/2503.14734">GR00T N1: An Open Foundation Model for Generalist Humanoid Robots</a> <span>(NVIDIA, arXiv 2025)</span>: a roughly 10 Hz VLM and a roughly 120 Hz DiT; the DiT cross-attends to the VLM's middle-layer (12th) features, and both are trained end to end. <span class="us"><b>For us:</b> a reference for which π0.5 layer the Flight DiT should read and how to inject it.</span></li>
+          <li><a href="https://arxiv.org/abs/2410.08001">Towards Synergistic, Generalized, and Efficient Dual-System for Robotic Manipulation</a> <span>(Bu et al., arXiv 2024)</span> <span class="links"><a href="https://opendrivelab.com/RoboDual/">Project page</a></span>: RoboDual: a generalist VLA emits discrete actions and latents, and a specialist DiT conditioned on them generates multi-step actions at 3.8 times the baseline control rate. <span class="us"><b>For us:</b> the closest precedent for a large VLA plus a small DiT specialist, with the condition flowing the other way.</span></li>
+          <li><a href="https://arxiv.org/abs/2410.05273">HiRT: Enhancing Robotic Control with Hierarchical Robot Transformers</a> <span>(Zhang et al., CoRL 2024)</span>: a VLM extracts slowly changing features at a low rate and a fast visual policy controls in real time from them; control rate doubles on static tasks and dynamic-task success rises from 48% to 75%. <span class="us"><b>For us:</b> evidence that a stale slow feature can be reused over several fast cycles.</span></li>
+          <li><a href="https://arxiv.org/abs/2506.01953">Fast-in-Slow: A Dual-System Foundation Model Unifying Fast Manipulation within Slow Reasoning</a> <span>(Chen et al., arXiv 2025)</span>: System 1 reuses the last transformer blocks of the VLM and takes high-rate point clouds, images and state; 117.7 Hz with chunk 8. <span class="us"><b>For us:</b> an option to share some π0.5 layers with the Flight DiT instead of keeping a fully separate network.</span></li>
+          <li><a href="https://arxiv.org/abs/2505.21432">Hume: Introducing System-2 Thinking in Visual-Language-Action Model</a> <span>(Song et al., arXiv 2025)</span>: System 2 samples several candidate chunks at a low rate and picks one with a value head; System 1 asynchronously refines a short piece of the chosen chunk by cascaded denoising. <span class="us"><b>For us:</b> a fast layer that refines a slice of the slow chunk, an interface between the Flight DiT and a contact layer.</span></li>
+          <li><a href="https://arxiv.org/abs/2512.20188">Asynchronous Fast-Slow Vision-Language-Action Policies for Whole-Body Robotic Manipulation</a> <span>(Zou et al., arXiv 2025)</span>: DuoCore-FS: a 1–3 Hz VLM writes instruction and fusion-query embeddings to a latent buffer; a 25–30 Hz fast path reads the newest entry each step and reuses the old one when nothing new arrives; trained end to end. <span class="us"><b>For us:</b> a template for an asynchronous buffer between π0.5 and the Flight DiT.</span></li>
+        </ul>
+        <h3>Asynchronous chunk execution and delay-aware conditioning</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2609.34170">RAVEL: Asynchronous Rolling Inference for Flow-Based Vision-Language-Action Models</a> <span>(Chen et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: separates VLM encoding from the action expert, which always uses the latest VLM context; a rolling buffer needs only one denoising step for near-term actions, and a fast observation path enters several expert layers through gated cross-attention. 30 Hz on hardware; π0.5's first-action latency falls from 272.86 ms to 93.45 ms. <span class="us"><b>For us:</b> it injects a fast external token into π0.5's action expert, which is nearly a ready design for F<sub>flight</sub>.</span></li>
+          <li><a href="https://arxiv.org/abs/2602.02459">TIC-VLA: A Think-in-Control Vision-Language-Action Model for Robot Navigation in Dynamic Environments</a> <span>(Huang et al., ICML 2026)</span> <span class="chip ok">closest to us</span>: a 0.5 Hz VLM and a 10 Hz policy; the action expert reads cached VLM features together with the explicit delay and the ego-motion since inference started, and training injects that delay. <span class="us"><b>For us:</b> F<sub>flight</sub> should carry a timestamp and the motion since it was computed, so π0.5 knows how old it is.</span></li>
+          <li><a href="https://arxiv.org/abs/2506.07339">Real-Time Execution of Action Chunking Flow Policies</a> <span>(Black et al., NeurIPS 2025)</span>: real-time chunking: the next chunk is generated while the current one runs, committed actions are frozen and the rest is inpainted, with no retraining; it holds up beyond 300 ms of latency. <span class="us"><b>For us:</b> removes the seams between π0.5's chunks at re-planning.</span></li>
+          <li><a href="https://arxiv.org/abs/2512.05964">Training-Time Action Conditioning for Efficient Real-Time Chunking</a> <span>(Black et al., arXiv 2025)</span>: simulates inference delay during training and conditions on the action prefix, moving the inpainting cost into training; shown on π0.6. <span class="us"><b>For us:</b> cheap to add when fine-tuning π0.5, with no inference overhead.</span></li>
+          <li><a href="https://arxiv.org/abs/2606.25985">Action ControlNet: A Lightweight Delay-Aware Adapter for Smooth Asynchronous Control in Vision-Language-Action Models</a> <span>(Guo et al., arXiv 2026)</span>: feeds the motion already executed back into a mostly frozen diffusion or flow action head as a residual condition, with few parameters. <span class="us"><b>For us:</b> a light delay compensator for π0.5's action head without full retraining.</span></li>
+          <li><a href="https://arxiv.org/abs/2602.13476">AsyncVLA: An Asynchronous VLA for Fast and Robust Navigation on the Edge</a> <span>(Hirose et al., arXiv 2026)</span>: a large VLA on a workstation and an on-board edge adapter that refines actions at a high rate; 40% higher success under up to 6 s of link delay. <span class="us"><b>For us:</b> a deployment reference for a slow model off board and a fast one on the vehicle.</span></li>
+        </ul>
+        <h3>Phase-scheduled correction</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2603.08342">PhaForce: Phase-Scheduled Visual-Force Policy Learning with Slow Planning and Fast Correction for Contact-Rich Manipulation</a> <span>(Wang et al., arXiv 2026)</span>: a low-rate diffusion planner fuses vision and force, and a contact-phase predictor schedules residual corrections at the control rate. <span class="us"><b>For us:</b> the contact phase could decide when the Flight DiT applies corrections to π0.5's chunk.</span></li>
+          <li><a href="https://arxiv.org/abs/2607.28596">FA-RDP: A Frequency-Adaptive Reactive Diffusion Policy for Contact-Rich Manipulation</a> <span>(Zhuo et al., arXiv 2026)</span>: switches between high and low sampling rates by contact phase. <span class="us"><b>For us:</b> the adaptive-rate variant of the reactive diffusion policy.</span></li>
+        </ul>
+        <p class="note"><b>Also checked:</b> <a href="https://arxiv.org/abs/2502.19417">Hi Robot</a> (ICML 2025, language interface between levels) and <a href="https://arxiv.org/abs/2506.01844">SmolVLA</a> (asynchronous inference stack).</p>
+      </div>
+    </section>
+    <section class="dev-group" id="aerial">
+      <div class="wrap">
+        <h2>Learned aerial manipulation since the main page <span class="count">4 items</span></h2>
+        <p class="where">Direct competitors on aerial platforms, beyond the three already cited on the main page.</p>
+        <p class="dev-summary">No learned aerial manipulation policy that takes force or wrench as input was found. Flying Hand and Aerial Manipulation in the Wild use no force; the one aerial work with contact force uses a hand-designed controller. A wrench-aware learned policy in the air is open.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2609.39670">From Local Whole-Body VLA Behaviors to Scene-Scale Aerial Manipulation</a> <span>(Guo et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: π0.5 fine-tuned with LoRA on a quadrotor with a 3-DoF arm outputs an 8-D whole-body action (arm configuration, gripper, body position and yaw offset), which trajectory optimisation turns into executable motion. <span class="us"><b>For us:</b> the closest platform and model, but a single whole-body policy: the natural baseline for our split design.</span></li>
+          <li><a href="https://arxiv.org/abs/2606.12859">AIR-VLA+: Decoupling Movement and Manipulation via Cascaded Dual-Action Decoders with Asymmetric MoE for Aerial Robots</a> <span>(Sun et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: cascaded manipulation and movement decoders in a flow-matching model; the UAV decoder reads the arm's intent one way and movement gradients are kept out of the arm. 80.2% above single-head π0.5 on the AIR-VLA benchmark. <span class="us"><b>For us:</b> separates flight from manipulation as we do, with the condition flowing arm to body instead of F<sub>flight</sub> to arm; worth a direction ablation and its gradient isolation.</span></li>
+          <li><a href="https://arxiv.org/abs/2510.02614">UMI-on-Air: Embodiment-Aware Guidance for Embodiment-Agnostic Visuomotor Policies</a> <span>(Gupta et al., ICRA 2026)</span> <span class="links"><a href="https://umi-on-air.github.io">Project page</a></span>: injects the gradient of the low-level controller's tracking cost into diffusion sampling so the policy proposes trajectories the vehicle can follow; no force input. <span class="us"><b>For us:</b> a precedent for controller feedback shaping the upper generator on an aerial platform.</span></li>
+          <li><a href="https://arxiv.org/abs/2602.08251">Aerial Manipulation with Contact-Aware Onboard Perception and Hybrid Control</a> <span>(Zhan et al., ICRA 2026)</span>: uses contact force through hybrid force-motion control, not a learned policy. <span class="us"><b>For us:</b> the only aerial work found that closes a loop on contact force.</span></li>
+        </ul>
+      </div>
+    </section>
+    <section class="dev-group" id="legged">
+      <div class="wrap">
+        <h2>Loco-manipulation on legged robots <span class="count">16 items</span></h2>
+        <p class="where">Quadrupeds with arms, and how VLAs start to be used for the arm.</p>
+        <p class="dev-summary">Most systems stack a visual or VLA policy on an RL whole-body or locomotion controller, talking through end-effector pose or trajectory plus body velocity (VBC, UMI on Legs, LEGS, FALCON). VLAs arrived from late 2025, almost always fine-tuned to output both arm and base commands. Keeping a pretrained VLA for the arm and feeding a separately learned body module back into it as a token was not found; FWBC-VLA and HAF come closest.</p>
+        <h3>VLA or foundation model for the arm on a legged base</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2609.03889">FWBC-VLA: Force-Aware Whole-Body Compensation for Contact-Rich Loco-Manipulation</a> <span>(Zhang et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: on a wheel-legged quadruped with a 6-DoF arm, fully fine-tuned π0.5 outputs arm, gripper and nominal base velocity for a whole-body controller; a separate module estimates contact force from residual torque, encodes it with a GRU into a token that enters π0.5's action expert by cross-attention, and a compensation MLP adds a base-velocity residual. <span class="us"><b>For us:</b> almost our structure, π0.5 plus a small separate module injecting a token into the action expert, but the token carries force rather than motion intent and π0.5 is not kept as is.</span></li>
+          <li><a href="https://arxiv.org/abs/2610.32271">From Tabletop to Walking Bot: Deploying a VLA Model on a Legged Manipulator Robot</a> <span>(Minelli et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: on a Go2 with a Piper arm, MolmoAct2 fine-tuned with LoRA outputs an 11-D command (base twist, body pitch, six arm joints, gripper); an arm-aware RL gait policy executes the base part. <span class="us"><b>For us:</b> the most direct case of moving a tabletop-pretrained VLA to a legged robot, though the VLA itself drives the base.</span></li>
+          <li><a href="https://arxiv.org/abs/2512.04381">FALCON: Actively Decoupled Visuomotor Policies for Loco-Manipulation with Foundation-Model-Based Coordination</a> <span>(He et al., arXiv 2025)</span> <span class="links"><a href="https://marmotlab.github.io/falcon">Project page</a></span> <span class="chip ok">closest to us</span>: on a Go2 with an Airbot arm, two separate diffusion policies (base velocity, pitch and height to an RL controller; end-effector position to IK) are coordinated by a shared latent fused from frozen CLIP features with task phase and progress. <span class="us"><b>For us:</b> a shared conditioning latent between arm and base, like our token, but both policies are trained from scratch on 50 demos.</span></li>
+          <li><a href="https://arxiv.org/abs/2407.10353">UMI on Legs: Making Manipulation Policies Mobile with Manipulation-Centric Whole-body Controllers</a> <span>(Ha et al., CoRL 2024)</span> <span class="links"><a href="https://umi-on-legs.github.io">Project page</a></span> <span class="chip ok">closest to us</span>: a manipulation policy outputs end-effector trajectories in the task frame and an RL whole-body controller tracks them; a checkpoint trained for a fixed-base arm runs zero-shot on a quadruped. <span class="us"><b>For us:</b> shows a pretrained arm policy can stay unchanged while the body absorbs the motion; information flows arm to body, the reverse of ours.</span></li>
+          <li><a href="https://arxiv.org/abs/2312.14457">QUAR-VLA: Vision-Language-Action Model for Quadruped Robots</a> <span>(Ding et al., ECCV 2024)</span>: the first quadruped VLA (QUART models, QUARD dataset); one model outputs locomotion and manipulation commands. <span class="us"><b>For us:</b> the single end-to-end route, with no arm and base split.</span></li>
+          <li><a href="https://arxiv.org/abs/2410.00231">Helpful DoggyBot: Open-World Object Fetching using Legged Robots and Vision-Language Models</a> <span>(Wu et al., arXiv 2024)</span> <span class="links"><a href="https://helpful-doggybot.github.io/">Project page</a></span>: a quadruped with a front gripper; a pretrained VLM handles semantics and an RL controller trained in simulation on depth does the climbing and leaning. <span class="us"><b>For us:</b> the foundation model plans only and outputs no actions.</span></li>
+          <li><a href="https://arxiv.org/abs/2508.08240">ODYSSEY: Open-World Quadrupeds Exploration and Manipulation for Long-Horizon Tasks</a> <span>(Wang et al., arXiv 2025)</span> <span class="links"><a href="https://kaijwang.github.io/odyssey.github.io/">Project page</a></span>: a hierarchical VLM planner decomposes long tasks over a two-stage RL whole-body controller that tracks end-effector targets. <span class="us"><b>For us:</b> VLM planning on an RL whole-body controller, again with no VLA on the arm.</span></li>
+        </ul>
+        <h3>Humanoids with VLAs</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2512.11047">WholeBodyVLA: Towards Unified Latent VLA for Whole-Body Loco-Manipulation Control</a> <span>(Jiang et al., ICLR 2026)</span>: on AgiBot X2, a VLA at about 10 Hz decodes both arms' joints and discrete locomotion commands (forward, turn, squat) for a 50 Hz RL locomotion policy. <span class="us"><b>For us:</b> the typical pattern: the VLA drives the hands and commands the legs through an RL controller.</span></li>
+          <li><a href="https://arxiv.org/abs/2606.01458">LEGS: Fine-Tuning Teleop-Free VLAs for Humanoid Loco-manipulation in an Embodied Gaussian Splatting World</a> <span>(Kim et al., CoRL 2026)</span> <span class="links"><a href="https://hojjunekim.github.io/legs/">Project page</a></span>: π0.5, ψ0 and GR00T N1.6 fine-tuned on a G1 output an 18-D command (two wrist 6D poses, grippers, base vx, vy, ωz and height) for an RL controller. <span class="us"><b>For us:</b> π0.5 outputting end-effector and base velocity, the most common interface.</span></li>
+          <li><a href="https://arxiv.org/abs/2608.16837">HAF: Adapting Generalist VLAs to Humanoid Whole-Body Loco-manipulation via Hierarchical Action Flow and Spectral Latent RL</a> <span>(Gu et al., arXiv 2026)</span>: a π0.5-based model denoises in three levels (locomotion and skill mode, then waist, then arms), then adapts with RL only in the noise subspace over a frozen backbone. <span class="us"><b>For us:</b> keeps π0.5 frozen and adapts from outside, though locomotion is still generated by the VLA.</span></li>
+          <li><a href="https://arxiv.org/abs/2506.13751">LeVERB: Humanoid Whole-Body Control with Latent Vision-Language Instruction</a> <span>(Xue et al., arXiv 2025)</span>: on a G1, a 10 Hz high-level VLA emits latent verbs that a 50 Hz RL whole-body controller executes. <span class="us"><b>For us:</b> a latent-token interface, flowing from the VLA to the controller, the reverse of ours.</span></li>
+        </ul>
+        <h3>Whole-body learned policies</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2403.16967">Visual Whole-Body Control for Legged Loco-Manipulation</a> <span>(Liu et al., CoRL 2024)</span> <span class="links"><a href="https://wholebody-b1.github.io">Project page</a></span>: VBC: on a B1 with an arm, a high-level visual policy outputs end-effector pose and body velocity, and a low-level RL policy tracks them with every joint. <span class="us"><b>For us:</b> set the standard interface of end-effector pose plus body velocity; both levels trained from scratch.</span></li>
+          <li><a href="https://arxiv.org/abs/2403.17367">RoboDuet: Learning a Cooperative Policy for Whole-body Legged Loco-Manipulation</a> <span>(Pan et al., arXiv 2024)</span> <span class="links"><a href="http://locomanip-duet.github.io">Project page</a></span>: separate locomotion and arm policies; the arm policy sends body-pose commands to the locomotion policy; two-stage training. <span class="us"><b>For us:</b> split modules that transfer across bodies, with information flowing arm to base.</span></li>
+          <li><a href="https://arxiv.org/abs/2403.18197">LocoMan: Advancing Versatile Quadrupedal Dexterity with Lightweight Loco-Manipulators</a> <span>(Lin et al., arXiv 2024)</span> <span class="links"><a href="https://linchangyi1.github.io/LocoMan">Project page</a></span>: 3-DoF manipulators on a Go1's front calves under one model-based whole-body controller. <span class="us"><b>For us:</b> the hardware and model-based route, with no learned arm policy.</span></li>
+        </ul>
+        <h3>Teleoperation and data</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2411.15131">WildLMa: Long Horizon Loco-Manipulation in the Wild</a> <span>(Qiu et al., arXiv 2024)</span> <span class="links"><a href="https://wildlma.github.io/">Project page</a></span>: VR whole-body teleoperation through a learned whole-body controller, an ACT and CLIP skill library from imitation, and an LLM planner on top. <span class="us"><b>For us:</b> the whole-body controller doubles as teleop and policy interface, which cuts demo cost.</span></li>
+          <li><a href="https://arxiv.org/abs/2506.16475">Human2LocoMan: Learning Versatile Quadrupedal Manipulation with Human Pretraining</a> <span>(Niu et al., arXiv 2025)</span> <span class="links"><a href="https://human2bots.github.io">Project page</a></span>: unifies human and LocoMan observations and actions, pretrains on human data and fine-tunes on robot data; 38.6% higher overall and 82.7% higher out of distribution. <span class="us"><b>For us:</b> another route to a pretrained arm policy across bodies.</span></li>
+        </ul>
+        <p class="note"><b>Also checked:</b> <a href="https://arxiv.org/abs/2403.13358">GeRM</a> (mixture-of-experts offline RL for quadrupeds, simulation only) and <a href="https://arxiv.org/abs/2503.08564">MoE-Loco</a> (locomotion only, no arm).</p>
+      </div>
+    </section>
+    <section class="dev-group" id="wheeled">
+      <div class="wrap">
+        <h2>Mobile manipulation on wheeled robots <span class="count">15 items</span></h2>
+        <p class="where">Mobile robots with arms, and how VLAs start to be used for the arm.</p>
+        <p class="dev-summary">Three routes exist. A fixed VLA works after an optimised or planned base pose, with the VLA unaware of the base (MoManipVLA, MoTo, N2M). One whole-body policy concatenates base velocity into the action or conditions arm on base inside the model (Mobile ALOHA, BEHAVIOR Robot Suite, PanoVLA). One-way base-to-arm conditioning (HiRe-MoMa) and modules inserted into π0.5 (PanoVLA) appeared in 2026 but have not been combined, which is what our design does.</p>
+        <h3>Pretrained arm policy plus a separate base module</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2610.20607">Hierarchical Residual Policy Learning for Real-World Mobile Manipulation with Sparse Human Guidance</a> <span>(Gong et al., CoRL 2026)</span> <span class="links"><a href="https://hire-moma.github.io/">Project page</a></span> <span class="chip ok">closest to us</span>: HiRe-MoMa learns residuals on a frozen base policy (Diffusion Policy or ACT) with separate base and arm heads; the base residual is computed first and fed to the arm head. TIAGo++. <span class="us"><b>For us:</b> one-way base-to-arm conditioning, the closest structure to the Flight DiT passing a token to π0.5, though the frozen policy is not a VLA.</span></li>
+          <li><a href="https://arxiv.org/abs/2503.13446">MoManipVLA: Transferring Vision-language-action Models for General Mobile Manipulation</a> <span>(Wu et al., CVPR 2025)</span> <span class="links"><a href="https://gary3410.github.io/momanipVLA/">Project page</a></span> <span class="chip ok">closest to us</span>: OpenVLA-7B with LoRA outputs end-effector waypoints, and a bi-level optimisation (base pose search, then IK for the arm) makes them reachable on a Stretch. <span class="us"><b>For us:</b> keeps the pretrained VLA and adds a base module, but the base is an untrained optimiser and the VLA never sees the base.</span></li>
+          <li><a href="https://arxiv.org/abs/2509.01658">MoTo: A Zero-shot Plug-in Interaction-aware Navigation for General Mobile Manipulation</a> <span>(Wu et al., CoRL 2025)</span> <span class="links"><a href="https://gary3410.github.io/MoTo">Project page</a></span>: a VLM marks interaction keypoints on the object and the arm, a docking base pose is optimised, then a fixed-base model (OpenVLA, RDT-1B, iDP3) does the manipulation. <span class="us"><b>For us:</b> move then manipulate, with no condition between the two; the authors note the viewpoint shift this causes for the VLA.</span></li>
+          <li><a href="https://arxiv.org/abs/2509.18671">N2M: Bridging Navigation and Manipulation by Learning Pose Preference from Rollout</a> <span>(Chai et al., arXiv 2025)</span> <span class="links"><a href="https://clvrai.github.io/N2M/">Project page</a></span>: a learned transition module that picks the initial base pose the manipulation policy prefers, from rollouts; policy-agnostic. <span class="us"><b>For us:</b> a learned base module, but it acts only before manipulation starts.</span></li>
+          <li><a href="https://arxiv.org/abs/2610.19600">Cracking Mobile Manipulation: From Failure Diagnosis to Agentic Robot System</a> <span>(Wang et al., arXiv 2026)</span>: fixed sub-task VLAs reach 80% on atomic skills but 19% when composed into mobile manipulation; reachability-aware base adjustment plus local end-effector adjustment lift RoboCasa365 to 47%. <span class="us"><b>For us:</b> the error comes mainly from base placement, which argues for a dedicated base module; theirs is hand-designed.</span></li>
+          <li><a href="https://arxiv.org/abs/2607.08448">Harness VLA: Steering Frozen VLAs into Reliable Manipulation Primitives via Memory-Guided Agents</a> <span>(Zhang et al., arXiv 2026)</span>: a frozen VLA is called only for contact phases, analytic primitives handle navigation and the base, and a memory-equipped LLM agent orchestrates them. <span class="us"><b>For us:</b> also keeps the VLA frozen, but switches discretely between primitives instead of conditioning continuously.</span></li>
+          <li><a href="https://arxiv.org/abs/2410.06237">BUMBLE: Unifying Reasoning and Acting with Vision-Language Models for Building-wide Mobile Manipulation</a> <span>(Shah et al., arXiv 2024)</span> <span class="links"><a href="https://robin-lab.cs.utexas.edu/BUMBLE/">Project page</a></span>: a VLM schedules a coarse-to-fine skill library across floors and manipulation. <span class="us"><b>For us:</b> the VLM-orchestrates-skills route, with no end-to-end arm VLA.</span></li>
+        </ul>
+        <h3>Whole-body imitation policies</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2401.02117">Mobile ALOHA: Learning Bimanual Mobile Manipulation with Low-Cost Whole-Body Teleoperation</a> <span>(Fu et al., arXiv 2024)</span> <span class="links"><a href="https://mobile-aloha.github.io">Project page</a></span>: one ACT policy outputs both arms' joints and base velocity, co-trained with static ALOHA data. <span class="us"><b>For us:</b> the baseline of one concatenated whole-body action, no split.</span></li>
+          <li><a href="https://arxiv.org/abs/2412.10447">TidyBot++: An Open-Source Holonomic Mobile Manipulator for Robot Learning</a> <span>(Wu et al., CoRL 2024)</span> <span class="links"><a href="https://tidybot2.github.io">Project page</a></span>: an open holonomic base with one arm, phone teleoperation, and one diffusion policy for base and arm. <span class="us"><b>For us:</b> a hardware and data platform; the policy is whole-body.</span></li>
+          <li><a href="https://arxiv.org/abs/2503.05652">BEHAVIOR Robot Suite: Streamlining Real-World Whole-Body Manipulation for Everyday Household Activities</a> <span>(Jiang et al., CoRL 2025)</span> <span class="links"><a href="https://behavior-robot-suite.github.io">Project page</a></span>: on a Galaxea R1, WB-VIMA predicts along the kinematic chain, base first, then torso, then arms, each conditioned on the ones before. <span class="us"><b>For us:</b> base-to-arm conditioning inside one model, the same direction as ours, but not from a pretrained VLA.</span></li>
+          <li><a href="https://arxiv.org/abs/2509.04443">EMMA: Scaling Mobile Manipulation via Egocentric Human Data</a> <span>(Zhu et al., arXiv 2025)</span> <span class="links"><a href="https://ego-moma.github.io">Project page</a></span>: a shared HPT-based trunk with a navigation head (x, y, ω) trained mostly on Aria-glasses human data and an arm head; a predicted phase switches between them. <span class="us"><b>For us:</b> shared trunk, split heads, phase gating, and no pretrained VLA.</span></li>
+        </ul>
+        <h3>VLA-based mobile manipulators, 2025–2026</h3>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2608.02257">Learning Panorama-Aware VLA for Mobile Manipulation with Whole-Body Teleoperation</a> <span>(Yang et al., arXiv 2026)</span> <span class="chip ok">closest to us</span>: PanoVLA inserts a roughly 100 M-parameter panorama expert between π0.5's VLM and action expert; the action is a 17-D whole-body vector (14 arm dimensions plus base vx, vy, ω). <span class="us"><b>For us:</b> adds a module inside π0.5 as we do, but π0.5 still outputs the base actions itself.</span></li>
+          <li><a href="https://arxiv.org/abs/2609.12081">MoPA: Coordinated Mobile Manipulation via Subsystem-Specific Perception Alignment</a> <span>(Chen et al., arXiv 2026)</span> <span class="links"><a href="https://MoPA-policy.github.io">Project page</a></span>: on a shared Qwen3-VL context, base and arm each get masked queries, and a mixture-of-transformers decoder exchanges the two action streams' state in every layer through coupled flow matching; π0 is a baseline. <span class="us"><b>For us:</b> two streams with per-layer exchange, a symmetric many-token version of our two modules and one token.</span></li>
+          <li><a href="https://arxiv.org/abs/2509.00576">Galaxea Open-World Dataset and G0 Dual-System VLA Model</a> <span>(Jiang et al., arXiv 2025)</span> <span class="links"><a href="https://opengalaxea.github.io/G0/">Project page</a></span>: a Qwen2.5-VL planner and a PaliGemma-based VLA executor drive base, torso and both arms of an R1 Lite. <span class="us"><b>For us:</b> the industry pattern of treating the base as more action dimensions.</span></li>
+          <li><a href="https://arxiv.org/abs/2606.00253">Per-Group Error, Not Total MSE: Fine-Tuning Vision-Language-Action Models for 11-DoF Mobile Manipulation</a> <span>(Montagut Bofi et al., ICRA 2026 workshop)</span>: SmolVLA and π0.5 fine-tuned to an 11-D action on a Toyota HSR; the checkpoint with the lowest total MSE is not the best on hardware, while the arm-group error predicts success better. <span class="us"><b>For us:</b> monitor arm and vehicle errors separately rather than one total loss.</span></li>
+        </ul>
+      </div>
+    </section>
+    <div class="wrap dev-part" id="cited">
+      <p class="part-label">Part B</p>
+      <p class="dev-part-title">Cited on the main page · 17 entries</p>
+      <p class="dev-intro">The references in the Related work sections of the main page, grouped by role.</p>
+    </div>
+
+<section class="dev-group" id="cited-models">
+      <div class="wrap">
+        <h2>Models and architectures <span class="count">4 items</span></h2>
+        <p class="where">Used in Part 1, Introduction · Related work · Models.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need (Transformer)</a> <span>(Vaswani et al., NeurIPS 2017)</span>: the backbone of both policies. Cross-attention is where language, images and F<sub>flight</sub> enter.</li>
+          <li><a href="https://arxiv.org/abs/2212.09748">Scalable Diffusion Models with Transformers (DiT)</a> <span>(Peebles &amp; Xie, ICCV 2023)</span>: a Transformer inside diffusion. The Flight DiT uses the same idea to generate a short flight-action chunk.</li>
+          <li><a href="https://arxiv.org/abs/2410.07864">RDT-1B: a Diffusion Foundation Model for Bimanual Manipulation</a> <span>(Liu et al., ICLR 2025)</span>: a diffusion Transformer robot policy. Fine-tuning costs about a week on 4×A100.</li>
+          <li><a href="https://huggingface.co/robotics-diffusion-transformer/rdt-170m">RDT-170M</a> <span>(Hugging Face weights)</span>: hidden 1024, depth 14, 64-step prediction; fits on one 4090 and is the starting point for the Flight DiT.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="dev-group" id="cited-vla">
+      <div class="wrap">
+        <h2>VLA policies and training code <span class="count">3 items</span></h2>
+        <p class="where">Used in Part 3, Dataset generation · Related work, and throughout Part 5, Benchmarking.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2504.16054">π0.5: a Vision-Language-Action Model with Open-World Generalization</a> <span>(Physical Intelligence, 2025)</span>: the VLA fine-tuned on the demonstration data.</li>
+          <li><a href="https://arxiv.org/abs/2410.24164">π0: A Vision-Language-Action Flow Model for General Robot Control</a> <span>(Black et al., 2024)</span>: the flow-matching action expert that π0.5 builds on.</li>
+          <li><a href="https://github.com/Physical-Intelligence/openpi">OpenPI</a> <span>(Physical Intelligence, code)</span>: the training code and the AM-Bench data configuration used by the export (LeRobot v2.1, 20 Hz, 50-step action chunks).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="dev-group" id="cited-aerial">
+      <div class="wrap">
+        <h2>Aerial manipulation and whole-body coordination <span class="count">4 items</span></h2>
+        <p class="where">Used in Part 1, Introduction · Related work · Aerial manipulation.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2504.10334">Flying Hand</a> <span>(He et al., 2025)</span>: an end-effector-centric interface on a fully actuated hexarotor with whole-body MPC. The high level only talks about the end effector. FA-Hexa is the same class of vehicle.</li>
+          <li><a href="https://arxiv.org/abs/2609.30521">Aerial Manipulation in the Wild</a> <span>(Zhan et al., 2026)</span>: a Diffusion Policy proposes end-effector motion and whole-body MPC executes it, outdoors. Here the upper model is a tabletop-pretrained VLA instead.</li>
+          <li><a href="https://arxiv.org/abs/2603.25038">π, But Make It Fly</a> <span>(Tucker et al., 2026)</span> <span class="links"><a href="https://airvla.github.io/">AirVLA project page</a></span>: visual features transfer to flight, control dynamics do not. Their fix writes payload guidance into the VLA's sampling (23% → 50% pick-and-place). This project keeps the lesson but not the mechanism: flight is a separate module and only a condition.</li>
+          <li><a href="https://arxiv.org/abs/2507.01961">AC-DiT: Adaptive Coordination Diffusion Transformer for Mobile Manipulation</a> <span>(Chen et al., 2025)</span>: extract base motion first, then condition the body on it. F<sub>flight</sub> comes from this idea, but AC-DiT still predicts the whole body with one network (about two weeks on 8×A100). A mobile-manipulation paper, listed here because it is the source of the conditioning scheme.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="dev-group" id="cited-simulation">
+      <div class="wrap">
+        <h2>Simulation and benchmark <span class="count">2 items</span></h2>
+        <p class="where">Used in Part 2, Specialist trajectories · Related work; the platform for every result on the page.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2609.00641">AM-Bench</a> <span>(Wang et al., 2026)</span> <span class="links"><a href="https://ambench.github.io/">Project page</a> <a href="https://ambench.github.io/docs/">Documentation</a> <a href="https://github.com/ambench/ambench">Code</a></span>: a modular simulation suite and benchmark for aerial manipulation policy learning, built on Isaac Lab. It provides the vehicles (FA-Hexa among them), the 12 tasks and the scripted specialists.</li>
+          <li><a href="https://isaac-sim.github.io/IsaacLab/">Isaac Lab</a> <span>(NVIDIA)</span>: the GPU simulation framework AM-Bench runs on (Isaac Sim 5.1).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="dev-group" id="cited-data">
+      <div class="wrap">
+        <h2>Data collection and data format <span class="count">2 items</span></h2>
+        <p class="where">Used in Part 3, Dataset generation · Related work.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/1703.09327">DART: Noise Injection for Robust Imitation Learning</a> <span>(Laskey et al., CoRL 2017)</span>: noise is injected into the supervisor's executed actions while the unperturbed action is recorded as the label, so the data covers the states a learner will drift into; the scheme used here.</li>
+          <li><a href="https://github.com/huggingface/lerobot">LeRobot</a> <span>(Cadene et al., 2024)</span>: the dataset format (v3.0 for recording, v2.1 for OpenPI) and the video encoding.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="dev-group" id="cited-baselines">
+      <div class="wrap">
+        <h2>Baselines named on the page <span class="count">1 item</span></h2>
+        <p class="where">Named in Part 1, Plan, as a comparison baseline; not linked on the main page.</p>
+        <ul class="refs">
+          <li><a href="https://arxiv.org/abs/2303.04137">Diffusion Policy: Visuomotor Policy Learning via Action Diffusion</a> <span>(Chi et al., RSS 2023)</span>: one of the planned baselines, alongside π0.5 fine-tuned with LoRA and the Flight DiT with full fine-tuning.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="dev-group" id="cited-code">
+      <div class="wrap">
+        <h2>Project code <span class="count">1 item</span></h2>
+        <p class="where">Private repository behind every result on the page.</p>
+        <ul class="refs">
+          <li><a href="https://github.com/MingtianTan/Aerial_Manipulation_Code">MingtianTan/Aerial_Manipulation_Code</a> <span>(private)</span>: the AM-Bench snapshot with the specialist fixes, the data-generation pipeline, the π0.5 record / prepare / serve / evaluate path and the cloud training scripts.</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>Develop mode collects the working direction and the literature behind it. Open <a href="index.html">the page</a> for the results.</p>
+    </div>
+  </footer>
+</body>
+</html>
