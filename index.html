@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261102d">
+  <link rel="stylesheet" href="styles.css?v=20261103a">
 </head>
 <body>
   <header class="nav">
@@ -37,6 +37,13 @@
       <p class="byline">Mingtian Tan · updated 3 Nov 2026</p>
       <h1>Aerial manipulation: keep the arm pretrained, learn flight separately</h1>
       <p class="lede">Reuse a vision-language-action model (VLA) that already knows how to use an arm, let a small Flight DiT learn flight from the scarce aerial data, and fine-tune the VLA to listen to it.</p>
+    </div>
+
+    <div class="wrap">
+      <figure class="figure hero-clip">
+        <video autoplay muted loop playsinline poster="assets/opendoor_threeview.jpg" width="1104" height="600" aria-label="FA-Hexa opening a latched door, seen from the side and through the two onboard cameras the policy uses"><source src="assets/opendoor_threeview.mp4" type="video/mp4"></video>
+        <figcaption>Open door, the hardest task solved so far: π0.5 fully fine-tuned on our demonstrations (30k steps) unlatches the door through its handle, swings it open and lets go. Left: side view. Right: the two images the policy sees, the end-effector camera and the body camera. Simulation in AM-Bench on Isaac Lab, 2× speed. <a href="assets/opendoor_threeview.gif">GIF version</a>.</figcaption>
+      </figure>
     </div>
 
     <!-- Introduction -->
