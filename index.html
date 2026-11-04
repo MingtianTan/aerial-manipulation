@@ -588,28 +588,28 @@
     <section id="benchmark-overview">
       <div class="wrap">
         <h2>Results at a glance</h2>
-        <p class="sub">The three evaluated policies side by side, all trained on the same 960 default-condition demonstrations and scored with the same protocol: 30 rollouts per task, rollout <i>i</i> with environment seed <i>i</i> in every cell, each task's own time limit. Model boxes with the per-model details follow below. Diffusion Policy is pending; where a policy has no result yet the figure says so.</p>
+        <p class="sub">The three evaluated policies side by side, all trained on the same 960 default-condition demonstrations and scored with the same protocol: 30 rollouts per task, rollout <i>i</i> with environment seed <i>i</i> in every cell, each task's own time limit. Model boxes with the per-model details follow below. Diffusion Policy is pending; where a policy has no result yet the figure says so. The simulator's per-task results depend on the GPU it runs on: the same ACT checkpoints, code and seeds score 41.1 % on an RTX PRO 6000 and 53.9 % on an RTX 4090, so ACT's best setting is shown for both machines, and its robustness sweep ran entirely on the RTX 4090. π0.5 was evaluated on an RTX 4080.</p>
       </div>
       <div class="wrap wide">
         <figure class="figure">
-          <a href="assets/benchmark/figures/fig4a_default_grid.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4a_default_grid.png" width="2360" height="1678" alt="Grid of success rates: twelve tasks by policy and checkpoint, pi0.5 20k/30k/40k, ACT-960 20k/30k/40k/40k with temporal ensembling, Diffusion Policy pending."></a>
-          <figcaption><b>Figure 4A.</b> Success rate per task on the default condition: π0.5 fully fine-tuned (20k, 30k, 40k steps), ACT-960 (20k, 30k, 40k, and 40k with temporal ensembling), Diffusion Policy pending. Teal intensity is the success rate out of 30 rollouts, grey is 0 %, dashed cells have not been run; the last row is the macro average over the twelve tasks.</figcaption>
+          <a href="assets/benchmark/figures/fig4a_default_grid.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4a_default_grid.png" width="2360" height="1678" alt="Grid of success rates: twelve tasks by policy and checkpoint, pi0.5 20k/30k/40k, ACT-960 20k/30k/40k/40k with temporal ensembling and 40k with temporal ensembling on an RTX 4090, Diffusion Policy pending."></a>
+          <figcaption><b>Figure 4A.</b> Success rate per task on the default condition: π0.5 fully fine-tuned (20k, 30k, 40k steps), ACT-960 (20k, 30k, 40k, and 40k with temporal ensembling, all on an RTX PRO 6000; the separate last column re-runs 40k with temporal ensembling on an RTX 4090 with the same code and seeds), Diffusion Policy pending. Teal intensity is the success rate out of 30 rollouts, grey is 0 %, dashed cells have not been run; the last row is the macro average over the twelve tasks.</figcaption>
         </figure>
         <figure class="figure">
-          <a href="assets/benchmark/figures/fig4b_default_ci.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4b_default_ci.png" width="2360" height="1744" alt="Dot plot with confidence intervals: per-task success of pi0.5 30k and ACT-960 40k with temporal ensembling."></a>
-          <figcaption><b>Figure 4B.</b> The best setting of each policy with Wilson 95 % confidence intervals (n = 30 per task, 360 for the macro average). With 30 rollouts two cells have to differ by about 30 points before their intervals separate, so differences of 10–20 points in the grid are within noise; the macro averages (81.1 vs 41.1 %) are not.</figcaption>
+          <a href="assets/benchmark/figures/fig4b_default_ci.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4b_default_ci.png" width="2360" height="1816" alt="Dot plot with confidence intervals: per-task success of pi0.5 30k and of ACT-960 40k with temporal ensembling on an RTX 4090 and on an RTX PRO 6000."></a>
+          <figcaption><b>Figure 4B.</b> The best setting of each policy with Wilson 95 % confidence intervals (n = 30 per task, 360 for the macro average); ACT-960 40k with temporal ensembling is shown on both machines (filled: RTX 4090, hollow: RTX PRO 6000). With 30 rollouts two cells have to differ by about 30 points before their intervals separate, so differences of 10–20 points in the grid are within noise; the three macro averages (81.1, 53.9 and 41.1 %) are not. The two runs of the same ACT checkpoints separate on NDT (0 vs 100 %), harvest lemon (20 vs 80 %) and rotate valve (97 vs 47 %); see <a href="#act-machine">Machine dependence</a> in the ACT box.</figcaption>
         </figure>
         <figure class="figure">
-          <a href="assets/benchmark/figures/fig4c_robustness_grid.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4c_robustness_grid.png" width="2360" height="1727" alt="Grid of success rates for pi0.5 30k under default physics, aero, and wind at 5, 10 and 20 percent; ACT and Diffusion Policy columns pending."></a>
-          <figcaption><b>Figure 4C.</b> Robustness: the π0.5 30k checkpoint under AM-Bench's disturbance variants (aero: thrust limited to 0–23 N per rotor, ground and wall effects, drag; wind: a constant force of 5, 10 or 20 % of the weight on top of aero), trained on default-condition demonstrations only. ACT-960 and Diffusion Policy pending.</figcaption>
+          <a href="assets/benchmark/figures/fig4c_robustness_grid.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4c_robustness_grid.png" width="2360" height="1727" alt="Grid of success rates for pi0.5 30k and ACT-960 40k with temporal ensembling under default physics, aero, and wind at 5, 10 and 20 percent; Diffusion Policy columns pending."></a>
+          <figcaption><b>Figure 4C.</b> Robustness: π0.5 30k and ACT-960 40k with temporal ensembling under AM-Bench's disturbance variants (aero: thrust limited to 0–23 N per rotor, ground and wall effects, drag; wind: a constant force of 5, 10 or 20 % of the weight on top of aero), both trained on default-condition demonstrations only. All ACT columns ran on the RTX 4090, so its Default column is the 53.9 % run; π0.5 ran on an RTX 4080. Diffusion Policy pending.</figcaption>
         </figure>
         <figure class="figure">
-          <a href="assets/benchmark/figures/fig4d_robustness_lines.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4d_robustness_lines.png" width="2360" height="1920" alt="Small multiples: one line chart per task of success rate against disturbance condition for pi0.5 30k, plus the macro average."></a>
-          <figcaption><b>Figure 4D.</b> The same sweep per task, one panel each at the same scale, plus the macro average: π0.5 30k, trained on default-condition demonstrations only; the shaded conditions were never seen in training. The contact tasks (push slider, rotate valve, pull lever) collapse under aero alone, press button holds to 10 % wind (90 %) and harvest lemon to 5 % (97 %); at 20 % wind the vehicle tips over in 158 of the 360 rollouts. ACT-960 and Diffusion Policy pending.</figcaption>
+          <a href="assets/benchmark/figures/fig4d_robustness_lines.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4d_robustness_lines.png" width="2360" height="1920" alt="Small multiples: one line chart per task of success rate against disturbance condition for pi0.5 30k and ACT-960 40k with temporal ensembling, plus the macro average."></a>
+          <figcaption><b>Figure 4D.</b> The same sweep per task, one panel each at the same scale, plus the macro average: π0.5 30k and ACT-960 40k with temporal ensembling (RTX 4090), both trained on default-condition demonstrations only; the shaded conditions were never seen in training. π0.5 starts higher (81.1 vs 53.9 %) but falls faster: its push slider and rotate valve collapse under aero alone (0 and 7 %), while ACT keeps them at 77 and 60 %. ACT is ahead at 10 % wind (50.0 vs 30.3 %) and at 20 % wind (31.1 vs 4.7 %, higher on nine of the twelve tasks), outside the macro intervals; under aero and 5 % wind the two are within noise. Both lose pull lever under aero (13 and 10 %). ACT's open door rises from 33 to 100 % with the wind, which always blows along +x and probably pushes the vehicle toward the door; a −x control has not been run. For π0.5 the wind tips the vehicle over in 158 of the 360 rollouts at 20 %. Diffusion Policy pending.</figcaption>
         </figure>
         <figure class="figure">
           <a href="assets/benchmark/figures/fig4e_checkpoints.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4e_checkpoints.png" width="2360" height="1920" alt="Small multiples: one panel per task of success rate at 20k, 30k and 40k training steps for pi0.5 and ACT-960, plus the macro average."></a>
-          <figcaption><b>Figure 4E.</b> Checkpoint sensitivity on the default condition, one panel per task plus the macro average: π0.5 and ACT-960 at 20k, 30k and 40k steps; the diamond is ACT-960 40k with temporal ensembling. π0.5's frame assembly goes 0 → 90 → 10 % and open door 13 → 37 → 17 %: both tasks have a long stationary phase in the demonstrations whose end the policy cannot observe, so whether a checkpoint leaves it in time is close to chance. Diffusion Policy pending.</figcaption>
+          <figcaption><b>Figure 4E.</b> Checkpoint sensitivity on the default condition, one panel per task plus the macro average: π0.5 and ACT-960 at 20k, 30k and 40k steps; the diamond is ACT-960 40k with temporal ensembling. π0.5's frame assembly goes 0 → 90 → 10 % and open door 13 → 37 → 17 %: both tasks have a long stationary phase in the demonstrations whose end the policy cannot observe, so whether a checkpoint leaves it in time is close to chance. All ACT points here are RTX PRO 6000 runs; the checkpoint sweep has not been repeated on the RTX 4090. Diffusion Policy pending.</figcaption>
         </figure>
         <figure class="figure">
           <a href="assets/benchmark/figures/fig4f_paired_seeds.png" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/benchmark/figures/fig4f_paired_seeds.png" width="2360" height="1440" alt="Stacked bars per task: how many of the 30 shared seeds succeed with both the 30k and 40k pi0.5 checkpoints, with one only, or with neither."></a>
@@ -769,13 +769,13 @@
           <li><b>Model.</b> Action Chunking with Transformers (<a href="https://arxiv.org/abs/2304.13705">Zhao et al., 2023</a>) as implemented in AM-Bench's LeRobot-based trainer, with the paper's hyperparameters (its Table 8a): ResNet-18 backbone pretrained on ImageNet, transformer width 512, 8 heads, feed-forward 3,200, 4 encoder and 1 decoder layers, KL weight 10, a chunk of 16 actions of which the first 8 are executed, one observation step. Inputs are the end-effector and body cameras at 384 × 384 (the same two views as our π0.5; AM-Bench's own ACT sees the end-effector camera only) and the 8-D proprioceptive state (end-effector position and quaternion, gripper width). Actions are 8-D end-effector targets relative to the current pose at 20 Hz, the representation π0.5 uses. One policy per task: twelve single-task models, not one multi-task model.</li>
           <li><b>Data.</b> The same 960 default-condition demonstrations as π0.5 (12 tasks × 80), exported per task to LeRobot v3 with lossless PNG frames (the recordings are AV1; the evaluator renders uncompressed), ImageNet image statistics and mean / standard-deviation normalisation of state and action.</li>
           <li><b>Training.</b> AdamW, learning rate 10<sup>−5</sup> held constant for the transformer and the backbone, weight decay 10<sup>−4</sup>, batch 8, seed 1000, 20,000 steps with a checkpoint every 5,000, run on RunPod. The runs were then resumed exactly to 40,000 steps (optimizer moments, RNG state and step counter restored, constant learning rate), so 20k + 20k is one 40k run. 20k steps at batch 8 are about 8 epochs over 80 demonstrations; at 40k the short tasks have seen 22–25 epochs, frame assembly 7.6, the cabinet about 8.7 and lemon 13.8. (An ACT-4800 variant trained on all five conditions × 80 demonstrations to 20k steps, 1.5 epochs, is undertrained and not reported.)</li>
-          <li><b>Protocol.</b> Identical to π0.5: AM-Bench's evaluator and success checks, default physics, 30 rollouts per task, rollout <i>i</i> with environment seed <i>i</i>, each task's own time limit, 20 Hz, one environment at a time, headless. Evaluation ran on an RTX PRO 6000 (Isaac Sim 5.1.0, Isaac Lab 2.3.2, LeRobot 0.4.4, eight environments in parallel); the cabinet task ran as three shards of ten seeds, which gives the same seed set as one run of thirty.</li>
-          <li><b>Result.</b> 20k, 30k and 40k steps reach 27.5, 23.6 and 28.6 % macro success (99, 85 and 103 of 360). Temporal ensembling at inference (below) lifts the 40k checkpoints to 41.1 % (148 of 360) without retraining. NDT, frame assembly and toss ball are never solved; press button, push slider and peg in hole sit at 43–67 % whichever checkpoint is used; the long cabinet task is at 0–13 %.</li>
+          <li><b>Protocol.</b> Identical to π0.5: AM-Bench's evaluator and success checks, default physics, 30 rollouts per task, rollout <i>i</i> with environment seed <i>i</i>, each task's own time limit, 20 Hz, one environment at a time, headless. Evaluation ran on an RTX PRO 6000 (Isaac Sim 5.1.0, Isaac Lab 2.3.2, LeRobot 0.4.4, eight environments in parallel); the cabinet task ran as three shards of ten seeds, which gives the same seed set as one run of thirty. The 40k checkpoints with temporal ensembling were then evaluated again on an RTX 4090 with the same code, arguments and seeds, under default physics and under all four disturbance conditions.</li>
+          <li><b>Result.</b> On the RTX PRO 6000, 20k, 30k and 40k steps reach 27.5, 23.6 and 28.6 % macro success (99, 85 and 103 of 360), and temporal ensembling at inference (below) lifts the 40k checkpoints to 41.1 % (148 of 360) without retraining. The same 40k + TE checkpoints reach 53.9 % (194 of 360) on the RTX 4090: NDT goes from 0 to 100 % and harvest lemon from 20 to 80 %, while rotate valve falls from 97 to 47 % (see <a href="#act-machine">Machine dependence</a>). On both machines frame assembly, toss ball and the cabinet stay at 0 % with ensembling. Under the disturbances ACT degrades far less than π0.5 and is ahead of it at 10 and 20 % wind.</li>
         </ul>
         <div class="stats">
-          <div class="stat"><b>41.1 %</b><span>macro success, 40k checkpoints with temporal ensembling</span></div>
-          <div class="stat"><b>28.6 %</b><span>40k with AM-Bench's default execution (8 steps open-loop)</span></div>
-          <div class="stat"><b>12</b><span>single-task policies, 20k → 40k steps each</span></div>
+          <div class="stat"><b>53.9 %</b><span>macro success, 40k + temporal ensembling, RTX 4090</span></div>
+          <div class="stat"><b>41.1 %</b><span>same checkpoints, code and seeds on an RTX PRO 6000</span></div>
+          <div class="stat"><b>31.1 %</b><span>at 20 % wind (RTX 4090), against 4.7 % for π0.5 30k</span></div>
         </div>
       </div>
     </section>
@@ -785,25 +785,25 @@
         <h2>Success rate per task</h2>
         <div class="table-wrap">
           <table class="rates">
-            <thead><tr><th scope="col">Task</th><th scope="col">ACT-960, 20k</th><th scope="col">ACT-960, 30k</th><th scope="col">ACT-960, 40k</th><th scope="col">ACT-960, 40k + TE</th><th scope="col">π0.5, 30k (Model 1)</th></tr></thead>
+            <thead><tr><th scope="col">Task</th><th scope="col">ACT-960, 20k</th><th scope="col">ACT-960, 30k</th><th scope="col">ACT-960, 40k</th><th scope="col">ACT-960, 40k + TE</th><th scope="col">ACT-960, 40k + TE<br>(RTX 4090)</th><th scope="col">π0.5, 30k (Model 1)</th></tr></thead>
             <tbody>
-              <tr><th scope="row">Press button</th><td>67</td><td>53</td><td>67</td><td>67</td><td>100</td></tr>
-              <tr><th scope="row">Peg in hole</th><td>47</td><td>53</td><td>43</td><td>53</td><td>70</td></tr>
-              <tr><th scope="row">Inspect surface (NDT)</th><td>0</td><td>0</td><td>0</td><td>0</td><td>93</td></tr>
-              <tr><th scope="row">Wipe window</th><td>43</td><td>3</td><td>20</td><td>63</td><td>93</td></tr>
-              <tr><th scope="row">Cabinet pick and place</th><td>0</td><td>3</td><td>13</td><td>0</td><td>100</td></tr>
-              <tr><th scope="row">Frame assembly</th><td>0</td><td>0</td><td>0</td><td>0</td><td>90</td></tr>
-              <tr><th scope="row">Harvest lemon</th><td>0</td><td>0</td><td>7</td><td>20</td><td>93</td></tr>
-              <tr><th scope="row">Toss ball</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
-              <tr><th scope="row">Rotate valve</th><td>53</td><td>10</td><td>33</td><td>97</td><td>100</td></tr>
-              <tr><th scope="row">Push slider</th><td>60</td><td>60</td><td>63</td><td>60</td><td>100</td></tr>
-              <tr><th scope="row">Pull lever</th><td>33</td><td>47</td><td>57</td><td>83</td><td>97</td></tr>
-              <tr><th scope="row">Open door</th><td>27</td><td>53</td><td>40</td><td>50</td><td>37</td></tr>
-              <tr><th scope="row"><b>Macro average</b></th><td><b>27.5</b></td><td><b>23.6</b></td><td><b>28.6</b></td><td><b>41.1</b></td><td><b>81.1</b></td></tr>
+              <tr><th scope="row">Press button</th><td>67</td><td>53</td><td>67</td><td>67</td><td>77</td><td>100</td></tr>
+              <tr><th scope="row">Peg in hole</th><td>47</td><td>53</td><td>43</td><td>53</td><td>73</td><td>70</td></tr>
+              <tr><th scope="row">Inspect surface (NDT)</th><td>0</td><td>0</td><td>0</td><td>0</td><td>100</td><td>93</td></tr>
+              <tr><th scope="row">Wipe window</th><td>43</td><td>3</td><td>20</td><td>63</td><td>63</td><td>93</td></tr>
+              <tr><th scope="row">Cabinet pick and place</th><td>0</td><td>3</td><td>13</td><td>0</td><td>0</td><td>100</td></tr>
+              <tr><th scope="row">Frame assembly</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>90</td></tr>
+              <tr><th scope="row">Harvest lemon</th><td>0</td><td>0</td><td>7</td><td>20</td><td>80</td><td>93</td></tr>
+              <tr><th scope="row">Toss ball</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Rotate valve</th><td>53</td><td>10</td><td>33</td><td>97</td><td>47</td><td>100</td></tr>
+              <tr><th scope="row">Push slider</th><td>60</td><td>60</td><td>63</td><td>60</td><td>87</td><td>100</td></tr>
+              <tr><th scope="row">Pull lever</th><td>33</td><td>47</td><td>57</td><td>83</td><td>87</td><td>97</td></tr>
+              <tr><th scope="row">Open door</th><td>27</td><td>53</td><td>40</td><td>50</td><td>33</td><td>37</td></tr>
+              <tr><th scope="row"><b>Macro average</b></th><td><b>27.5</b></td><td><b>23.6</b></td><td><b>28.6</b></td><td><b>41.1</b></td><td><b>53.9</b></td><td><b>81.1</b></td></tr>
             </tbody>
           </table>
         </div>
-        <p class="note">Table 5. Success rate in percent, 30 rollouts per task, each task's own time limit, the same 30 seeds in every column. TE: temporal ensembling at inference on the same 40k checkpoints. Open door is the one task where ACT (53 % at 30k, 50 % with ensembling) is ahead of π0.5 (37 %); it is also the task where a shorter open-loop horizon helps most (87 % with 4 executed steps per chunk, see below).</p>
+        <p class="note">Table 5. Success rate in percent, 30 rollouts per task, each task's own time limit, the same 30 seeds in every column. TE: temporal ensembling at inference on the same 40k checkpoints. The first four ACT columns ran on an RTX PRO 6000; the fifth re-runs 40k + TE on an RTX 4090 with the same code, arguments and seeds; π0.5 ran on an RTX 4080. Open door is the one task where ACT on the RTX PRO 6000 (53 % at 30k, 50 % with ensembling) is ahead of π0.5 (37 %); it is also the task where a shorter open-loop horizon helps most (87 % with 4 executed steps per chunk, see below). On the RTX 4090, ACT is level with π0.5 on NDT (100 vs 93 %) and peg in hole (73 vs 70 %), within seed noise.</p>
       </div>
     </section>
 
@@ -812,7 +812,7 @@
         <h2>Temporal ensembling</h2>
         <ul class="points">
           <li><b>What changes.</b> Only how the predicted chunks are executed; the weights are the same. AM-Bench's default runs the first 8 actions of each 16-step chunk open-loop and then predicts again. ACT's own inference scheme predicts a full chunk at every control step, decodes each chunk into absolute poses with the pose measured when that chunk was predicted, and executes the weighted mean of every chunk's prediction for the current step, with weights exp(−0.01·<i>i</i>) and <i>i</i> = 0 the oldest chunk. Positions and the gripper are averaged linearly; quaternions are sign-aligned to the oldest prediction, averaged and renormalised.</li>
-          <li><b>Effect.</b> Seed-paired against the default execution on the same 40k checkpoints: rotate valve 33 → 97 % (19 seeds succeed only with ensembling, none only without), wipe window 20 → 63 % (16 vs 3), pull lever 57 → 83 % (8 vs 0), harvest lemon 7 → 20 %; cabinet pick-and-place loses its four successes (0 vs 4). Open door does better with a shorter open-loop horizon instead: 4 executed steps per chunk give 87 % (26 of 30), against 40 % with 8 and 0 % with 1.</li>
+          <li><b>Effect.</b> Seed-paired against the default execution on the same 40k checkpoints, both on the RTX PRO 6000: rotate valve 33 → 97 % (19 seeds succeed only with ensembling, none only without), wipe window 20 → 63 % (16 vs 3), pull lever 57 → 83 % (8 vs 0), harvest lemon 7 → 20 %; cabinet pick-and-place loses its four successes (0 vs 4). Open door does better with a shorter open-loop horizon instead: 4 executed steps per chunk give 87 % (26 of 30), against 40 % with 8 and 0 % with 1.</li>
         </ul>
       </div>
     </section>
@@ -820,7 +820,7 @@
     <section id="act-finetune">
       <div class="wrap">
         <h2>Fine-tuning from 40k</h2>
-        <p class="sub">Three recipes on three tasks with headroom, started from the 40k checkpoints, evaluated with temporal ensembling and seed-paired against 40k + TE. None beats it beyond seed noise, so the reported ACT column stays 40k + TE. These tasks had already seen 22–25 epochs; the least-trained tasks (frame assembly, cabinet, lemon) were not fine-tuned.</p>
+        <p class="sub">Three recipes on three tasks with headroom, started from the 40k checkpoints, evaluated with temporal ensembling on the RTX PRO 6000 and seed-paired against 40k + TE on the same machine. None beats it beyond seed noise, so the reported ACT column stays 40k + TE. These tasks had already seen 22–25 epochs; the least-trained tasks (frame assembly, cabinet, lemon) were not fine-tuned.</p>
         <div class="table-wrap">
           <table class="rates">
             <thead><tr><th scope="col">Recipe (from 40k, batch 32)</th><th scope="col">Peg in hole</th><th scope="col">Rotate valve</th><th scope="col">Wipe window</th></tr></thead>
@@ -835,13 +835,64 @@
       </div>
     </section>
 
+    <section id="act-robustness">
+      <div class="wrap">
+        <h2>Robustness to disturbances</h2>
+        <p class="sub">The 40k checkpoints with temporal ensembling, trained on default-condition demonstrations only, under the same disturbance variants as π0.5 in Table 4: aero (thrust limited to 0–23 N per rotor, ground and wall effects, drag) and aero with a constant +x wind of 5, 10 or 20 % of the weight (3.25, 6.51 and 13.02 N). All five columns ran on the RTX 4090. Same 30 seeds per task in every condition.</p>
+        <div class="table-wrap">
+          <table class="rates">
+            <thead><tr><th scope="col">Task</th><th scope="col">Default</th><th scope="col">Aero</th><th scope="col">Wind 5 %</th><th scope="col">Wind 10 %</th><th scope="col">Wind 20 %</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Press button</th><td>77</td><td>73</td><td>67</td><td>63</td><td>37</td></tr>
+              <tr><th scope="row">Peg in hole</th><td>73</td><td>70</td><td>70</td><td>67</td><td>63</td></tr>
+              <tr><th scope="row">Inspect surface (NDT)</th><td>100</td><td>100</td><td>100</td><td>97</td><td>77</td></tr>
+              <tr><th scope="row">Wipe window</th><td>63</td><td>70</td><td>43</td><td>70</td><td>3</td></tr>
+              <tr><th scope="row">Cabinet pick and place</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Frame assembly</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Harvest lemon</th><td>80</td><td>53</td><td>67</td><td>57</td><td>10</td></tr>
+              <tr><th scope="row">Toss ball</th><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Rotate valve</th><td>47</td><td>60</td><td>57</td><td>57</td><td>7</td></tr>
+              <tr><th scope="row">Push slider</th><td>87</td><td>77</td><td>83</td><td>80</td><td>40</td></tr>
+              <tr><th scope="row">Pull lever</th><td>87</td><td>10</td><td>7</td><td>10</td><td>40</td></tr>
+              <tr><th scope="row">Open door</th><td>33</td><td>67</td><td>87</td><td>100</td><td>97</td></tr>
+              <tr><th scope="row"><b>Macro average</b></th><td><b>53.9</b></td><td><b>48.3</b></td><td><b>48.3</b></td><td><b>50.0</b></td><td><b>31.1</b></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Table 6. Success rate in percent, 30 rollouts per task, the task's own time limit in each condition. The average falls from 53.9 % to 48–50 % under aero and 5 or 10 % wind and to 31.1 % at 20 % wind, a much smaller drop than π0.5's (81.1 → 4.7 %, Table 4): at 10 % wind ACT is ahead, 50.0 vs 30.3 %, and at 20 % wind 31.1 vs 4.7 %, both outside the macro intervals; under aero and 5 % wind the two are within noise. NDT (97–100 %), peg in hole (67–70 %), push slider (77–83 %) and rotate valve (57–60 %) hold through 10 % wind, where π0.5 loses push slider and rotate valve under aero alone. Pull lever is the exception: it drops from 87 % to 7–10 % as soon as aero is on, as π0.5's does, and partly recovers to 40 % at 20 % wind. Open door is the only task that improves under disturbance (33 → 67–100 %); the wind always blows along +x, which probably pushes the vehicle toward the door, and a −x control has not been run. Cabinet, frame assembly and toss ball are 0 % in every condition. Two lemon rollouts, one at 5 % and one at 10 % wind, count as successes with half of the subtasks completed. With 30 rollouts the 95 % interval is about ±15–18 points per cell, and π0.5 ran on a different GPU (RTX 4080), so per-task differences between the two policies of that size are not conclusive.</p>
+      </div>
+    </section>
+
+    <section id="act-machine">
+      <div class="wrap">
+        <h2>Machine dependence</h2>
+        <p class="sub">The same checkpoints, code, arguments and seeds give different per-task results on the RTX PRO 6000 (Blackwell, on RunPod) and on the RTX 4090 (Ada). Both machines run Isaac Sim 5.1 with a byte-identical patched evaluator. The two 40k + TE columns of Table 5 are this comparison.</p>
+        <ul class="points">
+          <li><b>Size.</b> The macro average goes from 41.1 % to 53.9 %, and the 95 % intervals of three tasks separate: NDT 0 → 100 %, harvest lemon 20 → 80 % and rotate valve 97 → 47 %. Push slider (60 → 87 %), peg in hole (53 → 73 %) and open door (50 → 33 %) differ by 17–27 points; the other six tasks are within 10 points. The difference goes both ways, so neither machine is simply better.</li>
+          <li><b>What the logs show.</b> For NDT the tracking logs show the simulation behaving differently, not seed noise (seeds 0–9, table below). On the RTX PRO 6000 the base reaches its target to within 0.1–0.6 cm while the end effector stays 3–5 cm off, as if the probe were stuck against the surface. The likely cause is GPU PhysX contact simulation differing between GPU architectures and drivers; this has not been isolated.</li>
+          <li><b>What it means for the tables.</b> Conditions are compared within one machine: Table 6 and the ACT columns of Figures 4C and 4D are all RTX 4090. The 20k, 30k and 40k columns are RTX PRO 6000 only, comparable with each other and with that machine's 40k + TE column. π0.5 was evaluated on an RTX 4080, the same architecture as the RTX 4090; whether its numbers move on another GPU has not been tested.</li>
+        </ul>
+        <div class="table-wrap">
+          <table class="rates">
+            <thead><tr><th scope="col">NDT, default physics, seeds 0–9</th><th scope="col">RTX PRO 6000</th><th scope="col">RTX 4090</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Outcome</th><td>10 of 10 time out, no subtask completed</td><td>10 of 10 succeed, about 1,300 steps</td></tr>
+              <tr><th scope="row">Thrust saturation rate</th><td>57 %</td><td>7.9 %</td></tr>
+              <tr><th scope="row">Maximum tilt</th><td>0.35 rad</td><td>0.017 rad</td></tr>
+              <tr><th scope="row">Mean end-effector position error</th><td>14.6 cm</td><td>7.4 cm</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
     <section id="act-notes">
       <div class="wrap">
         <h2>Notes</h2>
         <ul class="points">
           <li><b>Not AM-Bench's ACT number.</b> The paper's ACT (26.94 % in its Table 10) sees the end-effector camera only and is trained on AM-Bench's own demonstrations with uncompressed images and its own task definitions. ACT-960 uses both cameras, the project's recordings and the Part 2 tasks (open door starts latched and must be opened through its handle), with the paper's hyperparameters. It is the apples-to-apples baseline for our π0.5 column, not a reproduction of the paper's row.</li>
-          <li><b>Pending.</b> The disturbance conditions (aero, wind 5 / 10 / 20 %) are implemented and verified for the ACT evaluator (same switches, wind force and time limits as the dataset) but not yet run: 1,440 rollouts, about 18.5 h with eight environments in parallel. Figures 4C, 4D and 4F mark them as pending.</li>
-          <li><b>Code.</b> <a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/ACT/pipeline/act"><code>pipeline/act/</code></a> on the <code>ACT</code> branch: the per-task export, training and exact resume, the temporal-ensembling patch, the sharded evaluator, the tables and a provenance note.</li>
+          <li><b>Pending.</b> The 20k, 30k and 40k checkpoints without ensembling have not been re-run on the RTX 4090, and ACT's per-seed outcomes for a paired comparison (Figure 4F) are not in the repository yet. Fine-tuning of the least-trained tasks (frame assembly, cabinet, lemon) and a −x wind control for open door have not been run.</li>
+          <li><b>Code.</b> <a href="https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/ACT/pipeline/act"><code>pipeline/act/</code></a> on the <code>ACT</code> branch: the per-task export, training and exact resume, the temporal-ensembling patch, the sharded evaluator, the RTX 4090 launch scripts (<code>eval/iral/</code>), the tables, the per-cell disturbance counts with their builder, and a provenance note.</li>
         </ul>
       </div>
     </section>
