@@ -386,3 +386,18 @@ table.comm tr.ours th a { color: var(--ok); }
 .dmap-fig figcaption { margin-top: 8px; font-size: 14.5px; color: var(--faint); }
 .dev-group .refs li:target { background: var(--part-bg); outline: 6px solid var(--part-bg); border-radius: 4px; }
 .dev-group h3:target, .dev-group:target h2 { background: var(--part-bg); }
+/* Pipeline (Nov 2026): the return channel, the optional base reference, the Phase 2 option on the image path */
+.dmap .wire.ret { stroke: var(--accent); stroke-width: 2.5; }
+.dmap .wire.opt { stroke-dasharray: 6 4; }
+.dmap .pill.opt { fill: var(--part-bg); stroke: #d3b260; }
+.dmap a:hover .pill.opt { fill: #f3e2b0; }
+/* Pipeline: one re-plan cycle on a time axis */
+.tl .bar { fill: var(--ok-bg); stroke: var(--ok); stroke-width: 1.5; }
+.tl .dot { fill: #e6f1f3; stroke: var(--accent); stroke-width: 2; }
+.tl .ticks { stroke: #8a949d; stroke-width: 10; stroke-dasharray: 1.4 7.6; }
+.tl .axis { fill: none; stroke: #c3cbd1; stroke-width: 1; }
+.tl .comb { fill: none; stroke: var(--accent); stroke-width: 1.4; }
+.tl .comb.opt { stroke: #8a949d; stroke-dasharray: 3 3; }
+/* Pipeline: where each part comes from */
+table.comm tr:target td, table.comm tr:target th { background: var(--part-bg); }
+table.src th[scope="row"] { min-width: 150px; }

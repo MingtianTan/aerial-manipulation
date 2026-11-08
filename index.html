@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261103a">
+  <link rel="stylesheet" href="styles.css?v=20261108a">
 </head>
 <body>
   <header class="nav">
@@ -34,7 +34,7 @@
       <figcaption>Concept: small aerial manipulators repairing a transport aircraft in flight. AI-generated illustration (ChatGPT), not a result.</figcaption>
     </figure>
     <div class="wrap title-block">
-      <p class="byline">Mingtian Tan · updated 3 Nov 2026</p>
+      <p class="byline">Mingtian Tan · updated 8 Nov 2026</p>
       <h1>Aerial manipulation: keep the arm pretrained, learn flight separately</h1>
       <p class="lede">Reuse a vision-language-action model (VLA) that already knows how to use an arm, let a small Flight DiT learn flight from the scarce aerial data, and fine-tune the VLA to listen to it.</p>
     </div>
@@ -74,10 +74,11 @@
         <h2>Idea</h2>
         <ul class="points">
           <li><b>Two policies.</b> A small Flight DiT handles flight. A mature VLA (π0.5) handles the arm. Flight is learned by the small model; the VLA only learns to take the flight into account.</li>
-          <li><b>Flight DiT.</b> A lightweight diffusion Transformer, sized like RDT-170M to train on one 4090. It reads language, images and proprioception, and outputs a flight chunk a<sub>flight</sub> = [Δx, Δy, Δz, Δψ] plus a flight-intent token F<sub>flight</sub>.</li>
-          <li><b>Arm VLA.</b> F<sub>flight</sub> is encoded by a small projector and injected into π0.5, at an intermediate transformer layer or at the action expert, so the flight intent is present at every denoising step. π0.5 is then fine-tuned with all of its parameters (not LoRA) on the aerial demonstrations with the token in place, and outputs a<sub>arm</sub> = [q1, q2, q3, q4, gripper] (FA-Hexa's arm: three pitch joints and a wrist roll).</li>
-          <li><b>Easy to swap.</b> The two policies meet only at the injected token. Replacing the arm VLA means re-training the projector and the fine-tune on the new backbone; the Flight DiT and its data stay as they are.</li>
-          <li><b>Low level stays split.</b> The flight controller tracks the flight chunk; joint servos track the arm.</li>
+          <li><b>Flight DiT.</b> A diffusion Transformer of about 170 M parameters (the size of RDT-170M), small enough to train on one desktop GPU. At every camera frame (20 Hz) it reads the last 0.2 s of the 120 Hz state, both images, the task and the chunk π0.5 is executing, and forecasts where the base will be over the next 2.5 s.</li>
+          <li><b>Arm VLA.</b> The forecast reaches π0.5 as F<sub>flight</sub>: 11 tokens placed in front of the action tokens of its action expert, which π0.5's VLM never sees. π0.5 keeps the 8-D end-effector chunks of the 30k checkpoint (81.1 % in Part 5); its VLM and image encoder stay frozen, and only the action expert learns to read the tokens.</li>
+          <li><b>Two-way and two-rate.</b> π0.5 re-plans every 0.4 s and reads the newest message; the Flight DiT ticks eight times in between and reads π0.5's current chunk with its age.</li>
+          <li><b>Easy to swap.</b> The two policies meet only at the message. Replacing the arm VLA means re-training the message projections and the action expert on the new backbone; the Flight DiT and its data stay as they are.</li>
+          <li><b>One IK executes both.</b> AM-Bench's floating-base IK, which produced every demonstration, turns π0.5's end-effector targets into base and arm targets; in a second configuration it also follows the Flight DiT's base path, so the faster loop acts on the vehicle directly.</li>
         </ul>
       </div>
     </section>
@@ -85,14 +86,115 @@
     <section id="pipeline">
       <div class="wrap">
         <h2>Pipeline</h2>
-        <figure class="figure">
-          <a href="assets/pipeline.jpg" target="_blank" rel="noopener" title="Open the full-size figure"><img src="assets/pipeline.jpg" alt="Pipeline: inputs, encoding, Flight DiT, mature VLA arm policy, low-level tracking"></a>
-          <figcaption>Blue: Flight DiT. Green: the pretrained VLA. Orange: flight-to-arm conditioning. Inputs are a language instruction, forward / downward / wrist RGB, pose, velocity, arm joints and gripper. The figure still draws a quadrotor with a 3-DoF arm and labels Stage B as LoRA; the platform is now FA-Hexa with a 4-DoF arm and π0.5 is fully fine-tuned.</figcaption>
+        <figure class="dmap-fig">
+          <div class="dmap-wrap">
+          <svg class="dmap" viewBox="-12 0 1152 604" role="img" aria-labelledby="dmap-title dmap-desc">
+          <title id="dmap-title">The planned pipeline</title>
+          <desc id="dmap-desc">Cameras, language, 120 Hz proprioception and, in Phase 2, contact feed a Flight DiT that ticks at 20 Hz and forecasts the base path for the next 2.5 s. An eleven-token message carries the forecast into π0.5's action expert at each re-plan, every 0.4 s; π0.5's VLM is frozen and never sees it. π0.5 sends the chunk it is executing, with its age, back to the Flight DiT. One floating-base IK at 120 Hz executes π0.5's end-effector chunk and, in M2, also follows the Flight DiT's base path; the vehicle's motion and contact feed back into the inputs. Module titles link to their sources and paper names to their reading-list entries.</desc>
+          <defs><marker id="m-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-gray"/></marker><marker id="m-acc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-acc"/></marker><marker id="m-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-bad"/></marker></defs>
+          <text x="20" y="30" class="col">INPUTS</text>
+          <text x="250" y="30" class="col">FAST LOOP · 20 Hz</text>
+          <text x="560" y="30" class="col">MESSAGE AND π0.5 · RE-PLANS AT 2.5 Hz</text>
+          <text x="900" y="30" class="col">LOW LEVEL · 120 Hz</text>
+          <rect x="20" y="50" width="190" height="78" rx="10" class="box"/>
+          <text x="34" y="74" class="t">Language + cameras</text>
+          <text x="34" y="94" class="s">instruction</text>
+          <text x="34" y="112" class="s">EE and body RGB, 20 Hz</text>
+          <rect x="20" y="222" width="190" height="110" rx="10" class="box"/>
+          <text x="34" y="246" class="t">Proprioception</text>
+          <text x="34" y="266" class="s">120 Hz · 35 values:</text>
+          <text x="34" y="284" class="s">base and end-effector</text>
+          <text x="34" y="302" class="s">pose and velocity,</text>
+          <text x="34" y="320" class="s">arm joints, gripper</text>
+          <rect x="20" y="356" width="190" height="112" rx="10" class="box new"/>
+          <a href="develop.html#src-contact"><text x="34" y="380" class="t link">Contact, Phase 2 ›</text></a>
+          <text x="34" y="400" class="s">external-wrench estimate,</text>
+          <text x="34" y="418" class="s">finger contact (sim)</text>
+          <text x="34" y="448" class="r"><tspan class="lead">Read: </tspan><a href="develop.html#p-2603-12665"><tspan class="paper">TacVLA</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2509-07962"><tspan class="paper">TA-VLA</tspan></a></text>
+          <rect x="250" y="180" width="260" height="212" rx="10" class="box dit"/>
+          <a href="develop.html#src-flight"><text x="264" y="204" class="t link">Flight DiT ›</text></a>
+          <rect x="440" y="190" width="58" height="20" rx="10" class="badge"/><text x="469" y="204.5" class="badge-t" text-anchor="middle">20 Hz</text>
+          <text x="264" y="226" class="s">≈ 170 M flow-matching DiT</text>
+          <text x="264" y="244" class="s">reads 0.2 s of 120 Hz state, the</text>
+          <text x="264" y="262" class="s">two images, the task, and π0.5's</text>
+          <text x="264" y="280" class="s">current chunk with its age</text>
+          <text x="264" y="298" class="s">forecasts the base path for</text>
+          <text x="264" y="316" class="s">2.5 s (50 × 3) and a latent z</text>
+          <text x="264" y="346" class="r"><tspan class="lead">Read: </tspan><a href="develop.html#p-2507-01961"><tspan class="paper">AC-DiT</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2602-23648"><tspan class="paper">FAVLA</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2604-07993"><tspan class="paper">HEX</tspan></a></text>
+          <text x="264" y="366" class="r"><a href="develop.html#p-2606-17055"><tspan class="paper">T-Rex</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2503-02881"><tspan class="paper">RDP</tspan></a></text>
+          <rect x="560" y="50" width="290" height="200" rx="10" class="box vla"/>
+          <a href="develop.html#src-pi05"><text x="574" y="74" class="t link">π0.5 arm policy ›</text></a>
+          <rect x="784" y="60" width="54" height="20" rx="10" class="badge vlab"/><text x="811" y="74.5" class="badge vlab-t" text-anchor="middle">2.5 Hz</text>
+          <rect x="574" y="88" width="262" height="36" rx="7" class="inner"/>
+          <text x="586" y="111" class="s">VLM + SigLIP (prefix) · frozen</text>
+          <rect x="574" y="134" width="262" height="56" rx="7" class="inner"/>
+          <text x="586" y="156" class="s">action expert · trains</text>
+          <text x="586" y="176" class="s">11 flight tokens, then 50 actions</text>
+          <text x="574" y="216" class="r"><tspan class="lead">Read: </tspan><a href="develop.html#p-2505-23705"><tspan class="paper">Knowledge Insulation</tspan></a></text>
+          <text x="574" y="236" class="r"><a href="develop.html#p-2609-34170"><tspan class="paper">RAVEL</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2504-16054"><tspan class="paper">π0.5</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-openpi"><tspan class="paper">OpenPI</tspan></a></text>
+          <rect x="560" y="300" width="290" height="160" rx="10" class="box ch"/>
+          <a href="develop.html#src-entry"><text x="574" y="324" class="t link">F<tspan dy="4" class="sub">flight</tspan><tspan dy="-4"></tspan> message ›</text></a>
+          <rect x="764" y="310" width="74" height="20" rx="10" class="badge"/><text x="801" y="324.5" class="badge-t" text-anchor="middle">11 tokens</text>
+          <text x="574" y="346" class="s">10 waypoints of the base path, in</text>
+          <text x="574" y="364" class="s">the EE frame of the chunk start;</text>
+          <text x="574" y="382" class="s">1 token: z, age, contact gate,</text>
+          <text x="574" y="400" class="s">body velocity · 384 numbers</text>
+          <text x="574" y="426" class="r"><tspan class="lead">Read: </tspan><a href="develop.html#p-2609-23968"><tspan class="paper">Opt2VLA</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2608-01381"><tspan class="paper">DreamTrajectory</tspan></a></text>
+          <text x="574" y="446" class="r"><a href="develop.html#p-2610-06318"><tspan class="paper">Wiring Matters</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2602-02459"><tspan class="paper">TIC-VLA</tspan></a></text>
+          <rect x="900" y="50" width="230" height="200" rx="10" class="box"/>
+          <a href="develop.html#src-ik"><text x="914" y="74" class="t link">One floating-base IK ›</text></a>
+          <text x="914" y="96" class="s">Pyroki, as for every demo:</text>
+          <text x="914" y="114" class="s">π0.5's EE target, plus the</text>
+          <text x="914" y="132" class="s">Flight DiT's base path in M2</text>
+          <text x="914" y="150" class="s">at weight w (w = 0 is today's</text>
+          <text x="914" y="168" class="s">controller)</text>
+          <text x="914" y="196" class="r"><tspan class="lead">Read: </tspan><a href="develop.html#p-2606-22174"><tspan class="paper">OpenHLM</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2610-20607"><tspan class="paper">HiRe-MoMa</tspan></a></text>
+          <text x="914" y="216" class="r"><a href="develop.html#p-2610-19600"><tspan class="paper">Cracking MoMa</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2407-10353"><tspan class="paper">UMI on Legs</tspan></a></text>
+          <rect x="900" y="300" width="230" height="146" rx="10" class="box"/>
+          <a href="develop.html#src-vehicle"><text x="914" y="324" class="t link">FA-Hexa ›</text></a>
+          <text x="914" y="346" class="s">fully actuated hexarotor; arm</text>
+          <text x="914" y="364" class="s">with three pitch joints and a</text>
+          <text x="914" y="382" class="s">wrist roll; PID tracks the IK</text>
+          <text x="914" y="408" class="r"><tspan class="lead">Read: </tspan><a href="develop.html#p-2504-10334"><tspan class="paper">Flying Hand</tspan></a><tspan class="sep"> · </tspan><a href="develop.html#p-2609-00641"><tspan class="paper">AM-Bench</tspan></a></text>
+          <text x="914" y="428" class="r"><a href="develop.html#p-2609-30521"><tspan class="paper">AM in the Wild</tspan></a></text>
+          <path d="M210,106 L572,106" class="wire" marker-end="url(#m-gray)"/>
+          <path d="M210,120 L226,120 L226,214 L248,214" class="wire" marker-end="url(#m-gray)"/>
+          <path d="M210,277 L248,277" class="wire" marker-end="url(#m-gray)"/>
+          <path d="M210,400 L234,400 L234,352 L248,352" class="wire" marker-end="url(#m-gray)"/>
+          <a href="develop.html#src-contact"><rect x="268" y="92" width="224" height="28" rx="14" class="pill opt"/><text x="380" y="111" class="pill-t" text-anchor="middle">TAP drawing, Phase 2 option ›</text></a>
+          <text x="380" y="82" class="w" text-anchor="middle">camera images and the instruction</text>
+          <path d="M510,350 L556,350" class="wire ch" marker-end="url(#m-acc)"/>
+          <text x="533" y="340" class="w acc" text-anchor="middle">B, z</text>
+          <path d="M805,300 L805,194" class="wire ch" marker-end="url(#m-acc)"/>
+          <text x="793" y="280" class="w acc" text-anchor="end">at each re-plan</text>
+          <path d="M560,162 L478,162 L478,177" class="wire ret" marker-end="url(#m-acc)"/>
+          <text x="516" y="154" class="w acc" text-anchor="middle">chunk + age</text>
+          <path d="M850,150 L896,150" class="wire" marker-end="url(#m-gray)"/>
+          <text x="874" y="140" class="w" text-anchor="middle">chunk</text>
+          <path d="M380,392 L380,486 L876,486 L876,236 L896,236" class="wire opt" marker-end="url(#m-gray)"/>
+          <text x="628" y="479" class="w" text-anchor="middle">base path as the IK's reference, every tick (M2)</text>
+          <path d="M1015,250 L1015,296" class="wire" marker-end="url(#m-gray)"/>
+          <text x="1022" y="278" class="w">IK targets</text>
+          <path d="M1100,446 L1100,514 L-4,514 L-4,300 L18,300" class="wire fb" marker-end="url(#m-bad)"/>
+          <path d="M-4,420 L18,420" class="wire fb" marker-end="url(#m-bad)"/>
+          <text x="560" y="507" class="w bad" text-anchor="middle">the vehicle moves and pushes on the world; state and contact feed back</text>
+          <text x="20" y="562" class="s strong">Same split on other platforms:</text>
+          <a href="develop.html#wheeled"><rect x="252" y="544" width="190" height="28" rx="14" class="pill"/><text x="347" y="563" class="pill-t" text-anchor="middle">Wheeled base + arm ›</text></a>
+          <a href="develop.html#legged"><rect x="454" y="544" width="190" height="28" rx="14" class="pill"/><text x="549" y="563" class="pill-t" text-anchor="middle">Legged and humanoid ›</text></a>
+          <a href="develop.html#aerial"><rect x="656" y="544" width="150" height="28" rx="14" class="pill"/><text x="731" y="563" class="pill-t" text-anchor="middle">Aerial VLAs ›</text></a>
+          <path d="M826,542 L856,542" class="wire" marker-end="url(#m-gray)"/><text x="866" y="546.5" class="w">signal</text>
+          <path d="M826,558 L856,558" class="wire ch" marker-end="url(#m-acc)"/><text x="866" y="562.5" class="w">messages between the two models</text>
+          <path d="M826,574 L856,574" class="wire opt" marker-end="url(#m-gray)"/><text x="866" y="578.5" class="w">base reference, M2 only</text>
+          <path d="M826,590 L856,590" class="wire fb" marker-end="url(#m-bad)"/><text x="866" y="594.5" class="w">physical feedback</text>
+          </svg>
+          </div>
+          <figcaption>The planned pipeline, 8 Nov 2026. Teal: the Flight DiT; green: π0.5; dashed: the message between them; yellow: added in Phase 2. Every module and paper name opens its sources and reading list in <a href="develop.html#pipeline">Develop mode</a>, which also has the timing, the training recipe and the experiments.</figcaption>
         </figure>
         <ul class="points">
-          <li><b>Stage A: flight only.</b> Train the Flight DiT on a<sub>flight</sub> and extract F<sub>flight</sub>.</li>
-          <li><b>Stage B: inject and fine-tune.</b> Encode F<sub>flight</sub>, inject it into π0.5 (intermediate layer or action expert) and fine-tune all of π0.5 on the same demonstrations.</li>
-          <li><b>Stage C: deploy.</b> Run both chunks in sync; flight and arm are tracked by their own low-level controllers.</li>
+          <li><b>Stage 0: labels.</b> Flight labels come from the measured 120 Hz base path of the 4,800 demonstrations, with no re-recording. The IK holds base yaw fixed in every demonstration, so the forecast has no Δψ.</li>
+          <li><b>Stage A: flight only.</b> Train the Flight DiT on all five conditions on one local GPU. It has to forecast the base better than constant velocity and than replaying π0.5's chunk through the IK before Stage B starts.</li>
+          <li><b>Stage B: teach π0.5 to read F<sub>flight</sub>.</b> Start from the 30k checkpoint, freeze the VLM and SigLIP, and train the action expert with the message in place, next to an identical run without it.</li>
+          <li><b>Stage C: deploy.</b> π0.5 re-plans every 0.4 s, the Flight DiT ticks at 20 Hz, and one IK runs at 120 Hz.</li>
         </ul>
       </div>
     </section>
@@ -102,17 +204,18 @@
         <h2>Related work</h2>
         <h3>Models</h3>
         <ul class="refs">
-          <li><a href="https://arxiv.org/abs/1706.03762">Transformer</a> <span>(Vaswani et al., NeurIPS 2017)</span>: the backbone of both policies. Cross-attention is where language, images and F<sub>flight</sub> enter.</li>
-          <li><a href="https://arxiv.org/abs/2212.09748">DiT</a> <span>(Peebles &amp; Xie, ICCV 2023)</span>: a Transformer inside diffusion. The Flight DiT uses the same idea to generate a short flight-action chunk.</li>
-          <li><a href="https://arxiv.org/abs/2410.07864">RDT-1B</a> / <a href="https://huggingface.co/robotics-diffusion-transformer/rdt-170m">RDT-170M</a> <span>(Liu et al., ICLR 2025)</span>: a diffusion Transformer robot policy. RDT-1B fine-tuning costs about a week on 4×A100; RDT-170M (hidden 1024, depth 14, 64-step prediction) fits on one 4090 and is the starting point for the Flight DiT.</li>
+          <li><a href="https://arxiv.org/abs/1706.03762">Transformer</a> <span>(Vaswani et al., NeurIPS 2017)</span>: the backbone of both policies. Attention is where language, images and F<sub>flight</sub> reach the actions.</li>
+          <li><a href="https://arxiv.org/abs/2212.09748">DiT</a> <span>(Peebles &amp; Xie, ICCV 2023)</span>: a Transformer inside diffusion. The Flight DiT uses the same idea to generate the base path.</li>
+          <li><a href="https://arxiv.org/abs/2410.07864">RDT-1B</a> / <a href="https://huggingface.co/robotics-diffusion-transformer/rdt-170m">RDT-170M</a> <span>(Liu et al., ICLR 2025)</span>: a diffusion Transformer robot policy. RDT-1B fine-tuning costs about a week on 4×A100; RDT-170M (hidden 1024, depth 14, 64-step prediction) sets the size of the Flight DiT, and its weights are one starting point.</li>
         </ul>
         <h3>Aerial manipulation</h3>
         <ul class="refs">
           <li><a href="https://arxiv.org/abs/2504.10334">Flying Hand</a> <span>(He et al., 2025)</span>: an end-effector-centric interface on a fully actuated hexarotor with whole-body MPC. The high level only talks about the end effector. FA-Hexa is the same class of vehicle.</li>
           <li><a href="https://arxiv.org/abs/2609.30521">Aerial Manipulation in the Wild</a> <span>(Zhan et al., 2026)</span>: a Diffusion Policy proposes end-effector motion and whole-body MPC executes it, outdoors. Here the upper model is a tabletop-pretrained VLA instead.</li>
           <li><a href="https://arxiv.org/abs/2603.25038">π, But Make It Fly</a> / <a href="https://airvla.github.io/">AirVLA</a> <span>(Tucker et al., 2026)</span>: visual features transfer to flight, control dynamics do not. Their fix writes payload guidance into the VLA's sampling (23% → 50% pick-and-place). This project keeps the lesson but not the mechanism: flight is a separate module and only a condition.</li>
-          <li><a href="https://arxiv.org/abs/2507.01961">AC-DiT</a> <span>(Chen et al., 2025)</span>: extract base motion first, then condition the body on it. F<sub>flight</sub> comes from this idea, but AC-DiT still predicts the whole body with one network (about two weeks on 8×A100).</li>
+          <li><a href="https://arxiv.org/abs/2507.01961">AC-DiT</a> <span>(Chen et al., 2025)</span>: extract base motion first, then condition the body on it. F<sub>flight</sub> comes from this idea, but AC-DiT still predicts the whole body with one network (a 170 M mobility head conditioning a larger whole-body head).</li>
         </ul>
+        <p class="note">The sources of each part of the pipeline, and the reading list behind them, are in <a href="develop.html#sources">Develop mode</a>.</p>
       </div>
     </section>
 
@@ -123,8 +226,8 @@
           <li><b>Goal: ICML 2027.</b> Dates are not out yet; going by the 2026 cycle, the abstract is due around 23 Jan and the full paper around 28 Jan 2027 (<a href="https://icml.cc/Conferences/2026/Dates">2026 dates</a>). That is about 15 weeks from mid-October.</li>
           <li><b>Done: the dataset.</b> 4,800 verified demonstrations, 12 tasks × 5 conditions × 80, recorded with the upgraded specialists (Parts 2 and 3).</li>
           <li><b>Done: the π0.5 baseline (Part 5).</b> Fully fine-tuned on the 960 default demonstrations with both cameras: 81.1 % macro success on AM-Bench's twelve tasks against 49.2 % in the paper; robustness runs under way.</li>
-          <li><b>Next: the Flight DiT (Part 4).</b> Stage A on the 120 Hz flight data, then Stage B: inject F<sub>flight</sub> into π0.5 and fine-tune it fully.</li>
-          <li><b>Then: the benchmark (Part 5).</b> Diffusion Policy, π0.5 fine-tuned with LoRA, and the Flight DiT + fully fine-tuned π0.5, all trained on the same demonstrations and evaluated with AM-Bench's success checks.</li>
+          <li><b>Next: Stage 0 and the Flight DiT (Part 4).</b> Labels from the 120 Hz base path, Stage A on the local GPU, then Stage B: π0.5 with F<sub>flight</sub> and a frozen VLM. A run in week 3, trained on the demonstrations' own future base path and tested with the scripted specialist's planned path, decides whether the channel is worth it.</li>
+          <li><b>Then: the benchmark (Part 5).</b> ACT and Diffusion Policy as outside baselines, and π0.5 arms that differ in what reaches the action expert (no message, the Flight DiT's message, the raw body state, the body state in π0.5's text tokens), plus the message with all of π0.5 trained. Every arm is evaluated on the default sweep and on the conditions where the 30k checkpoint fails (thrust limits and 10 % wind), with AM-Bench's success checks.</li>
         </ul>
         <div class="table-wrap">
           <table>
@@ -132,12 +235,13 @@
               <tr><th>Route</th><th>Compute</th><th>Decision</th></tr>
             </thead>
             <tbody>
-              <tr><td>Full AC-DiT</td><td>8×A100, about two weeks</td><td>Out of scope</td></tr>
+              <tr><td>Full AC-DiT</td><td>8 GPUs in the released scripts (ZeRO-2), with a 1B whole-body head</td><td>Out of scope</td></tr>
               <tr><td>RDT-1B fine-tune</td><td>4×A100, about a week (≈ $500 per run)</td><td>Too expensive</td></tr>
               <tr><td>Diffusion Policy</td><td>One 4090, hours to a day</td><td>Baseline</td></tr>
-              <tr><td>π0.5 LoRA</td><td>One GPU with ≥ 24 GB, about 2–3 days</td><td>Baseline</td></tr>
-              <tr><td>Flight DiT (RDT-170M size), Stage A</td><td>One 4090, about a week</td><td>Ours</td></tr>
-              <tr><td>π0.5 full fine-tune with F<sub>flight</sub>, Stage B</td><td>One 80 GB GPU (A100 / H100), about a day per run</td><td>Ours</td></tr>
+              <tr><td>Whole-body π0.5 (base + arm, 12-D)</td><td>One H100, about $75 per run, plus base-joint labels</td><td>Baseline on the 3 tasks with a base-joint interface</td></tr>
+              <tr><td>Flight DiT (RDT-170M size), Stage A</td><td>The local 16 GB GPU, 6–9 h per run (estimate)</td><td>Ours</td></tr>
+              <tr><td>π0.5 with F<sub>flight</sub>, VLM frozen, Stage B</td><td>One H100, about 4–5 h (≈ $20) per run (estimate)</td><td>Ours</td></tr>
+              <tr><td>π0.5 with F<sub>flight</sub>, all parameters</td><td>One H100, about 6 h (≈ $25) per run (estimate)</td><td>Comparison</td></tr>
             </tbody>
           </table>
         </div>
