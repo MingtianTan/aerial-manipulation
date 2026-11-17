@@ -836,6 +836,50 @@
       </div>
     </section>
     <!-- fd-default-run:end -->
+
+    <!-- fd-debug:begin -->
+    <details class="method-block" id="fd-debug-block">
+      <summary class="method" id="fd-debug">
+        <span class="method-head">
+          <span>
+            <span class="method-label">After the default-only run · 17 Nov 2026</span>
+            <h3 class="method-title">Debug</h3>
+          </span>
+          <span class="method-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
+
+    <section id="fd-debug-why">
+      <div class="wrap">
+        <h2>Why π0.5 alone does better</h2>
+        <p class="sub">Traced on 17 Nov 2026 from the logs of the default-only run, without new rollouts. The Flight DiT forecasts at 20 Hz where π0.5 re-plans every 0.4 s, but speed is not what the reference changes: π0.5 still decides where the end effector goes, and the forecast only moves where the base sits under it. It moves the base to where the specialist would have it; π0.5, which sees the base only through its cameras, then flies differently, and once the model acts it also forecasts the motion it causes itself.</p>
+        <ul class="points">
+          <li><b>Rates.</b> Physics, the PID and the IK run at 120 Hz, the cameras and π0.5's steps at 20 Hz; π0.5 re-plans every 8 steps (0.4 s) and executes the first 8 of its 50 actions. The Flight DiT forecasts at every camera frame (8 sampled paths averaged), but only its point 0.1 s ahead is used: at every step the anchor of the IK's base-smoothness term moves a fifth of the way towards it (α = <i>w</i><sup>2</sup>/(1 + <i>w</i><sup>2</sup>) = 0.2 at <i>w</i> = 0.5). Where the arm leaves the base free this sets the base's position. In a configuration from the inspection task's climb, the IK's next solution moves the base 29 % of the way towards a reference 5 cm above it, 8 % towards one 5 cm ahead and 1 % towards one 5 cm to the side.</li>
+          <li><b>π0.5 sees the base only through its cameras.</b> With actions relative to the end effector, π0.5's state input has its position and orientation set to zero; only the gripper's width is left. A base that sits elsewhere reaches π0.5 only through the two camera images.</li>
+          <li><b>The inspection task.</b> The note above leaves open which part of the loop lowers π0.5's targets; this is how it comes about. In the first chunk π0.5's targets are the same with and without the reference (1.267 against 1.274 m at 0.4 s), but the reference has already lifted the base by about 5 cm (1.147 against 1.094 m; 1.103 m in the demonstrations). For the rest of the climb the base stays 12–15 cm below the end-effector target; without the reference it stays 18–48 cm below (0.30 m median while the target is between 3 and 6 m; 0.20 m in the demonstrations). In the demonstrations the gap is this small only where the specialist stops and hovers (0.114 m at its pause about 3 s in, 0.108–0.116 m at the mark). π0.5 then plans a slower climb: the median rise from the first to the eighth action of a chunk is 0.16, 0.36, 0.26 and 0.11 m in the first four chunks with the chunk-reading model, against 0.17, 0.51, 0.51 and 0.27 m with the model loaded and <i>w</i> = 0. The target passes 6.5 m after 8.3 s instead of 6.0 s and stops at 6.80 m (6.95–6.96 m without the reference; the mark is at 7.00 m). That a base close under the end effector looks like hovering to π0.5 fits these numbers but has not been tested by itself. While it only watches, the model forecasts the climb well (0.96 m/s where the base climbs at 0.98; 0.5 cm low at 0.4 s); once it acts, it forecasts 0.60 m/s where the base climbs at 0.72 (3.8 cm low; the chunk-blind model 0.54 against 0.68 m/s, 5.0 cm low), which holds the slower climb in place.</li>
+          <li><b>Lemon harvesting.</b> After the pick the specialist backs away from the tree, and the Flight DiT forecasts that. The reference starts to pull the base back, the model sees the base move and forecasts more of it, and the reference follows: a loop that feeds itself. The note above has the numbers: while the lemon is carried the base backs up to x = 0.15 m instead of 0.57 m and reaches 1.07 instead of 0.43 m/s. While it only watches, the model's 1.0 s error on this task is 3.2 cm, better than any predictor that learns nothing (8.5 cm for constant velocity); when it acts, 9.3 cm.</li>
+          <li><b>What the model was trained on.</b> Only the specialist's demonstrations: no flight of π0.5, none it influenced, no thrust limit, no wind. In a demonstration π0.5's chunk is its guess of the specialist's plan and the images already show that plan, so reading the chunk lowers the held-out error by only 2–3 %. On π0.5's flights the forecast's 1.0 s error is 5.7 cm on default physics, 6.3 cm under aero, 7.0 cm at 10 % wind and 22.9 cm at 20 % wind (1.2 cm on held-out demonstrations). Under aero the reference also costs thrust margin: the base accelerates at 3.1 against 1.9 m/s² and a motor is at its limit in 55 against 43 % of the steps.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="fd-debug-closed-loop">
+      <div class="wrap">
+        <h2>Training the Flight DiT in closed loop</h2>
+        <p class="sub">Proposed on 17 Nov 2026: train the forecast on π0.5's own flights, so that it forecasts how the base moves when π0.5 flies. A small test started the same day; its outcome will be added here.</p>
+        <ul class="points">
+          <li><b>Data from π0.5's own flights.</b> π0.5 flies with the Flight DiT in the loop at <i>w</i> = 0: the model forecasts and logs but leaves the IK alone, so the base flies as with π0.5 alone (the control runs above show this). The seeds are kept apart from the scored (0–29) and tuning (1000–1009) ones. The labels are where the base goes when π0.5 flies, and the chunk is the one π0.5 was executing at that moment. This takes the specialist's habits out of the forecast (the small gap under the end effector, the step back after the pick, the overshoot at the top of the climb) and makes the chunk the input that says what π0.5 will do next.</li>
+          <li><b>What is logged.</b> Every rollout whole: the 35-D state at every step, the target executed and the base the IK commands, the two cameras' DINOv2 tokens at every frame (about 26 KB a frame) and every chunk π0.5 returns. The run's own logs keep no images and only four actions of each chunk, so they cannot be reused for training. The training sampler reads a recorded rollout exactly as the loop builds the model's inputs (checked input by input).</li>
+          <li><b>Training.</b> The two 44 M models are fine-tuned from their EMA weights on demonstrations and π0.5's flights in equal parts; held-out flights pick the weights. Only the data changes: the model, its inputs, its label (the base's actual path) and the way it acts stay as in the run.</li>
+          <li><b>A reference that learns nothing.</b> The environment's own IK, solved ahead along the chunk π0.5 is executing from its previous solution, gives the base it would command 0.1 s later. On a flight at <i>w</i> = 0 this replay gives back the commands the IK later issued to within 0.02 cm (median). Used as the reference it carries none of the specialist's habits: if the inspection task and lemon harvesting are still lost with it, moving the base away from where π0.5 alone keeps it is enough to cost successes, and training the Flight DiT alone cannot fix that.</li>
+          <li><b>Later rounds.</b> Once the model acts it creates states that π0.5 alone never visits (the lemon loop). A second round collects those states with the model acting and labels them with what the IK would command without the reference (the replay above), not with the base's actual path, which contains the reference's own push.</li>
+          <li><b>What it can give.</b> Used as a reference for the base 0.1 s ahead, the best expected outcome is to remove the losses, not to beat π0.5 alone: π0.5's failures on default physics are in its own grasps, which the reference does not reach. Using the 2.5 s forecast for more needs another use: feed-forward of thrust and attitude that helps the base hold the path the IK commands without changing it, or Part 1's pipeline with π0.5 retrained to read the forecast.</li>
+          <li><b>The small test.</b> Default physics only, about 10 hours of the workstation: 200 flights of π0.5 at <i>w</i> = 0 on the inspection task, lemon harvesting, peg in hole and frame assembly (10 per task held out); both models fine-tuned on them; then the scored seeds (0–29) with the weight and lead of the run: the chunk-reading model on the four tasks, the chunk-blind model and the IK-replay reference on the inspection task and lemon harvesting. Fixed before the flights: the losses count as removed if the inspection task keeps 26 or more of 30 and lemon harvesting 24 or more (π0.5 alone: 30 and 28), with peg in hole and frame assembly not 5 or more below π0.5 alone (22 and 29).</li>
+        </ul>
+      </div>
+    </section>
+    </details>
+    <!-- fd-debug:end -->
     </details>
 
     <!-- Results & benchmarking -->
