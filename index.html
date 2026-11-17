@@ -916,6 +916,83 @@
     </section>
     </details>
     <!-- fd-debug:end -->
+
+    <!-- fd-plan-b:begin -->
+    <details class="method-block" id="fd-plan-b-block">
+      <summary class="method" id="fd-plan-b">
+        <span class="method-head">
+          <span>
+            <span class="method-label">Plan, not yet run · 17 Nov 2026</span>
+            <h3 class="method-title">Plan B: the flight controller under disturbances</h3>
+          </span>
+          <span class="method-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
+
+    <section id="fd-plan-b-why">
+      <div class="wrap">
+        <h2>Why the flight controller</h2>
+        <p class="sub">Written on 17 Nov 2026 after the small test; not yet run. Under the disturbance conditions π0.5 alone loses many of its successes (271 of 330 on default physics; 167 under aero; 148, 112 and 11 with wind at 5, 10 and 20 % of the weight), and moving the base with a forecast helped in none of them. Plan B leaves π0.5, its end-effector targets and the base path the IK computes as they are, and changes only the flight controller below them, so that under disturbances the loop behaves more like the default one π0.5 was trained on: first how thrust is allocated when the rotors saturate, then a feed-forward of the aerodynamic forces.</p>
+        <ul class="points">
+          <li><b>Saturation, more than wind.</b> In the step logs of π0.5 alone under aero and 10 % wind, the force the PID requests exceeds the force the rotors produce (after clipping and the rotors' ground and wall effects) by more than 5 N in 15–57 % of the steps of successful rollouts. In several tasks the failures show far larger shortfalls: at 10 % wind, lemon harvesting 6.8 N on average in successes against 200.3 N in failures (13 of 30 rollouts crash), press button 20.8 against 490.2 N, with a median largest tilt of 52° in the failures. These are associations, not yet causes.</li>
+          <li><b>The PID is stiff.</b> With gains of 200, 120 and 80 per unit mass, a linear analysis gives about 1 cm of position offset for the mean force of 20 % wind, as long as the rotors can produce the force. Feeding the wind forward on its own therefore has little to correct. What goes wrong is clipping: after a pseudo-inverse allocation each rotor is clipped to 0–23 N on its own, which distorts force and torque together.</li>
+          <li><b>What the method may use.</b> AM-Bench computes every disturbance inside the controller step (rotor ground and wall effects, body drag, wind), so the true aerodynamic wrench is available in simulation; it serves only as an upper bound. The method itself uses only what a real vehicle can measure: its state, the rotor thrust it actually commands, a force sensor at the arm mount, and whether the body touches the floor or a wall.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="fd-plan-b-design">
+      <div class="wrap">
+        <h2>What changes</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <tbody>
+              <tr><th scope="row">S: allocation and anti-windup</th><td>When the rotors cannot deliver the requested wrench, roll and pitch torque are kept first, then vertical force, lateral force and yaw (sequential desaturation, identical to the present allocation whenever the request is feasible). The request is limited to the thrust margin before allocation, and the PID's integral stops growing on an axis whose force falls short.</td></tr>
+              <tr><th scope="row">O: true aerodynamic feed-forward</th><td>The step's aerodynamic wrench (wind, drag, ground and wall effects) is subtracted from the request, bounded, and placed below lateral force in the priority order. An upper bound only, never reported as the method.</td></tr>
+              <tr><th scope="row">M: observer feed-forward</th><td>A 6-DoF momentum observer (about 3 Hz) driven by the thrust actually produced, gravity and the arm-mount wrench. Contact and payload forces enter through the arm mount and are therefore not compensated; the estimate is held while the body touches the floor or a wall. The PID keeps its integral, frozen while a rotor is clipped.</td></tr>
+              <tr><th scope="row">L: learned predictor, only if needed</th><td>A small network (under 1 M parameters) predicting the wrench over the next 0.4 s from state and command history, the observer's estimate and the planned motion, adapted online in its last layer. Built only if the observer keeps less than half of the true feed-forward's gain; not the 44 M Flight DiT.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="fd-plan-b-test">
+      <div class="wrap">
+        <h2>How it will be tested</h2>
+        <ul class="points">
+          <li><b>Protocol.</b> The judged evaluation of the default-only run (above): 11 tasks, wind as a velocity field with gusts, the same checkpoint, cameras and judge. Every column is compared with π0.5 alone on the same seeds and the same wind.</li>
+          <li><b>Consistency first.</b> With the new hooks installed and switched off, two tasks at 10 % wind (60 rollouts) must come within 5 successes of the run's π0.5 alone. Unit tests check that the allocation equals the present one when the request is feasible and that the feed-forward is zero on default physics.</li>
+          <li><b>Screening.</b> Seeds 1000–1009, kept apart from the scored ones; aero and 10 % wind; 220 rollouts per column: π0.5 alone, S, O and S + O. If neither S nor S + O gains 10 rollouts on π0.5 alone, Plan B stops. If S + O gains 6 or more on S, the observer (M) is built and screened.</li>
+          <li><b>Confirmation, fixed in advance.</b> One column, S or S + M, on the scored seeds 0–29 under aero, 5 % and 10 % wind (990 rollouts), against the run's π0.5 alone. It counts as working if it gains 20 or more rollouts with an exact McNemar test at p &lt; 0.05 and default physics does not lose: no task 5 or more of 30 below π0.5 alone, at least 266 of 330 in total. 20 % wind is reported only.</li>
+          <li><b>Readouts.</b> Per step: the requested force split into feed-forward, P, I and D; the produced force; the shortfall per axis; the rotors at a limit; the observer against the true wrench. In the second before each crash, whether the shortfall was vertical (the body reaching the floor) or in roll and pitch (tipping over).</li>
+          <li><b>What to expect.</b> At best, part of the loss under aero and 5–10 % wind comes back; the default level is not expected to be exceeded, and at 20 % wind the rotors lack the thrust. About 3–4 days on the workstation's two GPUs (an estimate), starting once the plan is confirmed and the locked GPU has been restarted.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="fd-plan-b-risks">
+      <div class="wrap">
+        <h2>Expected problems</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <tbody>
+              <tr><th scope="row">Clipping tips the vehicle or brings it down</th><td>Prioritized allocation. With clipping, one of ten aggressive runs hit the ground and the position drifted, while with priorities it held (Faessler et al. 2017); the largest roll and pitch errors fell from 12° and 23° to about 1° (Smeur et al. 2017).</td></tr>
+              <tr><th scope="row">Contact and payload forces get cancelled</th><td>Compensating the whole estimated wrench amounts to an infinite virtual mass (Tomić 2018); in static contact the observer then acts as an extra integrator and the pressing force grows (our analysis). Only the aerodynamic part is fed forward, as in Tomić et al. 2020; the arm-mount wrench is a known input, and the estimate is held during contact. Frequency cannot separate quasi-static contact from wind (Tomić 2018), and gating by direction (Bodie et al. 2021) would not separate them at the window, whose contact normal is horizontal like the wind.</td></tr>
+              <tr><th scope="row">Saturation read as a disturbance</th><td>The observer is driven by the thrust actually produced, and integrals freeze on saturated axes (Jayanna et al. 2026; PX4).</td></tr>
+              <tr><th scope="row">Feed-forward takes the margin attitude needs</th><td>Its own priority level below lateral force, bounded to 60–70 % of the margin (our choice), like the lateral budget of Ryll et al. 2022 and the thrust budgets of Convens et al. 2021.</td></tr>
+              <tr><th scope="row">Estimate too slow or too fast</th><td>About 3 Hz. INDI and L1 used 5 Hz filters in the Neural-Fly comparison (O'Connell et al. 2022), and L1Quad filters force at 30 rad/s (Wu et al. 2025); a feed-forward whose estimate took about 1 s still cut the largest gust deviations by 40–50 % (Hentzen et al. 2019). AM-Bench's built-in L1 filters at 0.3 Hz, which by our estimate leaves about 60 % of a gust with a 1 s time constant uncompensated.</td></tr>
+              <tr><th scope="row">A frozen π0.5 reacts to a changed low level</th><td>As on the inspection task. The changes act only under disturbance or saturation, and their aim is to restore the default behaviour; restoring the intended execution brought a frozen π0.5 back to 0.90–0.98 success under actuation shifts that had dropped it to 0.00–0.16 (Siddique et al. 2026).</td></tr>
+              <tr><th scope="row">Whether learning is needed</th><td>A gust with a 1 s time constant is barely predictable 50 ms ahead (holding the current value comes within about 1 %, our estimate), and the arm's reaction follows from the planned motion (Tognon et al. 2017). Learned feed-forward helped where a model was missing (O'Connell et al. 2022; Kumar et al. 2021), so it is built only if the observer falls short of the true feed-forward.</td></tr>
+              <tr><th scope="row">20 % wind</th><td>The thrust limits remain, and feed-forward cannot add thrust; saturated collective thrust leads to loss of control (Sun et al. 2022). Reported, not promised.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Sources: <a href="https://rpg.ifi.uzh.ch/docs/RAL17_Faessler.pdf">Faessler et al. 2017</a>; <a href="https://repository.tudelft.nl/file/File_15d75891-ef9a-4639-bf15-78300ea76577">Smeur et al. 2017</a>; <a href="https://arxiv.org/abs/2109.01365">Sun et al. 2022</a>; <a href="https://arxiv.org/abs/2004.06612">Ryll et al. 2022</a>; <a href="https://www.frontiersin.org/journals/robotics-and-ai/articles/10.3389/frobt.2021.663809/full">Convens et al. 2021</a>; <a href="https://re.public.polimi.it/retrieve/07a6469c-f9ac-4234-a1b7-ec79072374a7/JAYAD02-25.pdf">Jayanna et al. 2026</a>; <a href="https://github.com/PX4/PX4-Autopilot">PX4</a>; <a href="https://arxiv.org/abs/1810.12908">Tomić et al. 2020</a>; <a href="https://elib.dlr.de/185788/1/2018_Teodor-Tomic_Thesis_Dissertation.pdf">Tomić 2018</a>; <a href="https://arxiv.org/abs/2003.09516">Bodie et al. 2021</a>; <a href="https://arxiv.org/abs/2205.06908">O'Connell et al. 2022</a>; <a href="https://arxiv.org/abs/2302.07208">Wu et al. 2025</a>; <a href="https://arxiv.org/abs/1908.03166">Hentzen et al. 2019</a>; <a href="https://arxiv.org/abs/2107.04034">Kumar et al. 2021</a>; <a href="https://iris.uniroma1.it/retrieve/e3835318-806e-15e8-e053-a505fe0a3de9/Tognon_Preprint_Dynamic-decentralized-control_2017.pdf">Tognon et al. 2017</a>; <a href="https://arxiv.org/abs/2611.20244">Siddique et al. 2026</a>.</p>
+      </div>
+    </section>
+    </details>
+    <!-- fd-plan-b:end -->
     </details>
 
     <!-- Results & benchmarking -->
