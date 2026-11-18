@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">Paused: G1 not met, waiting for a decision · since 2026-11-18 09:52</span>
+            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 13:24</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1023,7 +1023,7 @@
               <tr><th scope="row">A1</th><td>Data and checks: the Flight DiT&#x27;s message on π0.5&#x27;s training set, consistency tests, a pilot</td><td>done</td><td>2026-11-18 03:53</td><td>T1 0.0 mm as served; G0 1.33 cm; T4 0.036 mm; pilot 1.36 s per step</td></tr>
               <tr><th scope="row">A2</th><td>Training: π0.5&#x27;s action expert without and with the message (two runs, one GPU each)</td><td>done</td><td>2026-11-18 09:42</td><td>A-ctrl: step 15,000, loss 0.0009; A-tok: step 15,000, loss 0.0009</td></tr>
               <tr><th scope="row">A3</th><td>Offline check G1: does the trained model read the message?</td><td>done</td><td>2026-11-18 09:52</td><td>A-tok against @zero 1.4 mm, against @shuf 0.8 mm (rule: both at least 2 mm)</td></tr>
-              <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>skipped</td><td></td><td>not run: after G1, stage B was chosen</td></tr>
               <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>pending</td><td></td><td></td></tr>
               <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>pending</td><td></td><td></td></tr>
               <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>pending</td><td></td><td></td></tr>
@@ -1103,10 +1103,12 @@
         <p class="note">Error: the mean distance between the sampled chunk's end-effector targets and the demonstration's recorded targets, over the actions the demonstration still has. @shuf sends, for demonstration j of a task, the message of demonstration j + 1 of the same task at the same frame. After 15,000 steps the message's weights are still close to their random start: they moved by 4.5–8.1 % of their initial size (A-ctrl, with the same seed, keeps the initial values).</p>
       </div>
     </section>
-    <section id="fd-stage-b-paused">
+    <section id="fd-stage-b-decisions">
       <div class="wrap">
-        <h2>Where the run stands</h2>
-        <p class="sub">G1, fixed in advance as the gate before any rollout, is not met: with the message, A-tok&#x27;s chunks differ from those with the message masked by a median of 1.4 mm and from those with another demonstration&#x27;s message by 0.8 mm (rule: at least 2 mm for both), and the message does not bring the chunks closer to the demonstrations. As planned, stage A&#x27;s closed loop is not run and the run waits for a decision. The plan&#x27;s fallbacks, each only with consent, are a larger learning rate for the message&#x27;s own weights, or a zero-gated entry through the action expert&#x27;s adaptive normalization.</p>
+        <h2>Decisions along the way</h2>
+        <ul class="points">
+          <li><b>18 Nov 2026, 13:20 US Eastern.</b> After G1 (the message is not read), the decision was to skip stage A&#x27;s closed loop and go on with stage B as planned: first on default physics, hoping for about a tie with π0.5 alone, then the same systems under wind, to see whether they do better there. Stage A&#x27;s verdict under the rules fixed in advance is therefore &quot;not used&quot;. The likely reason: with the base driven by the IK after the hand, the Flight DiT&#x27;s forecast of the base adds nothing π0.5 cannot already infer (both runs reached the same training loss, and the message&#x27;s weights barely moved).</li>
+        </ul>
       </div>
     </section>
 
@@ -1114,7 +1116,7 @@
       <div class="wrap">
         <h2>Limits</h2>
         <ul class="points">
-          <li><b>Default physics only.</b> π0.5 alone already succeeds in 271 of 330 rollouts there and fails in its own manipulation, so a tie is the best expected outcome; a gain could only show under disturbances, which are the next stage.</li>
+          <li><b>Default physics first.</b> π0.5 alone already succeeds in 271 of 330 rollouts there and fails in its own manipulation, so a tie is the best expected outcome on default; whether the system does better under disturbances is checked after stage B, under wind (π0.5 alone: 148 of 330 at 5 % wind, 112 at 10 %).</li>
           <li><b>The message comes from elsewhere.</b> The Flight DiT was trained on another set of demonstrations and never saw π0.5's; G0 checks that its forecast stays accurate on them. It has no model of TossBall, whose message is masked.</li>
           <li><b>One training run per column.</b> A rerun of the same policy flips 24 % of single outcomes, so only the totals over 330 rollouts and the two tasks named in advance (NDT, Lemon) are judged.</li>
         </ul>
