@@ -993,6 +993,91 @@
     </section>
     </details>
     <!-- fd-plan-b:end -->
+
+    <!-- fd-stage-b:begin -->
+    <details class="method-block" id="fd-stage-b-block">
+      <summary class="method" id="fd-stage-b">
+        <span class="method-head">
+          <span>
+            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 03:57</span>
+            <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
+          </span>
+          <span class="method-toggle" aria-hidden="true"></span>
+        </span>
+      </summary>
+
+    <section id="fd-stage-b-why">
+      <div class="wrap">
+        <h2>What this run tests</h2>
+        <p class="sub">In the runs above the Flight DiT only nudged the base, and π0.5, frozen, never saw its forecast: the two did not work together. Here the trained chunk-blind Flight DiT stays frozen and its forecast reaches π0.5 as 11 tokens (ten waypoints of the base's path over the next 2.5 s and one latent), placed before the action tokens of π0.5's action expert, which alone is trained (after AC-DiT's mobility-to-body conditioning, where the base's latent conditions the whole-body action head). Stage A leaves the base to the IK as before and asks whether π0.5 learns to use the tokens without losing successes; stage B, only if A does no harm, also lets the Flight DiT fly the base's stand-off and height. Every column is compared with π0.5 alone on the same 11 tasks and seeds.</p>
+      </div>
+    </section>
+
+    <section id="fd-stage-b-progress">
+      <div class="wrap">
+        <h2>Progress</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Step</th><th scope="col">What</th><th scope="col">Status</th><th scope="col">Finished</th><th scope="col">Key numbers</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">A1</th><td>Data and checks: the Flight DiT&#x27;s message on π0.5&#x27;s training set, consistency tests, a pilot</td><td>done</td><td>2026-11-18 03:53</td><td>T1 0.0 mm as served; G0 1.33 cm; T4 0.036 mm; pilot 1.36 s per step</td></tr>
+              <tr><th scope="row">A2</th><td>Training: π0.5&#x27;s action expert without and with the message (two runs, one GPU each)</td><td>running</td><td></td><td>A-ctrl: step 2,100, loss 0.0011; A-tok: step 50, loss 0.0030</td></tr>
+              <tr><th scope="row">A3</th><td>Offline check G1: does the trained model read the message?</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B6-B7</th><td>Closed loop with the Flight DiT&#x27;s base; verdict of stage B</td><td>pending</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Numbers are printed by the run's scripts; times are local. The rules for every comparison were fixed before the runs.</p>
+      </div>
+    </section>
+
+    <section id="fd-stage-b-a1">
+      <div class="wrap">
+        <h2>A1: data and checks</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <tbody>
+              <tr><th scope="row">Training data</th><td>π0.5&#x27;s own training set: the 960 default-physics demonstrations of its 30k checkpoint. The 880 episodes of the 11 tasks the Flight DiT knows map frame by frame to their 120 Hz recordings (220,430 frames); TossBall&#x27;s 80 episodes get a masked message.</td></tr>
+              <tr><th scope="row">T3, alignment</th><td>End-effector position, orientation and gripper width of every mapped frame equal the recording at the mapped tick (largest difference 0).</td></tr>
+              <tr><th scope="row">G0, the message</th><td>The frozen chunk-blind Flight DiT&#x27;s 1.0 s forecast on these demonstrations is off by 1.33 cm (limit 2.0 cm; 1.31 cm on its own held-out demonstrations); per task 0.84–2.07 cm.</td></tr>
+              <tr><th scope="row">T1, T2 (small model)</th><td>With the message masked, the new model gives OpenPI&#x27;s loss and actions (largest difference 7.2e-07 in float32). With a valid message the actions change, and only then do the message&#x27;s parameters get a gradient.</td></tr>
+              <tr><th scope="row">T1 (30k weights)</th><td>Same 48 training frames, requests and noise as the stock policy. As served, a request whose message is masked goes through OpenPI&#x27;s own sampler: largest end-effector difference 0.0 mm. The masked-message path that training takes, against OpenPI&#x27;s sampler at full float32 precision: largest 0.0005 mm, median 0.0001 mm. In bfloat16 the same path was up to 2.55 mm off (median 1.83 mm): rounding, as the stock policy&#x27;s own bfloat16 and float32 answers differ by up to 9.6 mm (median 2.8 mm).</td></tr>
+              <tr><th scope="row">T4, offline and online</th><td>The closed loop&#x27;s code fed tick by tick (8 demonstrations of 8 tasks, 2,155 frames) against the training messages: waypoints at most 0.036 mm apart, z at most 1.6e-04 relative (limits 0.1 mm and 1e-3). The first try failed (3.3 mm, 1.8 %): DINOv2-S in bfloat16 moves by about 1 % with the size of the batch, so the training tokens were recomputed one frame at a time with the online function (G0 with the first tokens: 1.33 cm).</td></tr>
+              <tr><th scope="row">T5, freezing and saving</th><td>Trained: the action expert, the action projections, the time MLPs and the three message parameters (430.4 M of 3,353.7 M). After 5 steps all 32 frozen arrays are bit for bit unchanged. A saved checkpoint reads back bit for bit (56 of 56 arrays), its frozen arrays equal the 30k checkpoint&#x27;s, and the server comes up on it and answers requests with and without a message (4 of 4).</td></tr>
+              <tr><th scope="row">Pilot</th><td>300 steps on one RTX 4090 with real data, batch 32: 1.36 s per step (15,000 steps in about 5.7 h), peak memory 15.9 GiB, data loading 0.017 s per step.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Finished 2026-11-18 03:53. Every test and its limit were fixed before the run. T1 and T4 failed at first; both came down to bfloat16 rounding, the code was changed as described and they passed when rerun against the same limits.</p>
+      </div>
+    </section>
+    <section id="fd-stage-b-a2">
+      <div class="wrap">
+        <h2>A2: training</h2>
+        <p class="sub">From the 30k checkpoint with Gemma-2B and SigLIP frozen: 15,000 steps of batch 32, a cosine schedule to a peak of 1e-5, an EMA of the trained parameters. The two runs differ only in the message: masked always, or masked in 10 % of the samples. The checkpoint for evaluation, fixed in advance, is the EMA at step 15,000.</p>
+        <ul class="points">
+          <li><b>A-ctrl, message always masked.</b> Step 2,100 of 15,000; loss 0.0011 (mean of the logged batches over the last 1,000 steps); 1.38 s per step; peak memory 16.7 GiB; last update 2026-11-18 03:57:32.</li>
+          <li><b>A-tok, with the message.</b> Step 50 of 15,000; loss 0.0030 (mean of the logged batches over the last 1,000 steps); 1.35 s per step; peak memory 15.9 GiB; last update 2026-11-18 03:56:47.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="fd-stage-b-limits">
+      <div class="wrap">
+        <h2>Limits</h2>
+        <ul class="points">
+          <li><b>Default physics only.</b> π0.5 alone already succeeds in 271 of 330 rollouts there and fails in its own manipulation, so a tie is the best expected outcome; a gain could only show under disturbances, which are the next stage.</li>
+          <li><b>The message comes from elsewhere.</b> The Flight DiT was trained on another set of demonstrations and never saw π0.5's; G0 checks that its forecast stays accurate on them. It has no model of TossBall, whose message is masked.</li>
+          <li><b>One training run per column.</b> A rerun of the same policy flips 24 % of single outcomes, so only the totals over 330 rollouts and the two tasks named in advance (NDT, Lemon) are judged.</li>
+        </ul>
+      </div>
+    </section>
+    </details>
+    <!-- fd-stage-b:end -->
     </details>
 
     <!-- Results & benchmarking -->
