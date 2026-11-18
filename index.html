@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 03:57</span>
+            <span class="method-label">Paused: G1 not met, waiting for a decision · since 2026-11-18 09:52</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1021,8 +1021,8 @@
             <thead><tr><th scope="col">Step</th><th scope="col">What</th><th scope="col">Status</th><th scope="col">Finished</th><th scope="col">Key numbers</th></tr></thead>
             <tbody>
               <tr><th scope="row">A1</th><td>Data and checks: the Flight DiT&#x27;s message on π0.5&#x27;s training set, consistency tests, a pilot</td><td>done</td><td>2026-11-18 03:53</td><td>T1 0.0 mm as served; G0 1.33 cm; T4 0.036 mm; pilot 1.36 s per step</td></tr>
-              <tr><th scope="row">A2</th><td>Training: π0.5&#x27;s action expert without and with the message (two runs, one GPU each)</td><td>running</td><td></td><td>A-ctrl: step 2,100, loss 0.0011; A-tok: step 50, loss 0.0030</td></tr>
-              <tr><th scope="row">A3</th><td>Offline check G1: does the trained model read the message?</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">A2</th><td>Training: π0.5&#x27;s action expert without and with the message (two runs, one GPU each)</td><td>done</td><td>2026-11-18 09:42</td><td>A-ctrl: step 15,000, loss 0.0009; A-tok: step 15,000, loss 0.0009</td></tr>
+              <tr><th scope="row">A3</th><td>Offline check G1: does the trained model read the message?</td><td>done</td><td>2026-11-18 09:52</td><td>A-tok against @zero 1.4 mm, against @shuf 0.8 mm (rule: both at least 2 mm)</td></tr>
               <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>pending</td><td></td><td></td></tr>
               <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>pending</td><td></td><td></td></tr>
               <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>pending</td><td></td><td></td></tr>
@@ -1060,9 +1060,53 @@
         <h2>A2: training</h2>
         <p class="sub">From the 30k checkpoint with Gemma-2B and SigLIP frozen: 15,000 steps of batch 32, a cosine schedule to a peak of 1e-5, an EMA of the trained parameters. The two runs differ only in the message: masked always, or masked in 10 % of the samples. The checkpoint for evaluation, fixed in advance, is the EMA at step 15,000.</p>
         <ul class="points">
-          <li><b>A-ctrl, message always masked.</b> Step 2,100 of 15,000; loss 0.0011 (mean of the logged batches over the last 1,000 steps); 1.38 s per step; peak memory 16.7 GiB; last update 2026-11-18 03:57:32.</li>
-          <li><b>A-tok, with the message.</b> Step 50 of 15,000; loss 0.0030 (mean of the logged batches over the last 1,000 steps); 1.35 s per step; peak memory 15.9 GiB; last update 2026-11-18 03:56:47.</li>
+          <li><b>A-ctrl, message always masked.</b> Step 15,000 of 15,000; loss 0.0009 (mean of the logged batches over the last 1,000 steps); 1.38 s per step; peak memory 16.7 GiB; last update 2026-11-18 08:54:35.</li>
+          <li><b>A-tok, with the message.</b> Step 15,000 of 15,000; loss 0.0009 (mean of the logged batches over the last 1,000 steps); 1.38 s per step; peak memory 15.9 GiB; last update 2026-11-18 09:41:43.</li>
         </ul>
+      </div>
+    </section>
+    <section id="fd-stage-b-a3">
+      <div class="wrap">
+        <h2>A3: does the trained π0.5 read the message? (G1)</h2>
+        <p class="sub">Before any rollout: 3,020 observations, every 8th camera frame of 88 held-out demonstrations that neither model was trained on, each answered with the same fixed noise and 10 flow steps. The message is the one the closed loop would compute. The message is not in use by the rule fixed in advance (a median of at least 2 mm against both probes): stage A stops here and the run asks how to go on.</p>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Column</th><th scope="col">Error to the demonstration, first 8 actions (mm, median)</th><th scope="col">All 50 actions (mm, median)</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">π0.5 30k alone (reference)</th><td>9.5</td><td>19.0</td></tr>
+              <tr><th scope="row">A-ctrl</th><td>9.2</td><td>18.4</td></tr>
+              <tr><th scope="row">A-tok</th><td>9.3</td><td>18.4</td></tr>
+              <tr><th scope="row">A-tok, message masked (@zero)</th><td>9.4</td><td>18.8</td></tr>
+              <tr><th scope="row">A-tok, another demonstration&#x27;s message (@shuf)</th><td>9.3</td><td>18.4</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Task</th><th scope="col">A-tok against @zero, first 8 actions (mm, median)</th><th scope="col">A-tok against @shuf (mm, median)</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">All tasks</th><td>1.4</td><td>0.8</td></tr>
+              <tr><th scope="row">CabinetPickPlace</th><td>1.4</td><td>0.7</td></tr>
+              <tr><th scope="row">FrameAssembly</th><td>1.2</td><td>0.8</td></tr>
+              <tr><th scope="row">LemonHarvesting</th><td>1.4</td><td>0.8</td></tr>
+              <tr><th scope="row">NDT</th><td>1.9</td><td>0.8</td></tr>
+              <tr><th scope="row">OpenDoor</th><td>1.4</td><td>0.8</td></tr>
+              <tr><th scope="row">PegInHole</th><td>1.3</td><td>0.8</td></tr>
+              <tr><th scope="row">PressButton</th><td>1.5</td><td>0.8</td></tr>
+              <tr><th scope="row">PullLever</th><td>1.6</td><td>0.8</td></tr>
+              <tr><th scope="row">PushSlider</th><td>1.4</td><td>0.8</td></tr>
+              <tr><th scope="row">RotateValve</th><td>1.5</td><td>0.8</td></tr>
+              <tr><th scope="row">WipeWindow</th><td>2.0</td><td>0.8</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Error: the mean distance between the sampled chunk's end-effector targets and the demonstration's recorded targets, over the actions the demonstration still has. @shuf sends, for demonstration j of a task, the message of demonstration j + 1 of the same task at the same frame. After 15,000 steps the message's weights are still close to their random start: they moved by 4.5–8.1 % of their initial size (A-ctrl, with the same seed, keeps the initial values).</p>
+      </div>
+    </section>
+    <section id="fd-stage-b-paused">
+      <div class="wrap">
+        <h2>Where the run stands</h2>
+        <p class="sub">G1, fixed in advance as the gate before any rollout, is not met: with the message, A-tok&#x27;s chunks differ from those with the message masked by a median of 1.4 mm and from those with another demonstration&#x27;s message by 0.8 mm (rule: at least 2 mm for both), and the message does not bring the chunks closer to the demonstrations. As planned, stage A&#x27;s closed loop is not run and the run waits for a decision. The plan&#x27;s fallbacks, each only with consent, are a larger learning rate for the message&#x27;s own weights, or a zero-gated entry through the action expert&#x27;s adaptive normalization.</p>
       </div>
     </section>
 
