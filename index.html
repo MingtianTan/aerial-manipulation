@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 13:24</span>
+            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 14:48</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1009,7 +1009,7 @@
     <section id="fd-stage-b-why">
       <div class="wrap">
         <h2>What this run tests</h2>
-        <p class="sub">In the runs above the Flight DiT only nudged the base, and π0.5, frozen, never saw its forecast: the two did not work together. Here the trained chunk-blind Flight DiT stays frozen and its forecast reaches π0.5 as 11 tokens (ten waypoints of the base's path over the next 2.5 s and one latent), placed before the action tokens of π0.5's action expert, which alone is trained (after AC-DiT's mobility-to-body conditioning, where the base's latent conditions the whole-body action head). Stage A leaves the base to the IK as before and asks whether π0.5 learns to use the tokens without losing successes; stage B, only if A does no harm, also lets the Flight DiT fly the base's stand-off and height. Every column is compared with π0.5 alone on the same 11 tasks and seeds.</p>
+        <p class="sub">In the runs above the Flight DiT only nudged the base, and π0.5, frozen, never saw its forecast: the two did not work together. Here the trained chunk-blind Flight DiT stays frozen and its forecast reaches π0.5 as 11 tokens (ten waypoints of the base's path over the next 2.5 s and one latent), placed before the action tokens of π0.5's action expert, which alone is trained (after AC-DiT's mobility-to-body conditioning, where the base's latent conditions the whole-body action head). Stage A leaves the base to the IK as before and asks whether π0.5 learns to use the tokens without losing successes; stage B also lets the Flight DiT fly the base's stand-off and height (planned to follow only a useful or harmless stage A; it went ahead by decision, below). Every column is compared with π0.5 alone on the same 11 tasks and seeds.</p>
       </div>
     </section>
 
@@ -1024,8 +1024,8 @@
               <tr><th scope="row">A2</th><td>Training: π0.5&#x27;s action expert without and with the message (two runs, one GPU each)</td><td>done</td><td>2026-11-18 09:42</td><td>A-ctrl: step 15,000, loss 0.0009; A-tok: step 15,000, loss 0.0009</td></tr>
               <tr><th scope="row">A3</th><td>Offline check G1: does the trained model read the message?</td><td>done</td><td>2026-11-18 09:52</td><td>A-tok against @zero 1.4 mm, against @shuf 0.8 mm (rule: both at least 2 mm)</td></tr>
               <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>skipped</td><td></td><td>not run: after G1, stage B was chosen</td></tr>
-              <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>pending</td><td></td><td></td></tr>
-              <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>done</td><td>2026-11-18 14:40</td><td>setting s3; R1: 10 of 11 tasks pass; base command to the forecast 0.2–0.8 cm, NDT 5.3 cm (fails)</td></tr>
+              <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>running</td><td></td><td>B-frozen: screening 0/0 (of 40), formal 0/0 (of 330; π0.5 alone 271); demonstrations 217 of 880</td></tr>
               <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>pending</td><td></td><td></td></tr>
               <tr><th scope="row">B6-B7</th><td>Closed loop with the Flight DiT&#x27;s base; verdict of stage B</td><td>pending</td><td></td><td></td></tr>
             </tbody>
@@ -1101,6 +1101,41 @@
           </table>
         </div>
         <p class="note">Error: the mean distance between the sampled chunk's end-effector targets and the demonstration's recorded targets, over the actions the demonstration still has. @shuf sends, for demonstration j of a task, the message of demonstration j + 1 of the same task at the same frame. After 15,000 steps the message's weights are still close to their random start: they moved by 4.5–8.1 % of their initial size (A-ctrl, with the same seed, keeps the initial values).</p>
+      </div>
+    </section>
+    <section id="fd-stage-b-b1">
+      <div class="wrap">
+        <h2>B1: can the Flight DiT fly the base?</h2>
+        <p class="sub">The scripted specialist sets the end-effector targets; the Flight DiT's path pins the base's x and z, and the executor yields towards the IK's own base wherever the arm cannot reach (1 mm). First a sweep of three settings on NDT, Lemon, Peg and Frame, 5 attempts each; the setting with the most successes is kept. Then rule R1 on all 11 tasks, 20 attempts each: success at most 20 points below the scripted specialist alone, and the base command within 1 cm of the Flight DiT's reference (median over attempts of the mean x-z distance). Failing tasks: NDT; three or more would have stopped the run.</p>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Setting</th><th scope="col">What</th><th scope="col">Successes</th><th scope="col">Base command to reference (cm, mean)</th><th scope="col">NDT alone (cm)</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">s1</th><td>a new path every camera frame, lead 1 step</td><td>17/20</td><td>2.26</td><td>7.75</td></tr>
+              <tr><th scope="row">s2</th><td>a new path every camera frame, lead 0.05 s</td><td>19/20</td><td>2.13</td><td>6.52</td></tr>
+              <tr><th scope="row">s3 (chosen)</th><td>a new path every 0.4 s, lead 1 step</td><td>20/20</td><td>2.11</td><td>7.25</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Task</th><th scope="col">Successes</th><th scope="col">Specialist alone</th><th scope="col">Base command to reference (cm, median)</th><th scope="col">Share of steps that yielded</th><th scope="col">R1</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">PressButton</th><td>20/20</td><td>100 %</td><td>0.39</td><td>0.76</td><td>pass</td></tr>
+              <tr><th scope="row">PegInHole</th><td>19/20</td><td>88 %</td><td>0.55</td><td>0.86</td><td>pass</td></tr>
+              <tr><th scope="row">NDT</th><td>20/20</td><td>100 %</td><td>5.33</td><td>0.88</td><td>FAIL</td></tr>
+              <tr><th scope="row">WipeWindow</th><td>20/20</td><td>100 %</td><td>0.51</td><td>0.93</td><td>pass</td></tr>
+              <tr><th scope="row">CabinetPickPlace</th><td>20/20</td><td>100 %</td><td>0.29</td><td>0.96</td><td>pass</td></tr>
+              <tr><th scope="row">FrameAssembly</th><td>15/20</td><td>89 %</td><td>0.40</td><td>0.80</td><td>pass</td></tr>
+              <tr><th scope="row">LemonHarvesting</th><td>20/20</td><td>75 %</td><td>0.36</td><td>0.92</td><td>pass</td></tr>
+              <tr><th scope="row">RotateValve</th><td>20/20</td><td>98 %</td><td>0.37</td><td>0.87</td><td>pass</td></tr>
+              <tr><th scope="row">PushSlider</th><td>20/20</td><td>100 %</td><td>0.31</td><td>0.82</td><td>pass</td></tr>
+              <tr><th scope="row">PullLever</th><td>20/20</td><td>100 %</td><td>0.84</td><td>0.66</td><td>pass</td></tr>
+              <tr><th scope="row">OpenDoor</th><td>20/20</td><td>100 %</td><td>0.21</td><td>0.69</td><td>pass</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">The base tracks the Flight DiT closely on ten tasks (0.2–0.8 cm). On NDT, the tall inspection climb, it stays 5 cm or more from the forecast in every setting, while the task still succeeds: there the executor mostly takes the IK's own base. A likely reason, not checked: on NDT the base trails its command by about 7 cm in height even under the IK, and the Flight DiT forecasts where the base will be, not where it must be commanded to get there. The executor yields on most steps because one IK solve rarely lands within 1 mm. Recording checks before the sweep: the wrapper's per-step state equals the recorder's 120 Hz log and its attempts match the recorder's episodes; with the base left to the IK it changes nothing. The cameras of the new recordings match the old demonstrations: every new episode's first frame is shifted by 0–1 px (the median over three old episodes; one single pair on FrameAssembly shifted sideways by 13 px with a weak correlation, from scene content).</p>
       </div>
     </section>
     <section id="fd-stage-b-decisions">
