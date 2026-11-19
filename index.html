@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 21:05</span>
+            <span class="method-label">Paused: GPU 0 locked up (Xid 38), waiting for a decision · since 18 Nov 2026, 21:04 US Eastern</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1190,6 +1190,12 @@
           <li><b>18 Nov 2026, 13:20 US Eastern.</b> After G1 (the message is not read), the decision was to skip stage A&#x27;s closed loop and go on with stage B as planned: first on default physics, hoping for about a tie with π0.5 alone, then the same systems under wind, to see whether they do better there. Stage A&#x27;s verdict under the rules fixed in advance is therefore &quot;not used&quot;. The likely reason: with the base driven by the IK after the hand, the Flight DiT&#x27;s forecast of the base adds nothing π0.5 cannot already infer (both runs reached the same training loss, and the message&#x27;s weights barely moved).</li>
           <li><b>18 Nov 2026, 15:49 US Eastern.</b> B-tok&#x27;s training messages. With the chosen setting the recorder asked the Flight DiT only where the executor took a new path (every 0.4 s, the frames at which π0.5 asks in the closed loop); every other frame&#x27;s message has to be recomputed from the exported images. Those are AV1-compressed, and the Flight DiT is sensitive to that: at the same frame the recomputed message differs from the one the simulator&#x27;s own images give by about 1.6 cm (median of the largest waypoint component; a JPEG re-compression at quality 95 alone moves it by 2.9 mm), with about the same accuracy (1.0 s error 1.76 against 1.94 cm on a recording with the base left to the IK). Chosen for the best expected result: the recorded message at the frames where the executor took a new path (exactly what the evaluation sends) and the recomputed one elsewhere, so that 90 % of the training samples carry a message as in stage A and the recomputed ones act as message noise against over-trusting it. B-ctrl reads no message.</li>
         </ul>
+      </div>
+    </section>
+    <section id="fd-stage-b-paused">
+      <div class="wrap">
+        <h2>Where the run stands</h2>
+        <p class="sub">Seconds after B2&#x27;s evaluation queue ended, the first GPU of the machine locked up (NVIDIA Xid 38), as it had three times before; this time a keep-alive client had been querying the server all along. The B-ctrl run that started on that GPU right after could not initialise and was stopped. As the rules require, nothing more is started on that GPU and the run waits for a decision: a reboot, which clears the lock, and both GPUs as planned; or the remaining training and evaluation on the second GPU only, about 10–12 hours longer. B4&#x27;s data preparation finishes on the second GPU.</p>
       </div>
     </section>
 
