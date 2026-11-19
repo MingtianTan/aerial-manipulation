@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 23:19</span>
+            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-19 05:09</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1026,8 +1026,9 @@
               <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>skipped</td><td></td><td>not run: after G1, stage B was chosen</td></tr>
               <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>done</td><td>2026-11-18 14:40</td><td>setting s3; R1: 10 of 11 tasks pass; base command to the forecast 0.2–0.8 cm, NDT 5.3 cm (fails)</td></tr>
               <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>done</td><td>2026-11-18 21:03</td><td>B-frozen 247/330 (π0.5 alone 271; NDT 5/30 against 30); 880 demonstrations in 907 attempts</td></tr>
-              <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>running</td><td></td><td>export 880 episodes, 219,905 frames, T3 passed; B-ctrl step 250; B-tok step 250</td></tr>
-              <tr><th scope="row">B6-B7</th><td>Closed loop with the Flight DiT&#x27;s base; verdict of stage B</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>done</td><td>2026-11-19 05:03</td><td>B-ctrl: 15,000 steps, loss 0.0014, read back bit for bit; B-tok: 15,000 steps, loss 0.0014, read back bit for bit</td></tr>
+              <tr><th scope="row">B6-B7</th><td>Closed loop with the Flight DiT&#x27;s base; verdict of stage B</td><td>running</td><td></td><td>started 2026-11-19 05:03; the page shows these columns once they are complete</td></tr>
+              <tr><th scope="row">Wind</th><td>The target system under thrust limits, aerodynamics and wind, against π0.5 alone (added by decision)</td><td>pending</td><td></td><td></td></tr>
             </tbody>
           </table>
         </div>
@@ -1183,6 +1184,26 @@
         </div>
       </div>
     </section>
+    <section id="fd-stage-b-b4b5">
+      <div class="wrap">
+        <h2>B4–B5: the new demonstrations as training data, and the two runs</h2>
+        <div class="table-wrap">
+          <table class="plain">
+            <tbody>
+              <tr><th scope="row">Export</th><td>The 880 new demonstrations, 219,905 frames at 20 Hz, in π0.5&#x27;s training format; the normalisation statistics of the 30k checkpoint are kept. T3: end-effector position, orientation and gripper width of every frame equal the executor&#x27;s record at the mapped tick (largest difference 0).</td></tr>
+              <tr><th scope="row">Messages</th><td>Recomputed for every frame from the exported images, one frame at a time as online. The Flight DiT&#x27;s 1.0 s error on these demonstrations is 2.25 cm (0.87–2.36 cm per task, NDT 12.3 cm, where the base mostly follows the IK&#x27;s own solution). At the 27,980 frames where the executor took a new path, the message recorded online from the simulator&#x27;s images differs from the recomputed one by a median of 13.9 mm (99th percentile 155 mm), the effect of the video compression. B-tok trains on the recorded message at those frames and the recomputed one elsewhere; B-ctrl&#x27;s is always masked. In stage A&#x27;s scales the waypoints&#x27; spread is 0.94–1.08, so stage A&#x27;s normalisation is kept.</td></tr>
+              <tr><th scope="row">T4, offline and online</th><td>The closed loop&#x27;s code fed tick by tick (8 demonstrations of 8 tasks, 2,102 frames) against the training messages: waypoints at most 0.095 mm apart, z at most 2.5e-04 relative (limits 0.1 mm and 1e-3).</td></tr>
+              <tr><th scope="row">Pilot</th><td>300 steps with B-tok&#x27;s messages, batch 32: 1.39 s per step, peak memory 15.9 GiB, data loading 0.023 s per step.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="sub">The recipe of stage A on the new demonstrations: from the 30k checkpoint with Gemma-2B and SigLIP frozen, 15,000 steps of batch 32, a cosine schedule to a peak of 1e-5, an EMA of the trained parameters, the EMA at step 15,000 for evaluation. The two runs differ only in the message.</p>
+        <ul class="points">
+          <li><b>B-ctrl, message always masked.</b> Step 15,000 of 15,000; loss 0.0014 (mean of the logged batches over the last 1,000 steps); 1.38 s per step; peak memory 16.7 GiB; last update 2026-11-19 04:59:11; its final checkpoint reads back bit for bit (56 of 56 arrays).</li>
+          <li><b>B-tok, with the message (masked in 10 % of the samples).</b> Step 15,000 of 15,000; loss 0.0014 (mean of the logged batches over the last 1,000 steps); 1.38 s per step; peak memory 15.9 GiB; last update 2026-11-19 04:59:29; its final checkpoint reads back bit for bit (56 of 56 arrays).</li>
+        </ul>
+      </div>
+    </section>
     <section id="fd-stage-b-decisions">
       <div class="wrap">
         <h2>Decisions along the way</h2>
@@ -1198,7 +1219,7 @@
       <div class="wrap">
         <h2>Limits</h2>
         <ul class="points">
-          <li><b>Default physics first.</b> π0.5 alone already succeeds in 271 of 330 rollouts there and fails in its own manipulation, so a tie is the best expected outcome on default; whether the system does better under disturbances is checked after stage B, under wind (π0.5 alone: 148 of 330 at 5 % wind, 112 at 10 %).</li>
+          <li><b>Default physics first.</b> π0.5 alone already succeeds in 271 of 330 rollouts there and fails in its own manipulation, so a tie is the best expected outcome on default; whether the system does better under disturbances is checked after stage B, with thrust limits, aerodynamics and a wind of 5 % or 10 % of the weight (π0.5 alone: 148 and 112 of 330).</li>
           <li><b>The message comes from elsewhere.</b> The Flight DiT was trained on another set of demonstrations and never saw π0.5's; G0 checks that its forecast stays accurate on them. It has no model of TossBall, whose message is masked.</li>
           <li><b>One training run per column.</b> A rerun of the same policy flips 24 % of single outcomes, so only the totals over 330 rollouts and the two tasks named in advance (NDT, Lemon) are judged.</li>
         </ul>
