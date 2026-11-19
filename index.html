@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 14:48</span>
+            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-18 21:05</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1025,8 +1025,8 @@
               <tr><th scope="row">A3</th><td>Offline check G1: does the trained model read the message?</td><td>done</td><td>2026-11-18 09:52</td><td>A-tok against @zero 1.4 mm, against @shuf 0.8 mm (rule: both at least 2 mm)</td></tr>
               <tr><th scope="row">A4-A7</th><td>Closed loop: screening, 11 tasks × 30 seeds per run, probes, verdict of stage A</td><td>skipped</td><td></td><td>not run: after G1, stage B was chosen</td></tr>
               <tr><th scope="row">B1</th><td>The Flight DiT flies the base (x, z) for the scripted specialist: sweep and rule R1</td><td>done</td><td>2026-11-18 14:40</td><td>setting s3; R1: 10 of 11 tasks pass; base command to the forecast 0.2–0.8 cm, NDT 5.3 cm (fails)</td></tr>
-              <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>running</td><td></td><td>B-frozen: screening 0/0 (of 40), formal 0/0 (of 330; π0.5 alone 271); demonstrations 217 of 880</td></tr>
-              <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>pending</td><td></td><td></td></tr>
+              <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>done</td><td>2026-11-18 21:03</td><td>B-frozen 247/330 (π0.5 alone 271; NDT 5/30 against 30); 880 demonstrations in 907 attempts</td></tr>
+              <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>running</td><td></td><td>export 880 episodes, 219,905 frames, T3 passed</td></tr>
               <tr><th scope="row">B6-B7</th><td>Closed loop with the Flight DiT&#x27;s base; verdict of stage B</td><td>pending</td><td></td><td></td></tr>
             </tbody>
           </table>
@@ -1138,11 +1138,57 @@
         <p class="note">The base tracks the Flight DiT closely on ten tasks (0.2–0.8 cm). On NDT, the tall inspection climb, it stays 5 cm or more from the forecast in every setting, while the task still succeeds: there the executor mostly takes the IK's own base. A likely reason, not checked: on NDT the base trails its command by about 7 cm in height even under the IK, and the Flight DiT forecasts where the base will be, not where it must be commanded to get there. The executor yields on most steps because one IK solve rarely lands within 1 mm. Recording checks before the sweep: the wrapper's per-step state equals the recorder's 120 Hz log and its attempts match the recorder's episodes; with the base left to the IK it changes nothing. The cameras of the new recordings match the old demonstrations: every new episode's first frame is shifted by 0–1 px (the median over three old episodes; one single pair on FrameAssembly shifted sideways by 13 px with a weak correlation, from scene content).</p>
       </div>
     </section>
+    <section id="fd-stage-b-b2b3">
+      <div class="wrap">
+        <h2>B2–B3: π0.5 unchanged with the Flight DiT flying the base, and the new demonstrations</h2>
+        <p class="sub">B-frozen is π0.5's 30k checkpoint as it is, with the base's x and z flown by the Flight DiT (B1's setting) instead of the IK, on the same 11 tasks and seeds as π0.5 alone. Screening first (seeds 1000–1009, reported only: NDT 1/10, LemonHarvesting 10/10, PegInHole 2/10, FrameAssembly 7/10), then 30 rollouts per task.</p>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Task</th><th scope="col">π0.5 alone</th><th scope="col">B-frozen</th><th scope="col">Difference</th><th scope="col">Base command to reference (cm, median)</th><th scope="col">Share of steps that yielded</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">CabinetPickPlace</th><td>30/30</td><td>30/30</td><td>+0</td><td>0.96</td><td>0.99</td></tr>
+              <tr><th scope="row">FrameAssembly</th><td>29/30</td><td>29/30</td><td>+0</td><td>0.35</td><td>0.75</td></tr>
+              <tr><th scope="row">LemonHarvesting</th><td>28/30</td><td>29/30</td><td>+1</td><td>0.31</td><td>0.89</td></tr>
+              <tr><th scope="row">NDT</th><td>30/30</td><td>5/30</td><td>-25</td><td>3.10</td><td>0.88</td></tr>
+              <tr><th scope="row">OpenDoor</th><td>2/30</td><td>4/30</td><td>+2</td><td>0.95</td><td>0.97</td></tr>
+              <tr><th scope="row">PegInHole</th><td>22/30</td><td>22/30</td><td>+0</td><td>0.51</td><td>0.82</td></tr>
+              <tr><th scope="row">PressButton</th><td>30/30</td><td>30/30</td><td>+0</td><td>0.87</td><td>0.90</td></tr>
+              <tr><th scope="row">PullLever</th><td>24/30</td><td>24/30</td><td>+0</td><td>1.64</td><td>0.95</td></tr>
+              <tr><th scope="row">PushSlider</th><td>30/30</td><td>30/30</td><td>+0</td><td>1.44</td><td>0.95</td></tr>
+              <tr><th scope="row">RotateValve</th><td>25/30</td><td>23/30</td><td>-2</td><td>1.36</td><td>0.93</td></tr>
+              <tr><th scope="row">WipeWindow</th><td>21/30</td><td>21/30</td><td>+0</td><td>1.27</td><td>0.98</td></tr>
+              <tr><th scope="row">All</th><td>271/330</td><td>247/330</td><td>-24</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Paired by seed: 19 rollouts succeed only with B-frozen, 43 only with π0.5 alone (exact McNemar p = 0.0032). Crashes 0 (π0.5 alone 0); end-effector tracking error 0.98 cm (1.14); Lemon grasped / delivered 29 / 29 (28 / 28); OpenDoor doors opened 9 (9). On NDT, the one task it loses, the end-effector target stops lower: median final target height 6.78 m against 6.96 m with π0.5 alone (every rollout of both passes 6.5 m). The Flight DiT's in-loop 1.0 s error, π0.5 flying the hand: 4.41 cm.</p>
+        <p class="sub">B3 recorded, with the scripted specialist and the Flight DiT flying the base, 80 successful demonstrations per task (R1's successes included); these are what B-ctrl and B-tok train on.</p>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Task</th><th scope="col">Successes / attempts</th><th scope="col">Base command to reference (cm, median)</th><th scope="col">Share of steps that yielded</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">PressButton</th><td>80/80</td><td>0.33</td><td>0.75</td></tr>
+              <tr><th scope="row">PegInHole</th><td>80/82</td><td>0.56</td><td>0.84</td></tr>
+              <tr><th scope="row">NDT</th><td>80/80</td><td>6.14</td><td>0.90</td></tr>
+              <tr><th scope="row">WipeWindow</th><td>80/80</td><td>0.49</td><td>0.93</td></tr>
+              <tr><th scope="row">CabinetPickPlace</th><td>80/80</td><td>0.28</td><td>0.96</td></tr>
+              <tr><th scope="row">FrameAssembly</th><td>80/95</td><td>0.38</td><td>0.82</td></tr>
+              <tr><th scope="row">LemonHarvesting</th><td>80/88</td><td>0.36</td><td>0.92</td></tr>
+              <tr><th scope="row">RotateValve</th><td>80/81</td><td>0.33</td><td>0.83</td></tr>
+              <tr><th scope="row">PushSlider</th><td>80/80</td><td>0.31</td><td>0.82</td></tr>
+              <tr><th scope="row">PullLever</th><td>80/81</td><td>0.81</td><td>0.66</td></tr>
+              <tr><th scope="row">OpenDoor</th><td>80/80</td><td>0.23</td><td>0.72</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
     <section id="fd-stage-b-decisions">
       <div class="wrap">
         <h2>Decisions along the way</h2>
         <ul class="points">
           <li><b>18 Nov 2026, 13:20 US Eastern.</b> After G1 (the message is not read), the decision was to skip stage A&#x27;s closed loop and go on with stage B as planned: first on default physics, hoping for about a tie with π0.5 alone, then the same systems under wind, to see whether they do better there. Stage A&#x27;s verdict under the rules fixed in advance is therefore &quot;not used&quot;. The likely reason: with the base driven by the IK after the hand, the Flight DiT&#x27;s forecast of the base adds nothing π0.5 cannot already infer (both runs reached the same training loss, and the message&#x27;s weights barely moved).</li>
+          <li><b>18 Nov 2026, 15:49 US Eastern.</b> B-tok&#x27;s training messages. With the chosen setting the recorder asked the Flight DiT only where the executor took a new path (every 0.4 s, the frames at which π0.5 asks in the closed loop); every other frame&#x27;s message has to be recomputed from the exported images. Those are AV1-compressed, and the Flight DiT is sensitive to that: at the same frame the recomputed message differs from the one the simulator&#x27;s own images give by about 1.6 cm (median of the largest waypoint component; a JPEG re-compression at quality 95 alone moves it by 2.9 mm), with about the same accuracy (1.0 s error 1.76 against 1.94 cm on a recording with the base left to the IK). Chosen for the best expected result: the recorded message at the frames where the executor took a new path (exactly what the evaluation sends) and the recomputed one elsewhere, so that 90 % of the training samples carry a message as in stage A and the recomputed ones act as message noise against over-trusting it. B-ctrl reads no message.</li>
         </ul>
       </div>
     </section>
