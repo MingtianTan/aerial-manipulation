@@ -113,3 +113,10 @@
 .lx-card .big { margin: 7px 0 0; font: 600 1.18rem/1.25 var(--mono); color: var(--ink); }
 .lx-card .x { margin: 6px 0 0; font-size: 0.88rem; line-height: 1.5; color: var(--text); }
 .lx-svg .lx-iklab { fill: #5f6670; }
+
+/* what each model makes of an input, in a part's card */
+.lx-pop .lx-note { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--line); }
+.lx-pop .lx-note b { display: block; font: 600 0.7rem/1.4 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #5c6470; }
+.lx-pop .lx-note.pi b { color: var(--pi-ink); }
+.lx-pop .lx-note.ff b { color: var(--fd-ink); }
+.lx-pop .lx-note p { margin: 3px 0 0; }

@@ -548,10 +548,15 @@
     const base = PARTS[id] || { name: id };
     const unused = parts[id].classList.contains("lx-dim");
     const over = (!unused && S.tips && S.tips[id]) || {};
+    // notes say what each model makes of the part; a step shows only the models it uses (S.models)
+    const heads = { pi: S.piName || "π0.5", ff: "FlightFlow", ik: "The IK and the PID" };
+    const notes = unused ? [] : (over.notes || base.notes || []).filter(([who]) => (S.models || ["pi", "ff", "ik"]).includes(who))
+      .map(([who, words]) => [heads[who], words, who]);
     return {
       name: over.name || base.name,
       text: (unused ? "Not used in this step. " : "") + (over.text || base.text || ""),
       rows: unused ? [] : [...(base.rows || []), ...(over.rows || [])],
+      notes,
     };
   };
   function open(node) {
@@ -562,7 +567,8 @@
     node.classList.add("lx-hot");
     pop.style.setProperty("--tc", S.colour);
     pop.innerHTML = `<span class="tag">${esc(S.short)}</span><h4>${esc(c.name)}</h4>` + (c.text ? `<p>${esc(c.text)}</p>` : "") +
-      (c.rows.length ? `<dl>${c.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : "");
+      (c.rows.length ? `<dl>${c.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : "") +
+      c.notes.map(([h, words, who]) => `<div class="lx-note ${who}"><b>${esc(h)}</b><p>${esc(words)}</p></div>`).join("");
     pop.hidden = false;
     const sr = stage.getBoundingClientRect(), r = node.getBoundingClientRect();
     const w = pop.offsetWidth, h = pop.offsetHeight;
