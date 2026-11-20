@@ -122,22 +122,24 @@
 
   // See: the two cameras, the task and the flight state
   const gSee = hit(svg, 1, "the inputs", { class: "cx-hit cx-see", "data-from": 1, "data-now": "1" });
-  [["assets/overview/cam_body.jpg", 30, "body camera"], ["assets/overview/cam_ee.jpg", 188, "wrist camera"]].forEach(([src, y, name], k) => {
+  [["assets/overview/cam_body.jpg", 30, "body camera"], ["assets/overview/cam_ee.jpg", 188, "EE camera"]].forEach(([src, y, name], k) => {
     const clip = el("clipPath", { id: `cx-cam-${k}` }, defs);
     el("rect", { x: 0, y, width: 130, height: 130, rx: 7 }, clip);
     el("image", { href: src, x: 0, y, width: 130, height: 130, preserveAspectRatio: "xMidYMid slice", "clip-path": `url(#cx-cam-${k})` }, gSee);
     el("rect", { class: "cx-photo-edge", x: 0.5, y: y + 0.5, width: 129, height: 129, rx: 7 }, gSee);
     write(gSee, 0, y + 146, name, "cx-cap");
   });
-  chip(gSee, 0, 348, 130, 26, "“harvest lemon”");
-  chip(gSee, 0, 384, 130, 26, "flight state");
+  chip(gSee, 0, 346, 152, 28, "“harvest lemon”");
+  const stateChip = chip(gSee, 0, 384, 152, 28, "flight state", "cx-state",
+    { tabindex: 0, role: "button", "aria-expanded": "false", "aria-label": "Flight state: which states, and who reads them" });
+  write(stateChip, 139, 403, "+", "cx-more", { "text-anchor": "middle" });
 
   // Think, top: π0.5, with what it learned from
   const gPi = hit(svg, 1, "keep π0.5 for the arm");
   el("rect", { class: "cx-block pi", x: 196, y: 36, width: 452, height: 250, rx: 14, "data-now": "0 1 3" }, gPi);
   write(gPi, 216, 70, "π0.5", "cx-name pi-ink");
-  write(gPi, 216, 90, "pretrained vision-language-action model", "cx-sub");
-  write(gPi, 216, 118, "LEARNED FROM", "cx-mini");
+  write(gPi, 216, 93, "pretrained vision-language-action model", "cx-sub");
+  write(gPi, 216, 121, "LEARNED FROM", "cx-mini");
   const planToks = [];
   for (let k = 0; k < 8; k++) {
     const x = 312 + 29 * k;
@@ -159,11 +161,11 @@
   for (let k = 9; k >= 0; k--) armCards.push(card(216 + 8 * k, 158 - 3 * k, "arm")); // back to front
   for (let k = 1; k >= 0; k--) airCards.push(card(452 + 8 * k, 158 - 3 * k, "air"));
   const armLab = el("g", {}, gDeck);
-  write(armLab, 346, 160, "arm data", "cx-deck-lab");
-  write(armLab, 346, 177, "plentiful", "cx-deck-sub");
+  write(armLab, 346, 162, "arm data", "cx-deck-lab");
+  write(armLab, 346, 181, "plentiful", "cx-deck-sub");
   const airLab = el("g", {}, gDeck);
-  write(airLab, 518, 160, "aerial data", "cx-deck-lab");
-  write(airLab, 518, 177, "scarce", "cx-deck-sub");
+  write(airLab, 516, 162, "aerial data", "cx-deck-lab");
+  write(airLab, 516, 181, "scarce", "cx-deck-sub");
 
   // the forecast's place in π0.5: three slots in front of the hand plan
   const gSlots = hit(svg, 3, "share the forecast");
@@ -173,13 +175,13 @@
   // Think, bottom: FlightFlow and its forecast
   const gFf = hit(svg, 2, "learn flight", { "data-from": 2 });
   el("rect", { class: "cx-block fd", x: 196, y: 362, width: 152, height: 104, rx: 12, "data-now": "2" }, gFf);
-  write(gFf, 212, 394, "FlightFlow", "cx-name sm fd-ink");
-  write(gFf, 212, 415, "small model", "cx-sub");
-  write(gFf, 212, 432, "flow matching", "cx-sub");
+  write(gFf, 212, 393, "FlightFlow", "cx-name sm fd-ink");
+  write(gFf, 212, 416, "small model", "cx-sub");
+  write(gFf, 212, 435, "flow matching", "cx-sub");
   el("rect", { class: "cx-plot", x: 368, y: 340, width: 280, height: 160, rx: 10 }, gFf);
-  write(gFf, 382, 360, "BASE PATH", "cx-mini");
-  write(gFf, 634, 360, "noise → paths", "cx-tick", { "text-anchor": "end" });
-  el("line", { class: "cx-axis", x1: 384, x2: 632, y1: 476, y2: 476 }, gFf);
+  write(gFf, 382, 362, "BASE PATH", "cx-mini");
+  write(gFf, 634, 362, "noise → paths", "cx-tick", { "text-anchor": "end" });
+  el("line", { class: "cx-axis", x1: 384, x2: 632, y1: 474, y2: 474 }, gFf);
   write(gFf, 384, 492, "now", "cx-tick");
   write(gFf, 632, 492, "ahead", "cx-tick", { "text-anchor": "end" });
   const meanAt = (u) => [392 + 232 * u, 452 - 70 * u * u * (3 - 2 * u)];
@@ -203,10 +205,10 @@
   // connectors
   const gConn = el("g", {}, svg);
   const inputs = [
-    [[130, 95], [166, 95]], [[130, 253], [166, 253]], [[130, 361], [166, 361]], [[130, 397], [166, 397]], [[166, 95], [166, 414]],
+    [[130, 95], [170, 95]], [[130, 253], [170, 253]], [[152, 360], [170, 360]], [[152, 398], [170, 398]], [[170, 95], [170, 414]],
   ].map((p) => connector(gConn, p, "grey", "1 4", false));
-  inputs.push(connector(gConn, [[166, 160], [194, 160]], "grey", "1 4"));
-  const toFf = connector(gConn, [[166, 414], [194, 414]], "grey", "2 4");
+  inputs.push(connector(gConn, [[170, 160], [194, 160]], "grey", "1 4"));
+  const toFf = connector(gConn, [[170, 414], [194, 414]], "grey", "2 4");
   const toPlot = connector(gConn, [[348, 414], [366, 414]], "fd", "2");
   const hand = connector(gConn, [[648, 226], [742, 226]], "pi", "1 4");
   const handLab = write(gConn, 695, 216, "hand target", "cx-lab pi-ink", { "text-anchor": "middle" });
@@ -214,11 +216,11 @@
   const baseLab = write(gConn, 695, 410, "base path", "cx-lab fd-ink", { "text-anchor": "middle" });
   const tokPath = cubic([452, 338], [452, 312], [262, 318], [257, 290], 40);
   const tok = connector(gConn, tokPath, "fd", "3");
-  const tokLab = write(gConn, 466, 326, "forecast as tokens", "cx-lab fd-ink");
-  const loop = connector(gConn, [[952, 520], [952, 540], [65, 540], [65, 414]], "grey", "4");
+  const tokLab = write(gConn, 464, 327, "forecast as tokens", "cx-lab fd-ink");
+  const loop = connector(gConn, [[952, 520], [952, 540], [76, 540], [76, 416]], "grey", "4");
   const loopLab = el("g", {}, gConn);
-  el("rect", { class: "cx-labbg", x: 362, y: 532, width: 292, height: 16 }, loopLab);
-  write(loopLab, 508, 544, "new camera frames · both models plan again", "cx-cap", { "text-anchor": "middle" });
+  el("rect", { class: "cx-labbg", x: 330, y: 530, width: 356, height: 20 }, loopLab);
+  write(loopLab, 508, 545, "new camera frames · both models plan again", "cx-cap", { "text-anchor": "middle" });
 
   // Move: one vehicle, a wall of lemons
   const S = [858, 430], E = [964, 316], T = [1080, 262], WR = [1068, 262];
@@ -494,6 +496,45 @@
     const target = event.target.closest && event.target.closest("[data-go]");
     if (target && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); jump(Number(target.dataset.go)); }
   });
+  // The flight state opens a card with the 35 numbers it is made of and what each model reads of them
+  // (pipeline/flight_dit/common.py and features.py on the flight-dit branch; openpi's am_bench_policy.py).
+  const stateCard = fig.querySelector(".cx-pop");
+  const STATE_CARD = `<button class="close" type="button" aria-label="Close">×</button>
+    <h4>Flight state · 120 Hz</h4>
+    <p>35 numbers at every physics tick, positions in the world frame:</p>
+    <dl>
+      <dt>End effector</dt><dd>position <b>3</b> · orientation, quaternion <b>4</b> · linear velocity <b>3</b> · angular velocity <b>3</b></dd>
+      <dt>Gripper</dt><dd>opening width <b>1</b></dd>
+      <dt>Arm</dt><dd>joint positions <b>4</b> · joint velocities <b>4</b></dd>
+      <dt>Base</dt><dd>position <b>3</b> · orientation, quaternion <b>4</b> · linear velocity <b>3</b> · angular velocity <b>3</b></dd>
+    </dl>
+    <dl class="who">
+      <dt>FlightFlow</dt><dd>all 35 over the last 0.2 s (24 ticks), turned into the base’s heading, positions relative to the base (its height kept)</dd>
+      <dt>π0.5</dt><dd>only the gripper width; the hand’s pose serves to express its actions relative to the hand</dd>
+    </dl>`;
+  const closeState = () => { stateCard.hidden = true; stateChip.setAttribute("aria-expanded", "false"); };
+  const openState = () => {
+    stateCard.innerHTML = STATE_CARD;
+    stateCard.hidden = false;
+    stateChip.setAttribute("aria-expanded", "true");
+    stateCard.querySelector(".close").addEventListener("click", closeState);
+    // beside the chip, rising from its bottom edge; under it when there is no room beside it
+    const f = fig.getBoundingClientRect(), r = stateChip.getBoundingClientRect();
+    const w = stateCard.offsetWidth, h = stateCard.offsetHeight;
+    let x = r.right - f.left + 12, y = r.bottom - f.top - h;
+    if (x + w > f.width - 8) { x = Math.max(8, Math.min(r.left - f.left, f.width - w - 8)); y = r.bottom - f.top + 8; }
+    stateCard.style.transform = `translate(${Math.round(x)}px, ${Math.round(Math.max(8, y))}px)`;
+  };
+  const toggleState = (event) => { event.stopPropagation(); if (stateCard.hidden) openState(); else closeState(); };
+  stateChip.addEventListener("click", toggleState);
+  stateChip.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); toggleState(event); }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!stateCard.hidden && !stateCard.contains(event.target) && !stateChip.contains(event.target)) closeState();
+  });
+  addEventListener("keydown", (event) => { if (event.key === "Escape" && !stateCard.hidden) closeState(); });
+
   const sync = () => {
     bPlay.hidden = still();
     if (still()) { pause(); t = 1; paint(step, 1); }

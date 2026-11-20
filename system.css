@@ -1,0 +1,75 @@
+/* The full system as layers (index.html, #system): one layer per way the two models were wired, chosen on the left;
+   hovering or tapping a part of the drawing opens its details. system.js draws it with the .fig classes of overview.css. */
+.lx { --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+.lx-wrap { display: grid; grid-template-columns: 228px minmax(0, 1fr); gap: 22px; align-items: start; }
+.lx-nav { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 7px; }
+.lx-eyebrow { margin: 0 0 3px; font: 600 0.72rem/1.2 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+.lx-layer { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 9px; row-gap: 3px; align-items: baseline; width: 100%;
+  margin: 0; padding: 9px 10px 10px 10px; border: 1px solid var(--line); border-left: 4px solid #d6d6d6; border-radius: 8px;
+  background: #fff; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.lx-layer .k { grid-row: span 2; font: 600 0.74rem var(--mono); color: var(--faint); }
+.lx-layer b { font: 500 0.95rem/1.25 var(--title); color: var(--ink); }
+.lx-layer .s { font-size: 0.8rem; line-height: 1.38; color: var(--soft); }
+.lx-layer:hover { border-color: #bdbdbd; }
+.lx-layer:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+.lx-layer[aria-pressed="true"] { border-color: var(--lc, var(--ink)); border-left-color: var(--lc, var(--ink)); background: var(--lc-soft, #f6f6f6); }
+.lx-layer[aria-pressed="true"] .k { color: var(--lc, var(--ink)); }
+.lx-hint { margin: 6px 0 0; font-size: 0.8rem; line-height: 1.45; color: var(--faint); }
+.lx-stage { position: relative; min-width: 0; }
+.lx-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 4px; }
+.lx-head b { font: 500 1.1rem/1.3 var(--title); color: var(--ink); }
+.lx-head span { font-size: 0.9rem; color: var(--soft); }
+.lx-sum { margin: 8px 0 0; font-size: 0.92rem; line-height: 1.55; color: var(--text); }
+.lx-sum b { color: var(--ink); }
+
+/* the details card */
+.lx-pop { position: absolute; left: 0; top: 0; z-index: 6; width: min(500px, calc(100% - 16px)); padding: 12px 16px 13px;
+  border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; background: #fff; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  font-size: 0.85rem; line-height: 1.5; color: var(--text); pointer-events: none; }
+.lx-pop[hidden] { display: none; }
+.lx-pop .tag { display: inline-block; margin-bottom: 5px; padding: 1px 8px; border-radius: 999px; font: 600 0.68rem/1.6 var(--mono);
+  letter-spacing: 0.04em; color: #fff; background: var(--tc, #5c6470); }
+.lx-pop h4 { margin: 0 0 4px; font: 500 1.02rem/1.3 var(--title); color: var(--ink); }
+.lx-pop p { margin: 4px 0 0; }
+.lx-pop dl { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 5px 12px; margin: 8px 0 0; line-height: 1.45; }
+.lx-pop dt { padding-top: 2px; font: 600 0.66rem/1.6 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); }
+.lx-pop dd { margin: 0; }
+.lx-pop code { font: 0.78rem var(--mono); color: var(--ink); }
+.lx-pop .src { margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--line); font: 0.7rem/1.5 var(--mono); color: var(--faint); }
+
+/* layers: parts a layer does not use fade out; the part under the pointer is outlined */
+.lx-svg [data-part] { transition: opacity 0.35s ease; cursor: help; }
+.lx-svg [data-part]:focus { outline: none; }
+.lx-svg .lx-dim { opacity: 0.16; }
+.lx-svg .lx-off { opacity: 0; pointer-events: none; }
+.lx-svg .lx-hot .block, .lx-svg .lx-hot .msg, .lx-svg .lx-hot .box, .lx-svg .lx-hot .photo-edge { stroke: var(--ink); stroke-width: 2.4; }
+.lx-svg .lx-hot .wire { stroke-width: 3.6; }
+.lx-svg .lx-hit { fill: transparent; stroke: none; }
+.lx-svg .t-status { font: 600 11px var(--mono); letter-spacing: 0.04em; fill: var(--soft); }
+.lx-svg .t-status.s-trained { fill: var(--pi-ink); }
+.lx-svg .t-status.s-fd { fill: var(--fd-ink); }
+.lx-svg .t-path { font: 600 12px var(--mono); }
+.lx-svg .t-path.pi { fill: var(--pi-ink); }
+.lx-svg .t-path.fd { fill: var(--fd-ink); }
+.lx-svg .w-dash { stroke-dasharray: 6 5; }
+.lx-svg .lx-flow .wire { animation: lx-march 0.9s linear infinite; }
+@keyframes lx-march { to { stroke-dashoffset: -22; } }
+@media (prefers-reduced-motion: reduce) { .lx-svg .lx-flow .wire { animation: none; } }
+
+@media (max-width: 1000px) {
+  .lx-wrap { grid-template-columns: minmax(0, 1fr); }
+  .lx-nav { position: static; flex-direction: row; flex-wrap: wrap; }
+  .lx-nav .lx-eyebrow, .lx-hint { flex: 1 1 100%; }
+  .lx-layer { flex: 1 1 210px; width: auto; }
+}
+
+/* larger small print than the earlier static figure had */
+.lx-svg .t-state { font-size: 13px; }
+.lx-svg .t-caps { font-size: 12px; }
+.lx-svg .t-lbl { font-size: 14px; }
+.lx-svg .t-tiny { font-size: 13px; }
+.lx-svg .t-quote { font-size: 13.5px; }
+.lx-svg .t-photo { font-size: 13px; }
+.lx-svg .t-status { font-size: 12.5px; }
+.lx-svg .t-path { font-size: 13.5px; }
+.lx-pop { font-size: 0.88rem; }
