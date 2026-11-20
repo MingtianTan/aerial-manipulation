@@ -4,7 +4,8 @@ Project page (GitHub Pages, served from this folder): https://mingtiantan.github
 
 This repository holds the page only: `index.html` (the overview, with `overview.css` and `overview.js`; written by
 `pipeline/webpage/overview.py` in the code repository, and since 20 Nov edited here: the General idea player
-`concept.js`/`concept.css` and the Method figure in five steps `system.js`/`system-data.js`/`system.css`), `notes.html` (the earlier long page with every write-up, kept here but not linked from the site), `develop.html` (develop mode),
+`concept.js`/`concept.css`; the Method figure in five steps and the Next figure, one engine `system.js` with
+`system-data.js`, `next-data.js` and `system.css`; the forecast playback and predictor sketches `forecast.js`/`forecast.css`), `notes.html` (the earlier long page with every write-up, kept here but not linked from the site), `develop.html` (develop mode),
 `styles.css` and `main.js` (used by the notes and develop mode) and `assets/` (the task videos, posters and figures). Everything that produced the results is in the private repository
 [`MingtianTan/Aerial_Manipulation_Code`](https://github.com/MingtianTan/Aerial_Manipulation_Code), in the layout this
 repository had before the two were split (2026-10-20):
