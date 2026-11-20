@@ -1092,7 +1092,7 @@
       <div class="wrap">
         <h2>How it was run</h2>
         <ul class="points">
-          <li><b>Tokens.</b> The chunk-blind Flight DiT of the default-only run, frozen. Its forecast 1.0 s ahead is off by 1.33 cm on π0.5's training demonstrations, which it never saw (1.31 cm on its own held-out ones).</li>
+          <li><b>Tokens.</b> The chunk-blind Flight DiT fine-tuned in the small test above (44 M parameters; demonstrations and 160 of π0.5's own flights), frozen. Its forecast 1.0 s ahead is off by 1.33 cm on π0.5's training demonstrations, which it never saw (1.31 cm on its own held-out demonstrations).</li>
           <li><b>Training.</b> From π0.5's 30k checkpoint with its vision-language backbone (SigLIP, Gemma-2B) frozen: 430.4 M of 3,353.7 M parameters trained, 15,000 steps of batch 32. Each stage trains two models that differ only in the tokens: always masked, or sent (masked in 10 % of the samples). Stage A uses π0.5's own 960 demonstrations; stage B uses 880 new ones (80 per task), recorded with the scripted specialist while the Flight DiT flew the base.</li>
           <li><b>The Flight DiT's base.</b> A new path every 0.4 s, when π0.5 re-plans. The base follows it in stand-off and height and gives way towards the IK's own solution where the arm would not reach. In the full system's rollouts the base command stays 0.4–1.5 cm from the path on ten tasks (per-task medians) and 4.3 cm on the inspection task, the tall climb.</li>
           <li><b>Evaluation.</b> The judged protocol of the default-only run: 30 rollouts per task, rollout <i>i</i> with seed <i>i</i> in every column and, under wind, with the same wind. The comparisons and their thresholds were fixed before the runs.</li>
