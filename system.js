@@ -1,18 +1,24 @@
-// The full system as layers (index.html, #system). Each layer on the left is one way the two models were wired; the
-// drawing keeps the parts that layer uses, fades the others and relabels what was trained or frozen. Hovering,
-// focusing or tapping a part opens a card with its details for the chosen layer. Layer contents: LAYERS, PARTS below.
+// The system figure (index.html, #system), played like the concept figure above it in five steps chosen on the left:
+// 1 π0.5 alone, 2 FlightFlow and what it learned, 3–5 our three attempts at wiring the two models. Each step plays
+// in beats (inputs flow in, π0.5 plans, FlightFlow turns noise into paths, the plan or the forecast travels between
+// the models, one controller flies both) and lights the detail card under the drawing that the beat is about.
+// Hovering, focusing or tapping a part of the drawing opens its card for the chosen step. Contents: system-data.js.
+// With "reduce motion" set nothing moves by itself and the beats change without animation.
 (() => {
   const root = document.getElementById("system");
   const svg = root && root.querySelector("svg.lx-svg");
   if (!svg || !window.LX_DATA) return;
-  const { PARTS, LAYERS } = window.LX_DATA;
+  const { PARTS, SCENES } = window.LX_DATA;
   const NS = "http://www.w3.org/2000/svg";
-  const stage = root.querySelector(".lx-stage");
-  const nav = root.querySelector(".lx-nav");
-  const pop = root.querySelector(".lx-pop");
-  const head = root.querySelector(".lx-head");
-  const sum = root.querySelector(".lx-sum");
+  const $ = (s) => root.querySelector(s);
+  const stage = $(".lx-stage"), nav = $(".lx-nav"), pop = $(".lx-pop"), head = $(".lx-head"), cardsBox = $(".lx-cards");
+  const say = $(".cx-say"), ind = $(".cx-ind"), tabList = $(".cx-tabs");
+  const bPrev = $('[data-act="prev"]'), bPlay = $('[data-act="play"]'), bNext = $('[data-act="next"]'), bReset = $('[data-act="reset"]');
+  const motion = matchMedia("(prefers-reduced-motion: reduce)");
+  const still = () => motion.matches;
+  const REPO = "https://github.com/MingtianTan/Aerial_Manipulation_Code/tree/";
 
+  /* ---------------- helpers ---------------- */
   const el = (tag, attrs = {}, parent = null) => {
     const node = document.createElementNS(NS, tag);
     for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
@@ -24,24 +30,57 @@
     node.textContent = str;
     return node;
   };
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const seg = (t, a, b) => clamp((t - a) / (b - a));
+  const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const lerp = (a, b, f) => a + (b - a) * f;
+  const n1 = (v) => v.toFixed(1);
+  const pts = (list) => list.map(([x, y]) => `${n1(x)},${n1(y)}`).join(" ");
+  const show = (node, on) => { node.style.display = on ? "" : "none"; };
+  const fade = (node, a) => { node.setAttribute("opacity", a.toFixed(3)); show(node, a > 0.001); };
+  const track = (points) => {
+    const len = [0];
+    for (let k = 1; k < points.length; k++) len.push(len[k - 1] + Math.hypot(points[k][0] - points[k - 1][0], points[k][1] - points[k - 1][1]));
+    return { points, len, total: len[len.length - 1] };
+  };
+  const at = (tr, f) => {
+    const d = clamp(f) * tr.total;
+    let k = 1;
+    while (k < tr.len.length - 1 && tr.len[k] < d) k++;
+    const [x0, y0] = tr.points[k - 1], [x1, y1] = tr.points[k];
+    const u = (d - tr.len[k - 1]) / (tr.len[k] - tr.len[k - 1] || 1);
+    return [x0 + (x1 - x0) * u, y0 + (y1 - y0) * u];
+  };
+  const cut = (tr, a, b) => {
+    const out = [at(tr, a)];
+    for (let k = 1; k < tr.points.length - 1; k++) if (tr.len[k] > a * tr.total && tr.len[k] < b * tr.total) out.push(tr.points[k]);
+    out.push(at(tr, b));
+    return out;
+  };
+  const random = (seed) => () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let r = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
 
-  /* ---------------- the drawing (viewBox 1000 x 650), in the style of the earlier static figure ---------------- */
+  /* ---------------- the drawing (viewBox 1000 x 650) ---------------- */
   const defs = el("defs", {}, svg);
-  for (const [id, cls, size] of [["lx-m-grey", "head-grey", 7], ["lx-m-fd", "head-fd", 6], ["lx-m-pi", "head-pi", 6]]) {
+  for (const [id, cls, size] of [["lx-m-grey", "head-grey", 7], ["lx-m-fd", "head-fd", 6], ["lx-m-pi", "head-pi", 6], ["lx-m-hid", "head-hid", 6]]) {
     const m = el("marker", { id, viewBox: "0 0 10 10", refX: 8.5, refY: 5, markerWidth: size, markerHeight: size, orient: "auto-start-reverse" }, defs);
     el("path", { d: "M0 0.6 10 5 0 9.4z", class: cls }, m);
   }
   const parts = {};   // id -> <g>
-  const status = {};  // id -> <text> whose words change with the layer
+  const status = {};  // id -> <text> whose words change with the attempt
   const part = (id, parent = svg) => {
     const g = el("g", { "data-part": id, tabindex: 0, role: "button", "aria-label": PARTS[id] ? PARTS[id].name : id }, parent);
     parts[id] = g;
     return g;
   };
-  const wire = (g, points, colour, thick = false, dashed = false) =>
-    el("polyline", { points, class: `wire w-${colour}${thick ? " thick" : ""}${dashed ? " w-dash" : ""}`, "marker-end": `url(#lx-m-${colour})` }, g);
+  const wire = (g, points, colour, thick = false) =>
+    el("polyline", { points, class: `wire w-${colour}${thick ? " thick" : ""}`, "marker-end": `url(#lx-m-${colour})` }, g);
   const pills = (g, x, y, n, cls, step = 10) => { for (let k = 0; k < n; k++) el("rect", { x: x + k * step, y, width: 7, height: 16, rx: 2.5, class: `pill ${cls}` }, g); };
-  // A block with a title of one or more lines and, when it has an id, a status line under it (frozen, trained, ...).
   const block = (g, x, y, w, h, cls, lines, id) => {
     el("rect", { x, y, width: w, height: h, rx: 9, class: `block ${cls}` }, g);
     const cx = x + w / 2, top = y + (h - lines.length * 19 - (id ? 15 : 0)) / 2 + 14;
@@ -83,6 +122,7 @@
   const gDino = part("dino");
   block(gDino, 230, 92, 130, 44, "frozen", ["DINOv2-S"], "dino");
   pills(gDino, 368, 106, 4, "p-grey");
+  badge(gDino, 230, 92, 1);
   wire(gDino, "408,114 427,114", "grey");
   const gSenc = part("senc");
   block(gSenc, 230, 172, 130, 44, "fd-soft", ["State encoder"], "senc");
@@ -96,22 +136,34 @@
   block(gFmt, 430, 92, 150, 204, "fd-core", ["Flow-matching", "transformer"], "fmt");
   status.fmt2 = text(gFmt, 505, 235, "", "t-status");
   status.fmt3 = text(gFmt, 505, 253, "", "t-status");
-  badge(gFfBox, 230, 92, 1);
   badge(gFmt, 430, 92, 2);
+  // the forecast: samples that flow from noise into paths, their mean, and the latent
   const gFc = part("fc");
   el("rect", { x: 600, y: 88, width: 126, height: 212, rx: 12, class: "msg" }, gFc);
   wire(gFc, "580,160 598,160", "fd");
   wire(gFc, "580,262 598,262", "fd");
   text(gFc, 663, 110, "THE FORECAST", "t-caps");
-  const glyph = Array.from({ length: 11 }, (_, k) => [612 + k * 10.2, 196 - 40 * Math.pow(k / 10, 0.62)]);
-  el("polyline", { points: glyph.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" "), class: "fc-glyph" }, gFc);
-  glyph.slice(1).forEach(([x, y]) => el("circle", { cx: x.toFixed(1), cy: y.toFixed(1), r: 3.2, class: "fc-dot" }, gFc));
-  el("circle", { cx: 612, cy: 196, r: 4, class: "fc-now" }, gFc);
-  text(gFc, 663, 222, "base path,", "t-lbl");
-  text(gFc, 663, 238, "next 2.5 s", "t-lbl");
-  el("rect", { x: 641, y: 254, width: 44, height: 18, rx: 4, class: "pill p-fd" }, gFc);
-  text(gFc, 663, 267.5, "z", "t-z");
-  text(gFc, 663, 290, "latent", "t-lbl");
+  text(gFc, 663, 232, "base path,", "t-lbl");
+  text(gFc, 663, 247, "next 2.5 s", "t-lbl");
+  const glyphAt = (u) => [612 + 102 * u, 196 - 40 * Math.pow(u, 0.62)];
+  const rnd = random(11);
+  const samples = Array.from({ length: 8 }, (_, k) => {
+    const off = (k - 3.5) * 3.2, goal = [], noise = [];
+    for (let j = 0; j < 12; j++) {
+      const u = j / 11, [x, y] = glyphAt(u);
+      goal.push([x, y + off * Math.pow(u, 1.3) + Math.sin(Math.PI * u) * ((k % 3) - 1) * 2.5]);
+      noise.push([x + (rnd() - 0.5) * 8, 130 + rnd() * 76]);
+    }
+    return { node: el("polyline", { class: "fc-sample", points: pts(goal) }, gFc), goal, noise };
+  });
+  const meanTr = track(Array.from({ length: 21 }, (_, k) => glyphAt(k / 20)));
+  const mean = el("polyline", { class: "fc-glyph", points: "" }, gFc);
+  const dots = Array.from({ length: 10 }, (_, k) => { const [x, y] = glyphAt((k + 1) / 10); return el("circle", { cx: n1(x), cy: n1(y), r: 3.2, class: "fc-dot" }, gFc); });
+  const nowDot = el("circle", { cx: 612, cy: 196, r: 4, class: "fc-now" }, gFc);
+  const zGroup = el("g", {}, gFc);
+  el("rect", { x: 641, y: 258, width: 44, height: 17, rx: 4, class: "pill p-fd" }, zGroup);
+  text(zGroup, 663, 271, "z", "t-z");
+  text(zGroup, 663, 293, "latent", "t-lbl");
 
   // π0.5
   const gPiBox = part("pibox");
@@ -133,31 +185,45 @@
   block(gAx, 590, 440, 136, 124, "pi-core", ["Action", "expert"], "ax");
   status.ax2 = text(gAx, 658, 542, "", "t-status");
   status.axnote = text(gAx, 578, 596, "", "t-tiny");
+  const act = [0, 1, 2].map((k) => el("rect", { x: 711 + 9 * k, y: 418, width: 7, height: 16, rx: 2.5, class: "pill p-pi" }, gAx));
 
-  // the two directions between the models
+  // attempt 2: FlightFlow → π0.5 as 11 tokens
   const gTok = part("tok");
   wire(gTok, "663,300 663,410", "fd", true);
-  pills(gTok, 608, 418, 11, "p-fd", 9);
-  pills(gTok, 711, 418, 3, "p-pi", 9);
   el("rect", { x: 540, y: 300, width: 200, height: 136, class: "lx-hit" }, gTok);
   status.tok1 = text(gTok, 652, 351, "", "t-path fd", "end");
   status.tok2 = text(gTok, 652, 368, "", "t-path fd", "end");
   badge(gTok, 682, 356, 3);
+  const msg = Array.from({ length: 11 }, (_, k) => el("rect", { x: 608 + 9 * k, y: 418, width: 7, height: 16, rx: 2.5, class: "pill p-fd" }, gTok));
+  // attempt 1: π0.5's plan → FlightFlow
   const gChunk = part("chunk");
-  wire(gChunk, "597,438 597,394 470,394 470,298", "pi", true, true);
+  wire(gChunk, "597,438 597,394 470,394 470,298", "pi", true);
   el("rect", { x: 292, y: 334, width: 190, height: 52, class: "lx-hit" }, gChunk);
   el("rect", { x: 462, y: 386, width: 140, height: 16, class: "lx-hit" }, gChunk);
   status.chunk = text(gChunk, 460, 362, "", "t-path pi", "end");
+  const chunkRow = Array.from({ length: 8 }, (_, k) => el("rect", { x: 457 + 12 * k, y: 268, width: 6, height: 12, rx: 2, class: "pill p-pi" }, gChunk));
+  // attempt 3: FlightFlow's hidden states → an adapter → π0.5
+  const gHid = part("hid");
+  wire(gHid, "548,298 548,352 611,352", "hid", true);
+  const adapter = el("g", { class: "lx-adapter" }, gHid);
+  el("rect", { x: 614, y: 340, width: 98, height: 24, rx: 6 }, adapter);
+  text(adapter, 663, 356, "MLP adapter", "t-adapter");
+  wire(gHid, "663,364 663,398", "hid", true);
+  status.hid1 = text(gHid, 540, 344, "", "t-path hid", "end");
+  status.hid2 = text(gHid, 540, 361, "", "t-path hid", "end");
+  const grid = [];
+  for (let r = 0; r < 4; r++) grid.push(Array.from({ length: 11 }, (_, k) => el("rect", { x: 608 + 9 * k, y: 402 + 8 * r, width: 6, height: 6, rx: 1.5, class: "pill p-hid" }, gHid)));
 
-  // the input wires (shared)
-  const gIn = part("wires");
-  wire(gIn, "170,114 228,114", "grey");
-  wire(gIn, "212,114 212,462 228,462", "grey");
-  el("circle", { cx: 212, cy: 114, r: 3, class: "dot-grey" }, gIn);
-  wire(gIn, "170,194 228,194", "grey");
-  wire(gIn, "170,274 228,274", "grey");
-  wire(gIn, "196,274 196,542 228,542", "grey");
-  el("circle", { cx: 196, cy: 274, r: 3, class: "dot-grey" }, gIn);
+  // the input wires: to π0.5 and to FlightFlow
+  const gInPi = part("wires_pi");
+  wire(gInPi, "170,114 212,114 212,462 228,462", "grey");
+  wire(gInPi, "170,274 196,274 196,542 228,542", "grey");
+  const gInFf = part("wires_ff");
+  wire(gInFf, "170,114 228,114", "grey");
+  el("circle", { cx: 212, cy: 114, r: 3, class: "dot-grey" }, gInFf);
+  wire(gInFf, "170,194 228,194", "grey");
+  wire(gInFf, "170,274 228,274", "grey");
+  el("circle", { cx: 196, cy: 274, r: 3, class: "dot-grey" }, gInFf);
 
   // the vehicle, the controller and what each model sends it
   const gVeh = part("veh");
@@ -185,34 +251,173 @@
   el("rect", { x: 740, y: 340, width: 30, height: 175, class: "lx-hit" }, gHand);
   text(gHand, 784, 394, "the hand’s target pose", "t-lbl", "start");
 
-  /* ---------------- layers ---------------- */
-  let layer = null, hot = null;
-  const buttons = LAYERS.map((L, k) => {
+  // step 2's pictures: the IK taught FlightFlow; its path is the IK's; the same steps; the bar a controller fix sets
+  const gIns = part("insets");
+  const teach = el("g", {}, gIns);
+  el("polyline", { points: "850,298 850,264 731,264", class: "wire w-grey w-dash", "marker-end": "url(#lx-m-grey)" }, teach);
+  text(teach, 764, 256, "taught by the IK’s base", "t-lbl", "start");
+  const ikpath = el("g", {}, gFc);
+  el("polyline", { points: pts(Array.from({ length: 21 }, (_, k) => { const [x, y] = glyphAt(k / 20); return [x, y + 4]; })), class: "lx-ikpath" }, ikpath);
+  text(ikpath, 612, 140, "dashed: the IK", "t-tiny lx-iklab", "start");
+  const inset = (y, h, title) => {
+    const g = el("g", {}, gIns);
+    el("rect", { x: 780, y, width: 220, height: h, rx: 10, class: "keybox" }, g);
+    text(g, 796, y + 22, title, "t-caps", "start");
+    return g;
+  };
+  const bar = (g, y, label, value, max, cls, shown) => {
+    text(g, 796, y, label, "t-tiny", "start");
+    el("rect", { x: 796, y: y + 7, width: 150, height: 10, rx: 3, class: "lx-track" }, g);
+    el("rect", { x: 796, y: y + 7, width: (150 * value) / max, height: 10, rx: 3, class: cls }, g);
+    text(g, 990, y + 16, shown, "t-val", "end");
+  };
+  const fallback = inset(408, 104, "STEPS THE IK DECIDES");
+  bar(fallback, 452, "π0.5 alone: IK off > 1 mm", 63, 100, "lx-bar grey", "63 %");
+  bar(fallback, 488, "FlightFlow: back to the IK", 62, 100, "lx-bar fd", "62 %");
+  const crash = inset(522, 104, "CRASHES, 4 DISTURBED CELLS");
+  bar(crash, 566, "π0.5 alone", 43, 43, "lx-bar grey", "43");
+  bar(crash, 602, "+ controller fix, no learning", 3, 43, "lx-bar pi", "3");
+
+  /* ---------------- moving things (on top of the drawing) ---------------- */
+  const top = el("g", { class: "lx-top", "aria-hidden": "true" }, svg);
+  // packets that run along wires while a step plays
+  const lane = (points, colour) => {
+    const tr = track(points), n = clamp(Math.round(tr.total / 34), 1, 8);
+    const dotsOn = Array.from({ length: n }, () => el("circle", { r: 3.6, class: `lx-pk pk-${colour}` }, top));
+    return {
+      set(p, secs) {
+        const on = p > 0 && p < 1;
+        const a = Math.min(1, p / 0.08, (1 - p) / 0.08);
+        dotsOn.forEach((d, k) => {
+          show(d, on);
+          if (!on) return;
+          const [x, y] = at(tr, ((secs * 120) / tr.total + k / n) % 1);
+          d.setAttribute("cx", n1(x));
+          d.setAttribute("cy", n1(y));
+          d.setAttribute("opacity", a.toFixed(2));
+        });
+      },
+    };
+  };
+  const LANES = {
+    in_pi: [[[170, 114], [212, 114], [212, 462], [228, 462]], [[170, 274], [196, 274], [196, 542], [228, 542]]].map((p) => lane(p, "grey")),
+    in_ff: [[[170, 114], [228, 114]], [[170, 194], [228, 194]], [[170, 274], [228, 274]]].map((p) => lane(p, "grey")),
+    ff_in: [[[408, 114], [427, 114]], [[408, 194], [427, 194]], [[378, 274], [427, 274]], [[580, 160], [598, 160]], [[580, 262], [598, 262]]].map((p) => lane(p, "fd")),
+    pi_in: [[[408, 462], [427, 462]], [[408, 542], [427, 542]]].map((p) => lane(p, "grey")),
+    vlm_ax: [lane([[570, 502], [587, 502]], "grey")],
+    hand: [lane([[726, 502], [754, 502], [754, 350], [778, 350]], "pi")],
+    base: [lane([[726, 150], [754, 150], [754, 322], [778, 322]], "fd")],
+    cmd: [lane([[986, 298], [986, 174]], "grey")],
+    loop: [lane([[890, 44], [890, 24], [85, 24], [85, 39]], "grey")],
+  };
+  // tokens that travel between the models and land in their slots
+  const traveller = (build) => { const g = el("g", {}, top); build(g); return g; };
+  const msgGo = msg.map((_, k) => ({
+    node: traveller((g) => el("rect", { x: -3.5, y: -8, width: 7, height: 16, rx: 2.5, class: "pill p-fd" }, g)),
+    tr: track([[663, 300], [663, 396], [611.5 + 9 * k, 426]]),
+  }));
+  const hidGo = [0, 1, 2, 3].map((r) => ({
+    node: traveller((g) => { for (let k = 0; k < 11; k++) el("rect", { x: -48 + 9 * k, y: -3, width: 6, height: 6, rx: 1.5, class: "pill p-hid" }, g); }),
+    tr: track([[548, 300], [548, 352], [663, 352], [663, 392], [656, 405 + 8 * r]]),
+  }));
+  const chunkGo = {
+    node: traveller((g) => { for (let k = 0; k < 6; k++) el("rect", { x: -23 + 8 * k, y: -6, width: 6, height: 12, rx: 2, class: "pill p-pi" }, g); }),
+    tr: track([[597, 438], [597, 394], [470, 394], [470, 300], [505, 274]]),
+  };
+  const place = (node, [x, y]) => node.setAttribute("transform", `translate(${n1(x)} ${n1(y)})`);
+
+  /* ---------------- effects: what a step does, drawn at progress p (0 not yet, 1 done) ---------------- */
+  const SHOWN = { teach, ikpath, fallback, crash };
+  const FX = {
+    flow(what, p, secs) { for (const name of what.split(" ")) for (const l of LANES[name]) l.set(p, secs); },
+    show(what, p) { fade(SHOWN[what], easeOut(p)); },
+    pills(what, p) {
+      act.forEach((n, k) => fade(n, easeOut(seg(p, k * 0.25, k * 0.25 + 0.5))));
+    },
+    morph(what, p) {
+      const m = ease(seg(p, 0, 0.6));
+      for (const s of samples) {
+        s.node.setAttribute("points", pts(s.noise.map((q, j) => [lerp(q[0], s.goal[j][0], m), lerp(q[1], s.goal[j][1], m)])));
+        fade(s.node, seg(p, 0, 0.06) * lerp(0.7, 0.3, seg(p, 0.6, 0.75)));
+      }
+      const mm = seg(p, 0.58, 0.82);
+      show(mean, mm > 0);
+      if (mm > 0) mean.setAttribute("points", pts(cut(meanTr, 0, mm)));
+      dots.forEach((d, k) => fade(d, seg(mm, (k + 1) / 10 - 0.05, (k + 1) / 10)));
+      fade(nowDot, seg(p, 0, 0.06));
+      fade(zGroup, seg(p, 0.85, 1));
+    },
+    send(what, p) {
+      if (what === "msg") {
+        msgGo.forEach(({ node, tr }, k) => {
+          const s = ease(seg(p, k * 0.05, k * 0.05 + 0.45));
+          show(node, s > 0 && s < 1);
+          if (s > 0 && s < 1) place(node, at(tr, s));
+          fade(msg[k], s >= 1 ? 1 : 0);
+        });
+      } else if (what === "hid") {
+        hidGo.forEach(({ node, tr }, r) => {
+          const s = ease(seg(p, r * 0.18, r * 0.18 + 0.42));
+          show(node, s > 0 && s < 1);
+          if (s > 0 && s < 1) place(node, at(tr, s));
+          grid[r].forEach((q) => fade(q, s >= 1 ? 1 : 0));
+        });
+      } else if (what === "chunk") {
+        const s = ease(seg(p, 0, 0.8));
+        show(chunkGo.node, s > 0 && s < 1);
+        if (s > 0 && s < 1) place(chunkGo.node, at(chunkGo.tr, s));
+        chunkRow.forEach((q, k) => fade(q, easeOut(seg(p, 0.78 + k * 0.02, 0.9 + k * 0.02))));
+      }
+    },
+  };
+  // everything that moves starts hidden; an attempt's steps bring in what they own
+  const reset = () => {
+    for (const ls of Object.values(LANES)) for (const l of ls) l.set(0, 0);
+    for (const n of [...act, ...msg, ...chunkRow, ...grid.flat(), mean, nowDot, zGroup, ...dots, ...samples.map((s) => s.node), ...Object.values(SHOWN),
+      ...msgGo.map((m) => m.node), ...hidGo.map((h) => h.node), chunkGo.node]) show(n, false);
+  };
+
+  /* ---------------- the player ---------------- */
+  const BEATS = SCENES.flatMap((S, a) => S.beats.map((s, i) => ({ a, i, s })));
+  const LAST = BEATS.length - 1;
+  const HOLD = 2600;
+  let g = 0, t = 1, running = false, auto = false, held = 0, raf = 0, last = 0, touched = false, resume = false, shown = -1, hot = null;
+  const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+
+  const paint = () => {
+    const { a, i } = BEATS[g];
+    reset();
+    SCENES[a].beats.forEach((s, k) => {
+      const tt = k < i ? 1 : k > i ? 0 : t;
+      for (const [kind, what, t0, t1] of s.fx) FX[kind](what, seg(tt, t0, t1), k === i ? Math.max(0, tt - t0) * (s.dur / 1000) : 0);
+    });
+  };
+
+  const navButtons = SCENES.map((S, a) => {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "lx-layer";
-    b.style.setProperty("--lc", L.colour);
-    b.style.setProperty("--lc-soft", L.soft);
-    b.setAttribute("aria-pressed", "false");
-    b.innerHTML = `<span class="k">L${k + 1}</span><b></b><span class="s"></span>`;
-    b.querySelector("b").textContent = L.name;
-    b.querySelector(".s").textContent = L.sub;
-    b.addEventListener("click", () => use(k));
+    b.style.setProperty("--lc", S.colour);
+    b.style.setProperty("--lc-soft", S.soft);
+    b.innerHTML = `<span class="k">${a + 1}</span><b></b><span class="s"></span><span class="br"></span>`;
+    b.querySelector("b").textContent = S.name;
+    b.querySelector(".s").textContent = S.sub;
+    b.querySelector(".br").textContent = S.branches.join(" · ");
+    b.addEventListener("click", () => jump(BEATS.findIndex((x) => x.a === a)));
     nav.insertBefore(b, nav.querySelector(".lx-hint"));
     return b;
   });
-  const use = (k) => {
-    layer = LAYERS[k];
-    buttons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === k)));
-    for (const [id, g] of Object.entries(parts)) {
-      const s = (layer.parts && layer.parts[id]) || "on";
-      g.classList.toggle("lx-dim", s === "dim");
-      g.classList.toggle("lx-off", s === "off");
-      g.classList.toggle("lx-flow", (layer.flow || []).includes(id));
-      g.setAttribute("tabindex", s === "off" ? -1 : 0);
+  const useScene = (a) => {
+    const S = SCENES[a];
+    navButtons.forEach((b, j) => b.setAttribute("aria-pressed", String(j === a)));
+    for (const [id, node] of Object.entries(parts)) {
+      const st = (S.parts && S.parts[id]) || "on";
+      node.classList.toggle("lx-dim", st === "dim");
+      node.classList.toggle("lx-off", st === "off");
+      node.setAttribute("tabindex", st === "off" ? -1 : 0);
     }
     for (const [id, node] of Object.entries(status)) {
-      const value = (layer.status && layer.status[id]) ?? "";
+      const value = (S.status && S.status[id]) ?? "";
       const [words, tone] = Array.isArray(value) ? value : [value, ""];
       node.textContent = words;
       if (node.classList.contains("t-status")) {
@@ -220,70 +425,194 @@
         node.classList.toggle("s-fd", tone === "fd");
       }
     }
-    head.querySelector("b").textContent = layer.title;
-    head.querySelector("span").textContent = layer.when;
-    sum.innerHTML = layer.summary;
+    head.querySelector("b").textContent = `${a + 1} · ${S.name}`;
+    const when = head.querySelector("span");
+    when.textContent = `${S.when} · branches `;
+    S.branches.forEach((name, k) => {
+      const link = document.createElement("a");
+      link.href = REPO + name;
+      link.textContent = name;
+      link.rel = "noopener";
+      if (k) when.append(", ");
+      when.append(link);
+    });
+    cardsBox.style.setProperty("--sc", S.colour);
+    cardsBox.style.setProperty("--sc-soft", S.soft);
+    cardsBox.replaceChildren(...S.cards.map((c, k) => {
+      const d = document.createElement("div");
+      d.className = "lx-card";
+      d.innerHTML = `<p class="t"><span class="n">${k + 1}</span>${esc(c.t)}</p>` + (c.big ? `<p class="big">${esc(c.big)}</p>` : "") + `<p class="x">${esc(c.text)}</p>`;
+      return d;
+    }));
+    tabList.replaceChildren(...S.beats.map((s, k) => {
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.type = "button";
+      b.style.setProperty("--sc", S.colour);
+      b.innerHTML = `<span class="n">${k + 1}</span>`;
+      b.append(s.tab);
+      b.addEventListener("click", () => jump(BEATS.findIndex((x) => x.a === a && x.i === k)));
+      li.append(b);
+      return li;
+    }));
+    shown = a;
     if (hot) open(hot);
   };
+  const mark = (quiet) => {
+    const { a, i, s } = BEATS[g];
+    if (a !== shown) useScene(a);
+    for (const [id, node] of Object.entries(parts)) node.classList.toggle("lx-now", s.now.includes(id));
+    [...tabList.querySelectorAll("button")].forEach((b, k) => {
+      b.classList.toggle("is-done", k < i);
+      if (k === i) b.setAttribute("aria-current", "step");
+      else b.removeAttribute("aria-current");
+    });
+    [...cardsBox.children].forEach((d, k) => {
+      d.classList.toggle("is-now", k === s.card);
+      d.classList.toggle("is-done", s.card != null && k < s.card);
+    });
+    ind.innerHTML = `Step ${a + 1} · beat <b>${i + 1}</b> of ${SCENES[a].beats.length}`;
+    bPrev.disabled = g === 0;
+    bNext.disabled = g === LAST;
+    say.setAttribute("aria-live", quiet ? "off" : "polite");
+    say.textContent = s.line;
+  };
 
-  /* ---------------- the details card ---------------- */
-  // A part's card for the chosen layer: the layer's text replaces the part's, its rows follow the part's. A part
-  // the layer does not use says so and keeps only its general description.
+  const ICON = {
+    prev: '<path d="M18 5l-9 7 9 7z" fill="currentColor"/><rect x="4.5" y="5" width="2.5" height="14" fill="currentColor"/>',
+    next: '<path d="M6 5l9 7-9 7z" fill="currentColor"/><rect x="17" y="5" width="2.5" height="14" fill="currentColor"/>',
+    play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor"/>',
+    pause: '<rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/>',
+    reset: '<path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5M4 4v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  };
+  const icon = (b, name) => { b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ICON[name]}</svg>`; };
+  icon(bPrev, "prev");
+  icon(bNext, "next");
+  icon(bReset, "reset");
+  const setAuto = (on) => {
+    auto = on;
+    bPlay.setAttribute("aria-pressed", String(on));
+    bPlay.setAttribute("aria-label", on ? "Pause" : "Play");
+    icon(bPlay, on ? "pause" : "play");
+  };
+  const frame = (now) => {
+    raf = 0;
+    const dt = last ? Math.min(64, now - last) : 16;
+    last = now;
+    if (running) {
+      if (t < 1) {
+        t = Math.min(1, t + dt / BEATS[g].s.dur);
+        paint();
+      } else if (auto) {
+        held += dt;
+        if (held >= HOLD) {
+          if (g < LAST) enter(g + 1, true);
+          else { setAuto(false); running = false; }
+        }
+      } else running = false;
+    }
+    if (running) raf = requestAnimationFrame(frame);
+    else last = 0;
+  };
+  const kick = () => { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } };
+  function enter(k, quiet) {
+    g = clamp(k, 0, LAST);
+    held = 0;
+    t = still() ? 1 : 0;
+    mark(quiet);
+    paint();
+    running = t < 1 || auto;
+    if (running) kick();
+  }
+  const play = () => {
+    if (still()) return;
+    setAuto(true);
+    if (g === LAST && t >= 1) enter(0, true);
+    else { running = true; kick(); }
+  };
+  const pause = () => { setAuto(false); running = false; };
+  const jump = (k) => { touched = true; resume = false; setAuto(false); enter(k, false); };
+  bPlay.addEventListener("click", () => { touched = true; resume = false; if (auto) pause(); else play(); });
+  bPrev.addEventListener("click", () => jump(g - 1));
+  bNext.addEventListener("click", () => jump(g + 1));
+  bReset.addEventListener("click", () => jump(0));
+  const sync = () => {
+    bPlay.hidden = still();
+    if (still()) { pause(); t = 1; paint(); }
+  };
+  motion.addEventListener ? motion.addEventListener("change", sync) : motion.addListener(sync);
+
+  /* ---------------- the details card of a part ---------------- */
   const card = (id) => {
+    const S = SCENES[BEATS[g].a];
     const base = PARTS[id] || { name: id };
     const unused = parts[id].classList.contains("lx-dim");
-    const over = (!unused && layer.tips && layer.tips[id]) || {};
+    const over = (!unused && S.tips && S.tips[id]) || {};
     return {
       name: over.name || base.name,
-      text: (unused ? "Not used in this layer. " : "") + (over.text || base.text || ""),
+      text: (unused ? "Not used in this step. " : "") + (over.text || base.text || ""),
       rows: unused ? [] : [...(base.rows || []), ...(over.rows || [])],
-      src: over.src || base.src,
     };
   };
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const fmt = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>"); // `code` in the data becomes <code>
-  const open = (g) => {
-    const id = g.dataset.part;
-    const c = card(id);
-    if (hot && hot !== g) hot.classList.remove("lx-hot");
-    hot = g;
-    g.classList.add("lx-hot");
-    pop.style.setProperty("--tc", layer.colour);
-    pop.innerHTML = `<span class="tag">${esc(layer.short)}</span><h4>${esc(c.name)}</h4>` +
-      (c.text ? `<p>${fmt(c.text)}</p>` : "") +
-      (c.rows.length ? `<dl>${c.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${fmt(v)}</dd>`).join("")}</dl>` : "") +
-      (c.src ? `<div class="src">${fmt(c.src)}</div>` : "");
+  function open(node) {
+    const S = SCENES[BEATS[g].a];
+    const c = card(node.dataset.part);
+    if (hot && hot !== node) hot.classList.remove("lx-hot");
+    hot = node;
+    node.classList.add("lx-hot");
+    pop.style.setProperty("--tc", S.colour);
+    pop.innerHTML = `<span class="tag">${esc(S.short)}</span><h4>${esc(c.name)}</h4>` + (c.text ? `<p>${esc(c.text)}</p>` : "") +
+      (c.rows.length ? `<dl>${c.rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>` : "");
     pop.hidden = false;
-    // beside the part, inside the stage: to its right, else to its left, else under it
-    const s = stage.getBoundingClientRect(), r = g.getBoundingClientRect();
+    const sr = stage.getBoundingClientRect(), r = node.getBoundingClientRect();
     const w = pop.offsetWidth, h = pop.offsetHeight;
     const fit = (v, lo, hi) => Math.max(lo, Math.min(v, hi));
-    let x = r.right - s.left + 12, y = r.top - s.top;
-    if (x + w > s.width) x = r.left - s.left - w - 12;
-    if (x < 0) { x = fit(r.left - s.left, 0, s.width - w); y = r.bottom - s.top + 10; }
-    y = fit(y, 0, Math.max(0, s.height - h));
+    let x = r.right - sr.left + 12, y = r.top - sr.top;
+    if (x + w > sr.width) x = r.left - sr.left - w - 12;
+    if (x < 0) { x = fit(r.left - sr.left, 0, sr.width - w); y = r.bottom - sr.top + 10; }
+    y = fit(y, 0, Math.max(0, sr.height - h));
     pop.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
-  };
+  }
   const close = () => {
     if (hot) hot.classList.remove("lx-hot");
     hot = null;
     pop.hidden = true;
   };
-  svg.addEventListener("pointerover", (e) => {
-    const g = e.target.closest("[data-part]");
-    if (g && e.pointerType === "mouse") open(g);
-  });
+  svg.addEventListener("pointerover", (e) => { const node = e.target.closest("[data-part]"); if (node && e.pointerType === "mouse") open(node); });
   svg.addEventListener("pointerleave", (e) => { if (e.pointerType === "mouse") close(); });
   svg.addEventListener("click", (e) => {
-    const g = e.target.closest("[data-part]");
-    if (!g) return close();
-    if (hot === g && e.pointerType !== "mouse") close();
-    else open(g);
+    const node = e.target.closest("[data-part]");
+    if (!node) return close();
+    if (hot === node && e.pointerType !== "mouse") close();
+    else open(node);
   });
-  svg.addEventListener("focusin", (e) => { const g = e.target.closest("[data-part]"); if (g) open(g); });
+  svg.addEventListener("focusin", (e) => { const node = e.target.closest("[data-part]"); if (node) open(node); });
   svg.addEventListener("focusout", () => close());
   document.addEventListener("pointerdown", (e) => { if (hot && !svg.contains(e.target)) close(); });
   addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
 
-  use(LAYERS.findIndex((L) => L.default) >= 0 ? LAYERS.findIndex((L) => L.default) : 0);
+  // At rest the figure shows the full system (step 4), finished. It plays all five steps once when it first comes
+  // into view, pauses while scrolled away and carries on when it is back.
+  setAuto(false);
+  sync();
+  const rest = Math.max(0, SCENES.findIndex((S) => S.default));
+  g = BEATS.findIndex((x) => x.a === rest && x.i === SCENES[rest].beats.length - 1);
+  t = 1;
+  mark(true);
+  paint();
+  if ("IntersectionObserver" in window) {
+    let started = false;
+    new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.35) {
+          if (!started && !touched && !still()) { started = true; setAuto(true); enter(0, true); }
+          else if (resume) { resume = false; play(); }
+        } else if (entry.intersectionRatio < 0.1 && auto) {
+          resume = true;
+          pause();
+        }
+      }
+    }, { threshold: [0, 0.1, 0.35] }).observe(root);
+  }
+  root.system = { show(k, f = 1) { pause(); g = k; t = f; mark(true); paint(); } }; // for screenshots and tests
 })();

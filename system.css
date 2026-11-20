@@ -73,3 +73,43 @@
 .lx-svg .t-status { font-size: 12.5px; }
 .lx-svg .t-path { font-size: 13.5px; }
 .lx-pop { font-size: 0.88rem; }
+
+/* the five-step player (the buttons and step tabs reuse the concept figure's .cx-* styles) */
+.lx-stage .cx-bar { margin-top: 6px; }
+.lx-stage .cx-say { min-height: 4.8em; }
+.lx-layer .br { grid-column: 2; font: 0.74rem/1.45 var(--mono); color: var(--faint); }
+.lx-head a { font: 0.84rem var(--mono); }
+.lx-svg [data-part] { cursor: help; }
+.lx-svg .lx-now .block, .lx-svg .lx-now .msg, .lx-svg .lx-now .photo-edge, .lx-svg .lx-now .keybox { stroke-width: 2.8; }
+.lx-svg .lx-now > .box { stroke-width: 2.4; }
+.lx-svg .lx-now .wire { stroke-width: 3.4; }
+.lx-svg .lx-pk { stroke: #fff; stroke-width: 1.2; }
+.lx-svg .pk-grey { fill: #737a84; }
+.lx-svg .pk-fd { fill: var(--fd); }
+.lx-svg .pk-pi { fill: var(--pi); }
+.lx-svg .fc-sample { fill: none; stroke: var(--fd); stroke-width: 1.2; stroke-linejoin: round; }
+.lx-svg .p-hid { fill: #0d6772; }
+.lx-svg .head-hid { fill: #0d6772; }
+.lx-svg .w-hid { stroke: #0d6772; stroke-width: 2.6; }
+.lx-svg .lx-adapter rect { fill: #e3f0f1; stroke: #0d6772; stroke-width: 1.5; }
+.lx-svg .t-adapter { font: 600 12px var(--mono); fill: #0d6772; }
+.lx-svg .t-path.hid { fill: #0d6772; }
+.lx-svg .lx-ikpath { fill: none; stroke: #6f7782; stroke-width: 2; stroke-dasharray: 4 3; }
+.lx-svg .lx-track { fill: #ececec; }
+.lx-svg .lx-bar.grey { fill: #8a929c; }
+.lx-svg .lx-bar.fd { fill: var(--fd); }
+.lx-svg .lx-bar.pi { fill: var(--pi); }
+.lx-svg .t-val { font: 600 13px var(--mono); fill: var(--ink); }
+.lx-svg .w-dash { stroke-dasharray: 6 5; }
+
+/* the step's detail cards, lit by the beat that is about them */
+.lx-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 10px; margin-top: 14px; }
+.lx-card { padding: 10px 12px 12px; border: 1px solid var(--line); border-top: 3px solid var(--sc); border-radius: 8px; background: #fff;
+  transition: background 0.3s, box-shadow 0.3s; }
+.lx-card.is-done { background: #fcfcfc; }
+.lx-card.is-now { background: var(--sc-soft); box-shadow: 0 0 0 2px var(--sc); }
+.lx-card .t { display: flex; align-items: center; gap: 8px; margin: 0; font: 500 0.98rem/1.3 var(--title); color: var(--ink); }
+.lx-card .n { flex: none; width: 21px; height: 21px; border-radius: 4px; background: var(--sc); color: #fff; font: 600 0.72rem/21px var(--mono); text-align: center; }
+.lx-card .big { margin: 7px 0 0; font: 600 1.18rem/1.25 var(--mono); color: var(--ink); }
+.lx-card .x { margin: 6px 0 0; font-size: 0.88rem; line-height: 1.5; color: var(--text); }
+.lx-svg .lx-iklab { fill: #5f6670; }
