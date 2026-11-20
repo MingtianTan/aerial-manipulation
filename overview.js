@@ -1,4 +1,5 @@
-// The overview page: clips that play while on screen, task clips on hover or tap, the carousel's arrows, chart tooltips.
+// The overview page: clips that play while on screen, task clips on hover or tap, the carousel's arrows, the outline on the
+// left, chart tooltips.
 (() => {
   const play = (video) => video.play().catch(() => {});
   // With "reduce motion" set, nothing plays by itself: the clips get controls, and the task clips still play on hover or tap.
@@ -25,6 +26,22 @@
     for (const button of wrap.querySelectorAll("[data-dir]")) {
       button.addEventListener("click", () => track.scrollBy({ left: Number(button.dataset.dir) * track.clientWidth * 0.8, behavior: "smooth" }));
     }
+  }
+  // The outline on the left marks the part in view, and the section it belongs to.
+  const links = [...document.querySelectorAll(".rail a[href^='#']")].filter((a) => !a.classList.contains("rail-home"));
+  const targets = links.map((a) => document.getElementById(a.getAttribute("href").slice(1)));
+  let queued = false;
+  const mark = () => {
+    queued = false;
+    const line = innerHeight * 0.3;
+    let current = 0;
+    targets.forEach((el, i) => { if (el && el.getBoundingClientRect().top <= line) current = i; });
+    const parent = links[current].closest("ol").closest("li");
+    links.forEach((a, i) => a.classList.toggle("active", i === current || (parent !== null && a.parentElement === parent)));
+  };
+  if (links.length) {
+    addEventListener("scroll", () => { if (!queued) { queued = true; requestAnimationFrame(mark); } }, { passive: true });
+    mark();
   }
   // Tooltips: any element with data-tip; its first line is the heading. Text goes in with textContent.
   const tip = document.createElement("div");
