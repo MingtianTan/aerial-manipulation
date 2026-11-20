@@ -2,8 +2,9 @@
 
 Project page (GitHub Pages, served from this folder): https://mingtiantan.github.io/aerial-manipulation/
 
-This repository holds the page only: `index.html`, `styles.css`, `main.js` and `assets/` (the task videos, posters and
-figures it shows). Everything that produced the results is in the private repository
+This repository holds the page only: `index.html` (the overview, with `overview.css` and `overview.js`; written by
+`pipeline/webpage/overview.py` in the code repository), `notes.html` (the earlier long page with every write-up, kept here but not linked from the site), `develop.html` (develop mode),
+`styles.css` and `main.js` (used by the notes and develop mode) and `assets/` (the task videos, posters and figures). Everything that produced the results is in the private repository
 [`MingtianTan/Aerial_Manipulation_Code`](https://github.com/MingtianTan/Aerial_Manipulation_Code), in the layout this
 repository had before the two were split (2026-10-20):
 
