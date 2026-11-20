@@ -324,6 +324,10 @@
     node: traveller((g) => { for (let k = 0; k < 6; k++) el("rect", { x: -23 + 8 * k, y: -6, width: 6, height: 12, rx: 2, class: "pill p-pi" }, g); }),
     tr: track([[597, 438], [597, 394], [470, 394], [470, 300], [505, 274]]),
   };
+  const zGo = {
+    node: traveller((g) => { el("rect", { x: -15, y: -9, width: 30, height: 18, rx: 4, class: "pill p-fd" }, g); text(g, 0, 4.5, "[Z]", "t-z"); }),
+    tr: track([[548, 276], [600, 270], [663, 266]]),
+  };
   const place = (node, [x, y]) => node.setAttribute("transform", `translate(${n1(x)} ${n1(y)})`);
 
   /* ---------------- effects: what a step does, drawn at progress p (0 not yet, 1 done) ---------------- */
@@ -345,7 +349,7 @@
       if (mm > 0) mean.setAttribute("points", pts(cut(meanTr, 0, mm)));
       dots.forEach((d, k) => fade(d, seg(mm, (k + 1) / 10 - 0.05, (k + 1) / 10)));
       fade(nowDot, seg(p, 0, 0.06));
-      fade(zGroup, seg(p, 0.85, 1));
+      if (what !== "fcpath") fade(zGroup, seg(p, 0.85, 1));
     },
     send(what, p) {
       if (what === "msg") {
@@ -362,6 +366,12 @@
           if (s > 0 && s < 1) place(node, at(tr, s));
           grid[r].forEach((q) => fade(q, s >= 1 ? 1 : 0));
         });
+      } else if (what === "z") {
+        const s = ease(seg(p, 0, 0.75));
+        show(zGo.node, s > 0 && s < 1);
+        if (s > 0 && s < 1) place(zGo.node, at(zGo.tr, s));
+        fade(zGroup, s >= 1 ? 1 : seg(p, 0.75, 0.8) * 0);
+        if (s >= 1) fade(zGroup, 1);
       } else if (what === "chunk") {
         const s = ease(seg(p, 0, 0.8));
         show(chunkGo.node, s > 0 && s < 1);
@@ -374,8 +384,100 @@
   const reset = () => {
     for (const ls of Object.values(LANES)) for (const l of ls) l.set(0, 0);
     for (const n of [...act, ...msg, ...chunkRow, ...grid.flat(), mean, nowDot, zGroup, ...dots, ...samples.map((s) => s.node), ...Object.values(SHOWN),
-      ...msgGo.map((m) => m.node), ...hidGo.map((h) => h.node), chunkGo.node]) show(n, false);
+      ...msgGo.map((m) => m.node), ...hidGo.map((h) => h.node), chunkGo.node, zGo.node]) show(n, false);
   };
+
+  /* ---------------- small drawings in the detail cards (SVG markup) ---------------- */
+  const sq = (x, y, w, h, cls, rx = 2) => `<rect x="${n1(x)}" y="${n1(y)}" width="${n1(w)}" height="${n1(h)}" rx="${rx}" class="${cls}"/>`;
+  const tx = (x, y, words, cls = "v-t", anchor = "middle") => `<text x="${n1(x)}" y="${n1(y)}" text-anchor="${anchor}" class="${cls}">${words}</text>`;
+  const arrow = (x1, y1, x2, y2, cls = "v-line") => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}" marker-end="url(#lx-v-head)"/>`;
+  const svgOf = (w, h, body) => `<svg viewBox="0 0 ${w} ${h}" role="img" aria-hidden="true"><defs><marker id="lx-v-head" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10z" class="v-head"/></marker></defs>${body}</svg>`;
+  const VIZ = {
+    action8() {
+      let b = "";
+      for (let k = 0; k < 8; k++) b += sq(6 + 26 * k, 6, 22, 20, k < 3 ? "v-pi" : k < 7 ? "v-pisoft" : "v-grey");
+      return svgOf(220, 50, b + tx(42, 42, "position x y z") + tx(136, 42, "orientation (4)") + tx(201, 42, "grip"));
+    },
+    tokens55() {
+      let b = "";
+      for (let k = 0; k < 50; k++) b += sq(2 + 3.4 * k, 6, 2.6, 18, "v-fdsoft", 1);
+      for (let k = 0; k < 4; k++) b += sq(177 + 6 * k, 6, 5, 18, "v-fd", 1);
+      b += sq(203, 4, 15, 22, "v-fd2", 3) + tx(210.5, 19, "Z", "v-w");
+      return svgOf(220, 44, b + tx(86, 40, "50 path tokens") + tx(186, 40, "4 state"));
+    },
+    flow() {
+      const r = random(5);
+      let b = "";
+      for (let k = 0; k < 4; k++) b += `<polyline class="v-noise" points="${Array.from({ length: 9 }, (_, j) => `${n1(6 + j * 8)},${n1(8 + r() * 30)}`).join(" ")}"/>`;
+      for (let k = 0; k < 4; k++) b += `<polyline class="v-path" points="${Array.from({ length: 9 }, (_, j) => `${n1(132 + j * 10)},${n1(36 - 22 * Math.pow(j / 8, 0.7) + (k - 1.5) * 1.6 * j / 8)}`).join(" ")}"/>`;
+      b += `<polyline class="v-mean" points="${Array.from({ length: 9 }, (_, j) => `${n1(132 + j * 10)},${n1(36 - 22 * Math.pow(j / 8, 0.7))}`).join(" ")}"/>`;
+      return svgOf(220, 56, b + arrow(84, 24, 122, 24) + tx(103, 18, "4 steps", "v-s") + tx(40, 54, "noise") + tx(172, 54, "8 paths, mean"));
+    },
+    latent() {
+      let b = "";
+      for (let k = 0; k < 7; k++) b += sq(2 + 7 * k, 10, 5, 16, "v-fdsoft", 1);
+      b += sq(51, 8, 16, 20, "v-fd2", 3) + tx(59, 22, "Z", "v-w") + tx(34, 40, "last block");
+      b += arrow(70, 18, 92, 18) + sq(94, 8, 34, 20, "v-box", 4) + tx(111, 22, "linear", "v-s");
+      b += arrow(130, 18, 146, 18);
+      for (let k = 0; k < 16; k++) b += sq(148 + 4.2 * k, 10, 3.4, 16, k % 2 ? "v-fd" : "v-fd2", 1);
+      b += tx(182, 40, "z: 256 values");
+      b += sq(4, 50, 8, 8, "v-dashbox", 2) + tx(18, 57.5, "trained on: where the base is 0.4 s later", "v-s", "start");
+      b += sq(4, 64, 8, 8, "v-fd2", 2) + tx(18, 71.5, "used in test 2: one of the 11 tokens", "v-s", "start");
+      return svgOf(220, 78, b);
+    },
+    versions() {
+      const cell = (x, y, name, use, hot) => sq(x, y, 140, 42, hot ? "v-cell hot" : "v-cell", 6) + tx(x + 70, y + 18, name, "v-code") + tx(x + 70, y + 34, use, "v-s");
+      let b = tx(215, 14, "reads π0.5's plan", "v-t") + tx(365, 14, "no plan input", "v-t");
+      b += sq(2, 24, 128, 42, "v-data", 6) + tx(66, 41, "offline", "v-b") + tx(66, 57, "2,102 expert demos", "v-s");
+      b += sq(2, 96, 128, 42, "v-data on", 6) + tx(66, 113, "online", "v-b") + tx(66, 129, "+ 200 π0.5 flights", "v-s");
+      b += cell(145, 24, "fd40_c", "test 1, offline", false) + cell(295, 24, "fd40_nc", "for comparison", false);
+      b += cell(145, 96, "fdcl_c", "test 1, online", false) + cell(295, 96, "fdcl_nc", "then frozen: tests 2 and 3", true);
+      b += arrow(66, 68, 66, 92) + tx(72, 84, "fine-tune 10k steps", "v-s", "start");
+      return svgOf(440, 142, b);
+    },
+    plan() {
+      let b = "";
+      for (let r = 0; r < 5; r++) for (let k = 0; k < 8; k++) b += sq(40 + 18 * k, 4 + 9 * r, 15, 7, k < 3 ? "v-pi" : k < 7 ? "v-pisoft" : "v-grey", 1);
+      for (let r = 0; r < 5; r++) b += tx(34, 10 + 9 * r, `+${((r + 1) * 0.05).toFixed(2)} s`, "v-s", "end");
+      return svgOf(220, 64, b + tx(112, 56, "⋮ 50 targets, one per 0.05 s", "v-s"));
+    },
+    standin() {
+      return svgOf(220, 54, sq(2, 6, 86, 18, "v-pi", 3) + sq(88, 6, 86, 18, "v-grey", 3) + sq(174, 6, 44, 18, "v-none", 3) +
+        tx(45, 38, "π0.5's own plan", "v-s") + tx(45, 50, "40 %", "v-b") + tx(131, 38, "expert + small offset", "v-s") + tx(131, 50, "40 %", "v-b") +
+        tx(196, 38, "no plan", "v-s") + tx(196, 50, "20 %", "v-b"));
+    },
+    message() {
+      let b = `<polyline class="v-path" points="6,40 30,34 54,27 78,21 102,17"/>`;
+      for (let k = 0; k < 10; k++) b += `<circle cx="${n1(6 + 10.6 * (k + 0.5))}" cy="${n1(40 - 23 * Math.pow((k + 0.5) / 10, 0.8))}" r="2.6" class="v-fd"/>`;
+      b += sq(112, 22, 14, 18, "v-fd2", 3) + tx(119, 35, "z", "v-w");
+      b += arrow(130, 31, 146, 31);
+      for (let k = 0; k < 11; k++) b += sq(150 + 4.4 * k, 22, 3.4, 18, "v-fd", 1);
+      for (let k = 0; k < 4; k++) b += sq(200 + 4.4 * k, 22, 3.4, 18, "v-pi", 1);
+      return svgOf(220, 60, b + tx(56, 56, "10 waypoints + z") + tx(174, 56, "11 tokens") + tx(208, 16, "50 actions", "v-s", "middle"));
+    },
+    hidden() {
+      let b = sq(2, 18, 92, 100, "v-box", 6) + tx(48, 12, "FlightFlow", "v-b") + tx(48, 64, "14 blocks", "v-s") + sq(8, 98, 80, 14, "v-fdsoft", 3) + tx(48, 109, "last block", "v-s");
+      b += arrow(96, 104, 128, 68);
+      const taus = ["τ = 0", "0.25", "0.5", "0.75"];
+      for (let r = 0; r < 4; r++) {
+        b += tx(150, 39 + 20 * r, taus[r], "v-s", "end");
+        for (let k = 0; k < 11; k++) b += sq(156 + 12 * k, 28 + 20 * r, 10, 14, k === 10 ? "v-fd2" : "v-hid", 2);
+      }
+      b += tx(222, 18, "10 waypoint tokens + [Z]", "v-s") + tx(222, 120, "4 Euler steps × 11, averaged over 8 samples", "v-s");
+      b += arrow(292, 68, 318, 68) + sq(320, 50, 60, 36, "v-box", 6) + tx(350, 66, "MLP", "v-b") + tx(350, 80, "3 layers", "v-s");
+      b += arrow(382, 68, 400, 68) + sq(402, 52, 34, 32, "v-pisoft", 6) + tx(419, 72, "π0.5", "v-s") + tx(419, 100, "44 tokens", "v-s");
+      return svgOf(440, 128, b);
+    },
+    bars(rows) {
+      let b = "";
+      rows.forEach(([label, v, cls], k) => {
+        const y = 4 + 28 * k;
+        b += tx(2, y + 9, label, "v-s", "start") + sq(2, y + 13, 170 * v / 100, 9, `v-${cls}`, 2) + tx(176, y + 21, `${v} %`, "v-b", "start");
+      });
+      return svgOf(220, 8 + 28 * rows.length, b);
+    },
+  };
+  const vizOf = (viz) => { if (!viz) return ""; const [kind, data] = Array.isArray(viz) ? viz : [viz]; return `<div class="viz">${VIZ[kind](data)}</div>`; };
 
   /* ---------------- the player ---------------- */
   const BEATS = SCENES.flatMap((S, a) => S.beats.map((s, i) => ({ a, i, s })));
@@ -440,8 +542,8 @@
     cardsBox.style.setProperty("--sc-soft", S.soft);
     cardsBox.replaceChildren(...S.cards.map((c, k) => {
       const d = document.createElement("div");
-      d.className = "lx-card";
-      d.innerHTML = `<p class="t"><span class="n">${k + 1}</span>${esc(c.t)}</p>` + (c.big ? `<p class="big">${esc(c.big)}</p>` : "") + `<p class="x">${esc(c.text)}</p>`;
+      d.className = c.wide ? "lx-card wide" : "lx-card";
+      d.innerHTML = `<p class="t"><span class="n">${k + 1}</span>${esc(c.t)}</p>` + (c.big ? `<p class="big">${esc(c.big)}</p>` : "") + vizOf(c.viz) + `<p class="x">${esc(c.text)}</p>`;
       return d;
     }));
     tabList.replaceChildren(...S.beats.map((s, k) => {

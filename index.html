@@ -15,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Noto+Sans:400,400i,700|JetBrains+Mono:400,600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="overview.css?v=20261119c">
   <link rel="stylesheet" href="concept.css?v=20261120c">
-  <link rel="stylesheet" href="system.css?v=20261120c">
+  <link rel="stylesheet" href="system.css?v=20261120d">
 </head>
 <body>
   <nav class="rail" aria-label="Sections">
@@ -26,6 +26,7 @@
       <li><a href="#dataset">Data</a><ol><li><a href="#all-tasks">Twelve tasks</a></li><li><a href="#before-after">Before and after</a></li><li><a href="#dataset-generation">4,800 demonstrations</a></li></ol></li>
       <li><a href="#benchmarking">π0.5 baseline</a><ol><li><a href="#paper">Against the AM-Bench paper</a></li><li><a href="#robustness">Under disturbances</a></li></ol></li>
       <li><a href="#dit-training">FlightFlow in the loop</a><ol><li><a href="#tests">Three tests</a></li><li><a href="#ablation">What made the difference</a></li><li><a href="#fd-stage-b">Under disturbances, task by task</a></li><li><a href="#learned">What we learned</a></li></ol></li>
+      <li><a href="#next">Next</a></li>
     </ol>
   </nav>
   <header class="hero" id="top">
@@ -37,7 +38,7 @@
         <a class="button" href="https://github.com/MingtianTan/Aerial_Manipulation_Code"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg><span>Code (private)</span></a>
         <a class="button" href="https://ambench.github.io/"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 1.5h5v5M14.5 1.5 7.5 8.5M12.5 9.5v5h-11v-11h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AM-Bench</span></a>
       </nav>
-      <nav class="jump" aria-label="Sections"><a href="#idea">General idea</a><a href="#workflow">Current workflow</a><a href="#showcase">Test showcase</a><a href="#method">Method</a><a href="#dataset">Data</a><a href="#benchmarking">π0.5 baseline</a><a href="#dit-training">FlightFlow in the loop</a></nav>
+      <nav class="jump" aria-label="Sections"><a href="#idea">General idea</a><a href="#workflow">Current workflow</a><a href="#showcase">Test showcase</a><a href="#method">Method</a><a href="#dataset">Data</a><a href="#benchmarking">π0.5 baseline</a><a href="#dit-training">FlightFlow in the loop</a><a href="#next">Next</a></nav>
     </div>
   </header>
 
@@ -148,19 +149,6 @@
         </div>
         <figcaption>Every success rate is judged on default physics over 330 rollouts (11 tasks × 30 seeds, the same seeds everywhere); π0.5 alone, 82.1 %, is the bar. The branches named for each step hold its code. FlightFlow is a transformer trained by flow matching; develop mode and earlier notes call it the Flight DiT.</figcaption>
       </figure>
-      <div class="two even" style="margin-top:30px">
-        <ol class="steps one">
-          <li><span class="n">1</span><b>See.</b> Two cameras through a frozen DINOv2-S, the last 0.2 s of the 120 Hz state, and the task.</li>
-          <li><span class="n">2</span><b>Forecast.</b> A 44 M flow-matching transformer predicts where the base will be over the next 2.5 s, a new path at every π0.5 re-plan, every 0.4 s (8 sampled paths, averaged).</li>
-          <li><span class="n">3</span><b>Tell π0.5.</b> Ten waypoints of the path and one latent become 11 tokens in front of π0.5’s 50 action tokens. Only the action expert learns to read them (430 M of 3.35 B parameters); the vision-language model stays frozen.</li>
-          <li><span class="n">4</span><b>Fly both.</b> π0.5 sets the hand’s target pose, FlightFlow’s path sets the base’s stand-off and height, and one inverse-kinematics solver with a PID flies them at 120 Hz. π0.5 re-plans every 0.4 s with the newest forecast.</li>
-          <li class="plainrow"><b>Trained in this order:</b> π0.5, all weights, on 960 demonstrations; FlightFlow on 2,102 demonstrations and then on 160 of π0.5’s own flights; finally the scripted experts record 880 new demonstrations with FlightFlow flying the base, and π0.5’s action expert is retrained on them with the tokens.</li>
-        </ol>
-        <figure class="figure">
-          <svg class="fig photo" viewBox="0 0 920 517" role="img" aria-label="The hexarotor reaching for a lemon. π0.5 sets the hand’s target pose; FlightFlow’s path sets the base’s stand-off and height."><defs><marker id="w-grey" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0.6 10 5 0 9.4z" class="head-grey"/></marker><marker id="w-fd" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0.6 10 5 0 9.4z" class="head-fd"/></marker><marker id="w-pi" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0.6 10 5 0 9.4z" class="head-pi"/></marker></defs><image href="assets/overview/vehicle.jpg" x="0" y="0" width="920" height="517"/><circle cx="452" cy="268" r="34" class="ring-pi"/><rect x="508" y="290" width="256" height="40" rx="8" class="tag-pi"/><text x="636.0" y="317.0" text-anchor="middle" class="t-over">π0.5: the hand’s target</text><polyline points="246,456 452,456" class="wire w-fd" marker-start="url(#w-fd)" marker-end="url(#w-fd)"/><polyline points="92,474 92,388" class="wire w-fd" marker-start="url(#w-fd)" marker-end="url(#w-fd)"/><rect x="24" y="186" width="318" height="40" rx="8" class="tag-fd"/><text x="183.0" y="213.0" text-anchor="middle" class="t-over">FlightFlow: the base’s</text><text x="349.0" y="492.0" text-anchor="middle" class="t-over dark">stand-off</text><text x="112.0" y="440.0" text-anchor="start" class="t-over dark">height</text></svg>
-          <figcaption>Who moves what (on a frame of a π0.5 rollout). The arm leaves the base free along two directions, its stand-off and its height: those are what FlightFlow flies.</figcaption>
-        </figure>
-      </div>
       <div class="two" style="margin-top:44px" id="forecast">
         <figure class="figure">
           <h3 class="fig-title">What FlightFlow hands over<small>one rollout of the full system picking a lemon</small></h3>
@@ -371,6 +359,12 @@
     </div>
   </section>
 
+  <section class="section" id="next">
+    <div class="container">
+      <h2 class="title">Next</h2>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="container">
       <p>Mingtian Tan · updated 19 Nov 2026 · <a href="develop.html">develop mode</a></p>
@@ -378,8 +372,8 @@
     </div>
   </footer>
   <script src="overview.js?v=20261119c" defer></script>
-  <script src="system-data.js?v=20261120f" defer></script>
-  <script src="system.js?v=20261120c" defer></script>
+  <script src="system-data.js?v=20261120g" defer></script>
+  <script src="system.js?v=20261120d" defer></script>
   <script src="concept.js?v=20261120c" defer></script>
 </body>
 </html>
