@@ -1,12 +1,18 @@
 // The overview page: clips that play while on screen, task clips on hover or tap, the carousel's arrows, chart tooltips.
 (() => {
   const play = (video) => video.play().catch(() => {});
-  const auto = [...document.querySelectorAll("video[data-autoplay]")];
-  if ("IntersectionObserver" in window) {
+  // With "reduce motion" set, nothing plays by itself: the clips get controls, and the task clips still play on hover or tap.
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll("video[autoplay], video[data-autoplay]").forEach((video) => {
+      video.removeAttribute("autoplay");
+      video.pause();
+      video.controls = true;
+    });
+  } else if ("IntersectionObserver" in window) {
     const seen = new IntersectionObserver((entries) => {
       for (const entry of entries) entry.isIntersecting ? play(entry.target) : entry.target.pause();
-    }, { threshold: 0.6 });
-    auto.forEach((video) => seen.observe(video));
+    }, { threshold: 0.5 });
+    document.querySelectorAll("video[data-autoplay]").forEach((video) => seen.observe(video));
   }
   for (const card of document.querySelectorAll(".task")) {
     const video = card.querySelector("video");
