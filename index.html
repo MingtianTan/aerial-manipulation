@@ -999,7 +999,7 @@
       <summary class="method" id="fd-stage-b">
         <span class="method-head">
           <span>
-            <span class="method-label">In progress · from 18 Nov 2026 · updated 2026-11-19 10:55</span>
+            <span class="method-label">Done · 18–19 Nov 2026</span>
             <h3 class="method-title">The Flight DiT's forecast as an input to π0.5's action expert</h3>
           </span>
           <span class="method-toggle" aria-hidden="true"></span>
@@ -1028,7 +1028,7 @@
               <tr><th scope="row">B2-B3</th><td>Frozen π0.5 with the Flight DiT&#x27;s base; new demonstrations recorded with it</td><td>done</td><td>2026-11-18 21:03</td><td>B-frozen 247/330 (π0.5 alone 271; NDT 5/30 against 30); 880 demonstrations in 907 attempts</td></tr>
               <tr><th scope="row">B4-B5</th><td>Training on the new demonstrations, without and with the message</td><td>done</td><td>2026-11-19 05:03</td><td>B-ctrl: 15,000 steps, loss 0.0014, read back bit for bit; B-tok: 15,000 steps, loss 0.0014, read back bit for bit</td></tr>
               <tr><th scope="row">B6-B7</th><td>Closed loop with the Flight DiT&#x27;s base; verdict of stage B</td><td>done</td><td>2026-11-19 10:50</td><td>B-ctrl 273/330, B-tok 270/330 (π0.5 alone 271); verdict: tie (no measurable difference on default physics)</td></tr>
-              <tr><th scope="row">Wind</th><td>The target system under thrust limits, aerodynamics and wind, against π0.5 alone (added by decision)</td><td>running</td><td></td><td>started 2026-11-19 10:51; the page shows these columns once they are complete</td></tr>
+              <tr><th scope="row">Wind</th><td>The target system under thrust limits, aerodynamics and wind, against π0.5 alone (added by decision)</td><td>done</td><td>2026-11-19 19:04</td><td>5 %: B-tok 157/330 against 148/330, no measurable difference; 10 %: B-tok 128/330 against 112/330, no measurable difference</td></tr>
             </tbody>
           </table>
         </div>
@@ -1254,6 +1254,56 @@
           </table>
         </div>
         <p class="note">The demonstrations are the scripted specialist's: π0.5's training set with the IK flying the base, and B3's with the Flight DiT flying it. They compare with each other (same hand, another base controller), the closed-loop columns with each other (same π0.5); across the two, the hand's own behaviour differs as well.</p>
+      </div>
+    </section>
+    <section id="fd-stage-b-wind">
+      <div class="wrap">
+        <h2>Under wind: the target system against π0.5 alone</h2>
+        <p class="sub">Added after stage B by decision: B-tok, unchanged, under two of AM-Bench's disturbance conditions, which switch on the rotors' thrust limits, aerodynamic effects (ground, near-wall, drag) and wind as a velocity field whose force is about 5 % (3.25 N) or 10 % (6.51 N) of the weight, from a different horizontal direction in every rollout, ramped in over 1 s, with gusts; the same wind as in π0.5 alone's cells, rollout by rollout. π0.5 alone's cells under the same conditions and seeds come from the earlier run; both systems were trained on default physics only. Fixed before these runs, with K2's yardstick: better if B-tok minus π0.5 alone is at least 18 and the exact McNemar p &lt; 0.05, worse for the mirror, otherwise no measurable difference.</p>
+        <h3>5 % of the weight as wind (wind05)</h3>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Task</th><th scope="col">π0.5 alone</th><th scope="col">B-tok</th><th scope="col">Crashed: π0.5 alone</th><th scope="col">Crashed: B-tok</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">CabinetPickPlace</th><td>18/30</td><td>11/30</td><td>0</td><td>4</td></tr>
+              <tr><th scope="row">FrameAssembly</th><td>20/30</td><td>25/30</td><td>2</td><td>2</td></tr>
+              <tr><th scope="row">LemonHarvesting</th><td>21/30</td><td>21/30</td><td>1</td><td>1</td></tr>
+              <tr><th scope="row">NDT</th><td>27/30</td><td>30/30</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">OpenDoor</th><td>8/30</td><td>10/30</td><td>9</td><td>7</td></tr>
+              <tr><th scope="row">PegInHole</th><td>19/30</td><td>23/30</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">PressButton</th><td>30/30</td><td>30/30</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">PullLever</th><td>1/30</td><td>2/30</td><td>6</td><td>7</td></tr>
+              <tr><th scope="row">PushSlider</th><td>1/30</td><td>0/30</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">RotateValve</th><td>2/30</td><td>4/30</td><td>7</td><td>1</td></tr>
+              <tr><th scope="row">WipeWindow</th><td>1/30</td><td>1/30</td><td>5</td><td>0</td></tr>
+              <tr><th scope="row">All</th><td>148/330</td><td>157/330</td><td>30</td><td>22</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Paired by seed over the 330 rollouts both have: 40 succeed only with B-tok, 31 only with π0.5 alone (exact McNemar p = 0.34). Judgement: no measurable difference.</p>
+        <p class="note">Readouts: π0.5 alone: tracking 1.87 cm, Lemon grasped / delivered 23 / 21, doors opened 11, NDT&#x27;s final target height 6.96 m, the hand&#x27;s height to the inspection target over the last 2 s -2.5 cm (highest point 8.0 cm), CabinetPickPlace&#x27;s door pulled open / can lifted / can placed 28 / 18 / 18; B-tok: tracking 1.71 cm, Lemon grasped / delivered 22 / 21, doors opened 14, NDT&#x27;s final target height 6.97 m, the hand&#x27;s height to the inspection target over the last 2 s -0.4 cm (highest point 8.1 cm), CabinetPickPlace&#x27;s door pulled open / can lifted / can placed 18 / 12 / 11. B-tok&#x27;s base command to reference 0.50–4.07 cm per task (NDT 4.07 cm), the Flight DiT&#x27;s in-loop 1.0 s error 5.45 cm. CabinetPickPlace's stages and the crashes per task were added to the readouts during these runs, after their interim numbers.</p>
+        <h3>10 % of the weight as wind (wind10)</h3>
+        <div class="table-wrap">
+          <table class="plain">
+            <thead><tr><th scope="col">Task</th><th scope="col">π0.5 alone</th><th scope="col">B-tok</th><th scope="col">Crashed: π0.5 alone</th><th scope="col">Crashed: B-tok</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">CabinetPickPlace</th><td>10/30</td><td>6/30</td><td>5</td><td>10</td></tr>
+              <tr><th scope="row">FrameAssembly</th><td>11/30</td><td>17/30</td><td>10</td><td>6</td></tr>
+              <tr><th scope="row">LemonHarvesting</th><td>9/30</td><td>7/30</td><td>13</td><td>10</td></tr>
+              <tr><th scope="row">NDT</th><td>18/30</td><td>28/30</td><td>8</td><td>2</td></tr>
+              <tr><th scope="row">OpenDoor</th><td>4/30</td><td>4/30</td><td>13</td><td>14</td></tr>
+              <tr><th scope="row">PegInHole</th><td>17/30</td><td>22/30</td><td>1</td><td>1</td></tr>
+              <tr><th scope="row">PressButton</th><td>27/30</td><td>29/30</td><td>2</td><td>1</td></tr>
+              <tr><th scope="row">PullLever</th><td>5/30</td><td>5/30</td><td>4</td><td>7</td></tr>
+              <tr><th scope="row">PushSlider</th><td>4/30</td><td>7/30</td><td>2</td><td>0</td></tr>
+              <tr><th scope="row">RotateValve</th><td>7/30</td><td>3/30</td><td>11</td><td>4</td></tr>
+              <tr><th scope="row">WipeWindow</th><td>0/30</td><td>0/30</td><td>8</td><td>9</td></tr>
+              <tr><th scope="row">All</th><td>112/330</td><td>128/330</td><td>77</td><td>64</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">Paired by seed over the 330 rollouts both have: 48 succeed only with B-tok, 32 only with π0.5 alone (exact McNemar p = 0.093). Judgement: no measurable difference.</p>
+        <p class="note">Readouts: π0.5 alone: tracking 2.74 cm, Lemon grasped / delivered 12 / 9, doors opened 11, NDT&#x27;s final target height 6.96 m, the hand&#x27;s height to the inspection target over the last 2 s -3.0 cm (highest point 8.2 cm), CabinetPickPlace&#x27;s door pulled open / can lifted / can placed 21 / 12 / 10; B-tok: tracking 2.65 cm, Lemon grasped / delivered 9 / 8, doors opened 9, NDT&#x27;s final target height 6.97 m, the hand&#x27;s height to the inspection target over the last 2 s -0.2 cm (highest point 8.5 cm), CabinetPickPlace&#x27;s door pulled open / can lifted / can placed 15 / 7 / 6. B-tok&#x27;s base command to reference 0.73–4.68 cm per task (NDT 4.68 cm), the Flight DiT&#x27;s in-loop 1.0 s error 6.44 cm. CabinetPickPlace's stages and the crashes per task were added to the readouts during these runs, after their interim numbers.</p>
       </div>
     </section>
     <section id="fd-stage-b-decisions">
