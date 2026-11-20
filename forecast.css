@@ -1,0 +1,92 @@
+/* The forecast block of the overview page (index.html, #forecast): the rollout that forecast.js plays back, and the
+   sketches of the five predictors under the two figures. Colours and fonts come from overview.css; the player's buttons
+   (.cx-btn, .cx-ind) from concept.css. */
+
+/* the player */
+#forecast { --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+#forecast .fc-bar { margin: 0 0 10px; }
+#forecast .fc-bar[hidden] { display: none; }
+#forecast .fc-bar .cx-player { flex-wrap: wrap; row-gap: 6px; }
+#forecast .cx-ind { font-variant-numeric: tabular-nums; }
+.fc-k { flex: none; width: 34px; height: 14px; overflow: visible; }
+.fc-k .fc-k-new { fill: none; stroke: var(--fd); stroke-width: 2.6; }
+.fc-k .fc-k-dot { fill: var(--fd); stroke: #fff; stroke-width: 1.2; }
+.key.fc-k-old { border-top-width: 1.5px; opacity: 0.7; }
+
+/* the rollout, while it plays */
+.fc-roll .fc-cur line { stroke: #2f2f2f; stroke-width: 1.25; opacity: 0.5; }
+.fc-roll .fc-pill { fill: #2f2f2f; }
+.fc-roll .fc-pill-t { font-size: 12.5px; font-weight: 700; fill: #fff; font-variant-numeric: tabular-nums; }
+.fc-roll .fc-base { fill: #222; stroke: #fff; stroke-width: 2; }
+.fc-roll .event.is-ahead { opacity: 0.4; }
+.fc-roll .event.is-hit { stroke: #8a8a8a; stroke-dasharray: 4 3; }
+.fc-roll .fc-evlab { font-size: 13px; font-weight: 500; fill: var(--ink); }
+.fc-roll .fc-glow { fill: #f2c230; opacity: 0; }
+.fc-roll .fc-hit { fill: transparent; cursor: ew-resize; }
+
+/* a bar group and its card, lit together */
+#forecast .fig .grp.is-hot .hit { fill: rgba(0, 0, 0, 0.05); }
+
+/* the five predictors, left to right as in the chart */
+#forecast .fc-strip { grid-column: 1 / -1; }
+#forecast .fc-strip .fig-title.sub { margin: 4px 0 6px; }
+.fc-preds { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; margin: 12px 0 0; padding: 0; list-style: none; }
+.fc-pred { padding: 12px 14px 14px; border: 1px solid var(--line); border-left: 4px solid #9aa5b8; border-radius: 10px; background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s; }
+.fc-pred.ours { border-left-color: var(--fd); }
+.fc-pred.is-hot { border-color: #b5b5b5; border-left-color: #5f6b80; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08); }
+.fc-pred.ours.is-hot { border-left-color: var(--fd); }
+.fc-pred b { display: block; margin: 10px 0 4px; font: 500 1rem/1.3 var(--title); color: var(--ink); }
+.fc-pred.ours b { color: var(--fd-ink); }
+.fc-pred p { margin: 0; font-size: 0.88rem; line-height: 1.5; color: var(--text); }
+.fc-pred p.so { margin-top: 6px; color: var(--ink); }
+.fc-sk { display: block; width: 100%; height: auto; }
+
+/* the sketches: black is where the base really goes, dashed what the predictor says, the bracket its miss at 2.5 s */
+.fc-sk .sk-bg { fill: #f6f7f9; }
+.fc-sk .sk-guide { stroke: #dfe2e7; stroke-width: 1; stroke-dasharray: 3 3; }
+.fc-k .sk-past, .fc-sk .sk-past { fill: none; stroke: #bdbdbd; stroke-width: 1.8; stroke-linecap: round; }
+.fc-k .sk-true, .fc-sk .sk-true { fill: none; stroke: #222; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.fc-k .sk-now, .fc-sk .sk-now { fill: #222; stroke: #fff; stroke-width: 1.5; }
+.fc-sk .sk-end { fill: #222; }
+.fc-k .sk-axis { fill: none; stroke: #8f8f8f; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.fc-k .sk-pred, .fc-sk .sk-pred { fill: none; stroke: #7d8696; stroke-width: 2; stroke-dasharray: 5 3.5; stroke-linecap: round; }
+.fc-k .sk-ring, .fc-sk .sk-ring { fill: #fff; stroke: #7d8696; stroke-width: 1.8; }
+.fc-sk .sk-ring.ff { stroke: var(--fd); }
+.fc-k .sk-gap, .fc-sk .sk-gap { fill: none; stroke: #5f6b80; stroke-width: 1.8; }
+.fc-pred.ours .sk-gap { stroke: var(--fd); }
+.fc-sk .sk-hand { fill: none; stroke: #a3a3a3; stroke-width: 1.6; stroke-linecap: round; }
+.fc-sk .sk-grip { fill: none; stroke: #6b6b6b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fc-sk .sk-planline { fill: none; stroke: var(--pi); stroke-width: 1.2; stroke-dasharray: 2 3; opacity: 0.7; }
+.fc-sk .sk-plan { fill: var(--pi); stroke: #fff; stroke-width: 1.2; }
+.fc-sk .sk-arm { stroke: #9dbfee; stroke-width: 1.3; }
+.fc-sk .sk-sample { fill: none; stroke: var(--fd); stroke-width: 1.3; opacity: 0.38; }
+.fc-sk .sk-halo { fill: none; stroke: #74bf8b; stroke-width: 6; stroke-linecap: butt; stroke-linejoin: round; }
+
+/* what the chart shows, and what it does not */
+.fc-verdict { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; margin: 18px 0 0; }
+.fc-verdict p { position: relative; margin: 0; padding: 12px 16px 12px 48px; border-radius: 10px; font-size: 0.95rem; line-height: 1.5;
+  color: var(--text); }
+.fc-verdict .yes { background: var(--fd-soft); }
+.fc-verdict .no { background: var(--band); }
+.fc-verdict b { color: var(--ink); }
+.fc-vi { position: absolute; left: 14px; top: 13px; width: 22px; height: 22px; }
+.fc-vi circle { stroke: none; }
+.fc-vi path { fill: none; stroke: #fff; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.yes .fc-vi circle { fill: var(--fd); }
+.no .fc-vi circle { fill: #8a8a8a; }
+#forecast details.numbers .fc-note { max-width: 560px; margin: 8px 0 0; color: var(--soft); line-height: 1.5; }
+
+@media (max-width: 1000px) {
+  .fc-preds { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .fc-pred { display: grid; grid-template-columns: 176px minmax(0, 1fr); column-gap: 16px; align-items: start; }
+  .fc-pred .fc-sk { grid-row: 1 / span 3; }
+  .fc-pred > b, .fc-pred > p { grid-column: 2; }
+  .fc-pred b { margin-top: 0; }
+}
+@media (max-width: 760px) {
+  .fc-verdict { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .fc-pred { grid-template-columns: 112px minmax(0, 1fr); column-gap: 12px; padding: 10px 12px 12px; }
+}
