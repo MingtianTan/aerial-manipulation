@@ -425,6 +425,30 @@
       b += sq(4, 64, 8, 8, "v-fd2", 2) + tx(18, 71.5, "used in test 2: one of the 11 tokens", "v-s", "start");
       return svgOf(220, 78, b);
     },
+    zmake() {
+      let b = tx(125, 13, "50 path tokens: the noisy path", "v-s") + tx(262, 13, "4 state", "v-s");
+      for (let k = 0; k < 50; k++) b += sq(10 + 4.6 * k, 20, 3.6, 18, "v-fdsoft", 1);
+      for (let k = 0; k < 4; k++) b += sq(248 + 7 * k, 20, 5, 18, "v-fd", 1);
+      b += sq(280, 18, 22, 22, "v-fd2", 4) + tx(291, 33, "Z", "v-w");
+      b += tx(312, 27, "[Z]: one learned token, the same", "v-s", "start") + tx(312, 41, "at the start of every sample", "v-s", "start");
+      b += sq(6, 52, 300, 82, "v-blocks", 8) + sq(280, 52, 22, 82, "v-zlane", 0);
+      b += tx(140, 86, "14 blocks", "v-b") + tx(140, 104, "in each, [Z] reads the path and", "v-s") + tx(140, 118, "state tokens (self-attention)", "v-s");
+      b += sq(336, 58, 132, 26, "v-box", 6) + tx(402, 75, "34 image tokens", "v-s") + arrow(336, 71, 306, 71);
+      b += tx(472, 75, "cross-attention", "v-s", "start");
+      b += sq(336, 98, 132, 26, "v-box", 6) + tx(402, 115, "task + flow time", "v-s") + arrow(336, 111, 306, 111);
+      b += tx(472, 115, "scale and shift each block", "v-s", "start");
+      b += arrow(291, 134, 291, 150) + sq(274, 152, 34, 20, "v-fd2", 3) + tx(291, 166, "512", "v-w");
+      b += tx(244, 166, "[Z] after the last block", "v-s", "end");
+      b += arrow(310, 162, 334, 162) + sq(336, 151, 92, 22, "v-box", 5) + tx(382, 166, "linear → 256", "v-s");
+      b += arrow(430, 162, 448, 162);
+      for (let k = 0; k < 16; k++) b += sq(450 + 4.4 * k, 153, 3.4, 18, k % 2 ? "v-fd" : "v-fd2", 1);
+      b += tx(526, 167, "z: 256 values", "v-b", "start");
+      b += `<path d="M462 172 V188 H425 V202" class="v-dash" marker-end="url(#lx-v-head)"/>`;
+      b += sq(326, 204, 198, 42, "v-train", 6) + tx(425, 221, "trained only to predict", "v-s") + tx(425, 238, "where the base is 0.4 s later", "v-b");
+      b += `<path d="M508 172 V188 H594 V202" class="v-line" marker-end="url(#lx-v-head)"/>`;
+      b += sq(530, 204, 128, 42, "v-use", 6) + tx(594, 221, "mean of 8 samples", "v-s") + tx(594, 238, "→ test 2’s 11th token", "v-b");
+      return svgOf(660, 252, b);
+    },
     versions() {
       const cell = (x, y, name, use, hot) => sq(x, y, 140, 42, hot ? "v-cell hot" : "v-cell", 6) + tx(x + 70, y + 18, name, "v-code") + tx(x + 70, y + 34, use, "v-s");
       let b = tx(215, 14, "reads π0.5's plan", "v-t") + tx(365, 14, "no plan input", "v-t");
@@ -542,7 +566,7 @@
     cardsBox.style.setProperty("--sc-soft", S.soft);
     cardsBox.replaceChildren(...S.cards.map((c, k) => {
       const d = document.createElement("div");
-      d.className = c.wide ? "lx-card wide" : "lx-card";
+      d.className = c.full ? "lx-card full" : c.wide ? "lx-card wide" : "lx-card";
       d.innerHTML = `<p class="t"><span class="n">${k + 1}</span>${esc(c.t)}</p>` + (c.big ? `<p class="big">${esc(c.big)}</p>` : "") + vizOf(c.viz) + `<p class="x">${esc(c.text)}</p>`;
       return d;
     }));

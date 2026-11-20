@@ -152,3 +152,9 @@
 .lx-card .v-path { fill: none; stroke: #8cc9a3; stroke-width: 1.2; }
 .lx-card .v-mean { fill: none; stroke: var(--fd); stroke-width: 2.4; stroke-linecap: round; }
 @media (max-width: 760px) { .lx-card.wide { grid-column: auto; } }
+.lx-card.full { grid-column: 1 / -1; }
+.lx-card.full .viz svg { max-height: 300px; }
+.lx-card .v-blocks { fill: #f3faf5; stroke: #8cc9a3; }
+.lx-card .v-zlane { fill: rgba(15, 92, 48, 0.16); }
+.lx-card .v-train { fill: #fff; stroke: #0f5c30; stroke-dasharray: 4 3; }
+.lx-card .v-use { fill: #eef8f6; stroke: #2f9e8f; }
