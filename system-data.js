@@ -38,7 +38,7 @@ window.LX_DATA = (() => {
     fc: { name: "The forecast", text: "The base's x, y, z over the next 2.5 s (50 steps), from where it is now.",
       rows: [["Latent z", "256 values from the [Z] token"], ["Error at 1 s", "1.25 cm (constant velocity: 12.7 cm)"]] },
     pibox: { name: "π0.5", text: "OpenPI π0.5, 3.35 B parameters: SigLIP (415 M), Gemma-2B (2.51 B), action expert (428 M).",
-      rows: [["Fine-tuned", "all weights, 960 demonstrations, both cameras; step 30k of a 40k run"], ["Plans", "every 0.4 s: 50 targets, the first 8 flown"]] },
+      rows: [["Fine-tuned", "all weights, 80 default-physics demonstrations per task, both cameras; step 30k of a 40k run"], ["Plans", "every 0.4 s: 50 targets, the first 8 flown"]] },
     siglip: { name: "SigLIP", text: "SigLIP So400m: each 224 × 224 image becomes 256 tokens." },
     text: { name: "Text tokens", text: "“Task: …, State: …; Action:”, 30 to 49 tokens." },
     vlm: { name: "Gemma-2B VLM", text: "18 layers, width 2048: reads images and text together." },
