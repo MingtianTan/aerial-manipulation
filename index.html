@@ -12,15 +12,15 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect fill='%23123a40' width='32' height='32' rx='6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23ffffff'/%3E%3Cpath d='M6 16h6M20 16h6M16 6v6M16 20v6' stroke='%23cfe9ec' stroke-width='1.6'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Noto+Sans:400,400i,700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans:400,500,700|Noto+Sans:400,400i,700|JetBrains+Mono:400,600&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="overview.css?v=20261119c">
+  <link rel="stylesheet" href="concept.css?v=20261120a">
 </head>
 <body>
   <nav class="rail" aria-label="Sections">
     <a class="rail-home" href="#top">Aerial Manipulation</a>
     <ol>
-      <li><a href="#top">Overview</a></li>
-      <li><a href="#pipeline">The pipeline in five steps</a></li>
+      <li><a href="#top">Overview</a><ol><li><a href="#concept">The idea</a></li><li><a href="#workflow">Current workflow</a></li><li><a href="#showcase">Test showcase</a></li></ol></li>
       <li><a href="#method">Method</a><ol><li><a href="#system">The full system</a></li><li><a href="#forecast">The forecast</a></li></ol></li>
       <li><a href="#dataset">Data</a><ol><li><a href="#all-tasks">Twelve tasks</a></li><li><a href="#before-after">Before and after</a></li><li><a href="#dataset-generation">4,800 demonstrations</a></li></ol></li>
       <li><a href="#benchmarking">π0.5 baseline</a><ol><li><a href="#paper">Against the AM-Bench paper</a></li><li><a href="#robustness">Under disturbances</a></li></ol></li>
@@ -36,7 +36,7 @@
         <a class="button" href="https://github.com/MingtianTan/Aerial_Manipulation_Code"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg><span>Code (private)</span></a>
         <a class="button" href="https://ambench.github.io/"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 1.5h5v5M14.5 1.5 7.5 8.5M12.5 9.5v5h-11v-11h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>AM-Bench</span></a>
       </nav>
-      <nav class="jump" aria-label="Sections"><a href="#pipeline">The pipeline in five steps</a><a href="#method">Method</a><a href="#dataset">Data</a><a href="#benchmarking">π0.5 baseline</a><a href="#dit-training">FlightFlow in the loop</a></nav>
+      <nav class="jump" aria-label="Sections"><a href="#concept">The idea</a><a href="#workflow">Current workflow</a><a href="#showcase">Test showcase</a><a href="#method">Method</a><a href="#dataset">Data</a><a href="#benchmarking">π0.5 baseline</a><a href="#dit-training">FlightFlow in the loop</a></nav>
     </div>
   </header>
 
@@ -49,9 +49,35 @@
 
   <section class="abstract" id="introduction">
     <div class="container">
-      <p class="subtitle">Aerial manipulation data is scarce, but vision-language-action models already know how to use an arm. We keep one, π0.5, for the arm and train a small flow-matching model, <b>FlightFlow</b>, that forecasts how the vehicle flies. Five steps on AM-Bench’s hexarotor, and what each one bought:</p>
+      <p class="subtitle">Aerial manipulation data is scarce, but vision-language-action models already know how to use an arm. We keep one, π0.5, for the arm and train a small flow-matching model, <b>FlightFlow</b>, that forecasts how the vehicle flies.</p>
     </div>
     <div class="container wide">
+      <figure class="cx" id="concept" aria-labelledby="cx-title">
+        <p class="cx-eyebrow" id="cx-title">The idea, one step at a time</p>
+        <div class="cx-bar">
+          <div class="cx-player">
+            <div class="cx-btns" role="group" aria-label="Player">
+              <button class="cx-btn" type="button" data-act="prev" aria-label="Step back"></button>
+              <button class="cx-btn" type="button" data-act="play" aria-label="Play" aria-pressed="false"></button>
+              <button class="cx-btn" type="button" data-act="next" aria-label="Step forward"></button>
+              <button class="cx-btn" type="button" data-act="reset" aria-label="Back to the start"></button>
+            </div>
+            <span class="cx-ind">Step <b>5</b> of 5</span>
+          </div>
+          <ol class="cx-tabs" aria-label="Steps">
+            <li><button type="button" data-go="0" style="--sc:var(--pi)"><span class="n">1</span>What VLAs know</button></li>
+            <li><button type="button" data-go="1" style="--sc:var(--pi)"><span class="n">2</span>Keep π0.5 for the arm</button></li>
+            <li><button type="button" data-go="2" style="--sc:var(--fd)"><span class="n">3</span>Learn flight</button></li>
+            <li><button type="button" data-go="3" style="--sc:linear-gradient(135deg, var(--fd) 50%, var(--pi) 50%)"><span class="n">4</span>Share the forecast</button></li>
+            <li><button type="button" data-go="4" style="--sc:linear-gradient(135deg, var(--fd) 50%, var(--pi) 50%)"><span class="n">5</span>Fly together</button></li>
+          </ol>
+        </div>
+        <p class="cx-say">One controller flies both: the hand goes to π0.5’s target, and the base follows FlightFlow’s path. The cameras see the new scene, and both models plan again.</p>
+        <div class="scroll cx-scroll"><svg class="cx-svg" viewBox="0 0 1160 556" role="img" aria-label="The idea in five steps. π0.5, a vision-language-action model that learned from plentiful robot-arm data, keeps the arm: from the two cameras and the task it decides where the hand goes. FlightFlow, a small flow-matching model trained on our scarce aerial demonstrations, forecasts the base’s path. The forecast reaches π0.5 as a few extra tokens, and one controller flies the hand to π0.5’s target and the base along FlightFlow’s path."></svg></div>
+        <div class="cx-legend"><span><i style="--k:var(--pi)"></i>π0.5 and the arm it moves</span><span><i style="--k:var(--fd)"></i>FlightFlow and the base it flies</span><span><i style="--k:#9a9a9a"></i>shared: inputs and the controller</span></div>
+        <figcaption><b>What to notice.</b> Each model has one job. π0.5 brings the arm skills it already has; FlightFlow is the one new model, and it only learns how the vehicle flies. Press play, or click a step or any part of the drawing. The workflow below shows how each part was built and what it bought.</figcaption>
+      </figure>
+      <h3 class="fig-title block-title" id="workflow">Current workflow<small>Five steps on AM-Bench’s hexarotor, and what each one bought</small></h3>
       <ol class="pipeline" id="pipeline">
         <li class="step "><div class="step-head"><span class="n">1</span>Fix the experts</div><img class="shot" src="assets/dataset/poster/demo2_04_WipeWindow.jpg" alt="The scripted expert wiping a window"><p class="how">7 of AM-Bench’s 12 tasks fixed: 6 new experts, 4 stricter checks, 1 reset</p><p class="gain"><span class="from">73</span><span class="arrow">→</span>100<small> %</small></p><p class="unit">of the expert runs succeed<em>60 runs: 5 per task, default&nbsp;physics</em></p></li>
         <li class="step "><div class="step-head"><span class="n">2</span>Record and verify</div><div class="shot four"><img src="assets/dataset/poster/demo2_05_CabinetPickPlace.jpg" alt="" loading="lazy"><img src="assets/dataset/poster/wind10_07_LemonHarvesting.jpg" alt="" loading="lazy"><img src="assets/dataset/poster/aero_09_RotateValve.jpg" alt="" loading="lazy"><img src="assets/dataset/poster/wind20_12_OpenDoor.jpg" alt="" loading="lazy"></div><p class="how">12 tasks × 5 conditions × 80; noisy execution, clean labels, 7 checks per episode</p><p class="gain">4,800</p><p class="unit">verified demonstrations<em>127 faulty successes replaced</em></p></li>
@@ -63,8 +89,9 @@
     </div>
   </section>
 
-  <section class="band rollouts" aria-label="Rollouts of π0.5">
+  <section class="band rollouts" aria-label="Rollouts of π0.5" id="showcase">
     <div class="container wide">
+      <h3 class="fig-title block-title">Test showcase</h3>
       <div class="carousel-wrap">
         <button class="nav prev" type="button" data-dir="-1" aria-label="Previous clips">‹</button>
         <div class="carousel">
@@ -326,5 +353,6 @@
     </div>
   </footer>
   <script src="overview.js?v=20261119c" defer></script>
+  <script src="concept.js?v=20261120a" defer></script>
 </body>
 </html>
