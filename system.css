@@ -158,3 +158,50 @@
 .lx-card .v-zlane { fill: rgba(15, 92, 48, 0.16); }
 .lx-card .v-train { fill: #fff; stroke: #0f5c30; stroke-dasharray: 4 3; }
 .lx-card .v-use { fill: #eef8f6; stroke: #2f9e8f; }
+
+/* The Next figure (#plans in #next) runs on the same engine. Parts a layer only recalls are faded but keep their card;
+   the numbered badges of the general idea are hidden there and the new channels carry letters. What follows is drawn
+   only for figures whose data asks for it (system.js, extras), so #system does not change. */
+.lx-svg .lx-faded { opacity: 0.4; }
+.lx-svg .badge.lx-letter { fill: #2f9e8f; }
+.lx-svg .badge.lx-letter.lx-old { fill: #5c6470; }
+.lx-svg .dot-fd { fill: var(--fd); }
+.lx-svg .lx-tick { stroke: #c4c4c4; stroke-width: 2; stroke-linecap: round; }
+.lx-svg .lx-tick.on { stroke: var(--fd); stroke-width: 2.6; }
+.lx-svg .lx-bar.msg { fill: #2f9e8f; }
+.lx-svg .lx-train .block { fill: #d3e4fb; stroke: var(--pi); stroke-width: 2; transition: fill 0.5s, stroke 0.5s; }
+.lx-svg .lx-lora { fill: var(--pi); }
+.lx-svg .lx-lorabox { fill: none; stroke: var(--pi); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.lx-svg .head-amb { fill: #eda100; }
+.lx-svg .head-dark { fill: #5c6470; }
+.lx-svg .wire.w-amb { stroke: #eda100; stroke-width: 2.5; }
+.lx-svg .wire.w-dark { stroke: #5c6470; stroke-width: 2; }
+.lx-svg .lx-x { fill: none; stroke: #d55181; stroke-width: 3; stroke-linecap: round; }
+.lx-svg .lx-chip { fill: #fff; stroke: #eda100; stroke-width: 1.5; stroke-dasharray: 5 4; }
+.lx-svg .lx-chip.def { fill: var(--frozen); stroke: var(--frozen-edge); stroke-dasharray: none; }
+.lx-svg .lx-used .lx-chip { fill: #fdf3dc; stroke-dasharray: none; transition: fill 0.5s; }
+.lx-svg .t-status.s-amb { fill: #9a6400; }
+.lx-svg .lx-wind { stroke: #eda100; stroke-width: 3.2; stroke-linecap: round; }
+.lx-svg .lx-wind-halo { stroke: #fff; stroke-width: 7; stroke-linecap: round; opacity: 0.85; }
+.lx-svg .lx-windtag { fill: #eda100; }
+.lx-svg .t-windtag { font: 700 12.5px var(--title); letter-spacing: 0.08em; fill: #fff; }
+.lx-svg .lx-doc { fill: #fdf3dc; stroke: #eda100; stroke-width: 1.5; }
+.lx-svg .lx-mark { fill: #5c6470; stroke: #fff; stroke-width: 1.5; }
+.lx-svg .lx-mark.amb { fill: #eda100; }
+.lx-svg .lx-glyph-w { fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lx-svg .lx-limit { stroke: #d55181; stroke-width: 2.4; stroke-linecap: round; }
+.lx-svg .wire.w-amb.thick { stroke-width: 3; }
+.lx-svg .lx-faded.lx-now { opacity: 0.6; }
+.lx-card .v-dark { fill: #5c6470; }
+#next .lx-svg circle.badge:not(.lx-letter), #next .lx-svg text.t-badge:not(.lx-letter) { display: none; }
+#next .lx-svg .t-caps, #next .lx-svg .t-z, #next .lx-svg .t-adapter { font-size: 12.5px; }
+#next .lx-card .v-t, #next .lx-card .v-s, #next .lx-card .v-w, #next .lx-card .v-code { font-size: 12.5px; }
+#next .lx-card .v-b { font-size: 13px; }
+.lx-card .v-msg { fill: #2f9e8f; }
+.lx-card .v-amb { fill: #eda100; }
+.lx-card .v-ambsoft { fill: #fff; stroke: #eda100; stroke-dasharray: 3 2; }
+.lx-card .v-ambline { stroke: #eda100; stroke-width: 3; stroke-linecap: round; }
+.lx-card .v-wall { fill: #ebe9e5; stroke: #d3cfc8; }
+.lx-card .v-fdbox { fill: var(--fd-soft); stroke: var(--fd); }
+.lx-card .v-pibox { fill: var(--pi-soft); stroke: var(--pi); }
+.lx-card .v-x { fill: none; stroke: #d55181; stroke-width: 2.4; stroke-linecap: round; }

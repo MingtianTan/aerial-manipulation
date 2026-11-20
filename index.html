@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="overview.css?v=20261119c">
   <link rel="stylesheet" href="forecast.css?v=1">
   <link rel="stylesheet" href="concept.css?v=20261120c">
-  <link rel="stylesheet" href="system.css?v=20261120e">
+  <link rel="stylesheet" href="system.css?v=202611201625">
 </head>
 <body>
   <nav class="rail" aria-label="Sections">
@@ -122,7 +122,7 @@
       <p class="lede">π0.5 plans the hand and an inverse-kinematics solver places the base. FlightFlow forecasts where the base will fly; we tried three ways of connecting it to π0.5.</p>
     </div>
     <div class="container wide">
-      <figure class="figure lx" id="system">
+      <figure class="figure lx" id="system" data-lx="LX_DATA">
         <div class="lx-wrap">
           <nav class="lx-nav" aria-label="Steps">
             <p class="lx-eyebrow">Five steps</p>
@@ -433,6 +433,37 @@
   <section class="section" id="next">
     <div class="container">
       <h2 class="title">Next</h2>
+      <p class="lede">Three things to try on the same system: other ways to send FlightFlow’s forecast to π0.5, training more of π0.5, and the aero and wind demonstrations already recorded.</p>
+    </div>
+    <div class="container wide">
+      <figure class="figure lx" id="plans" data-lx="LX_NEXT">
+        <div class="lx-wrap">
+          <nav class="lx-nav" aria-label="Layers">
+            <p class="lx-eyebrow">Three layers</p>
+            <p class="lx-hint">Press play or pick a layer. Hover or tap any part of the drawing for what would change, and why.</p>
+          </nav>
+          <div class="lx-stage">
+            <p class="lx-head"><b></b><span></span></p>
+            <div class="cx-bar">
+              <div class="cx-player">
+                <div class="cx-btns" role="group" aria-label="Player">
+                  <button class="cx-btn" type="button" data-act="prev" aria-label="Step back"></button>
+                  <button class="cx-btn" type="button" data-act="play" aria-label="Play" aria-pressed="false"></button>
+                  <button class="cx-btn" type="button" data-act="next" aria-label="Step forward"></button>
+                  <button class="cx-btn" type="button" data-act="reset" aria-label="Back to the start"></button>
+                </div>
+                <span class="cx-ind"></span>
+              </div>
+              <ol class="cx-tabs" aria-label="Beats of this layer"></ol>
+            </div>
+            <p class="cx-say"></p>
+            <div class="scroll"><svg class="fig diagram lx-svg" style="--w:1000px" viewBox="0 0 1000 650" role="img" aria-label="The system drawing again, with three things to try. Layer 1, other ways to send FlightFlow’s forecast to π0.5: z added to the flow time in every layer of the action expert; the path written into the prompt that Gemma-2B reads; π0.5 planning the base as well, starting from FlightFlow’s path. Layer 2: training Gemma-2B and SigLIP too, with LoRA adapters or every weight, since the images and the prompt never see the message. Layer 3: training both models on the recorded demonstrations with thrust limits, aerodynamics and wind, whose motion the IK does not model."></svg></div>
+            <div class="lx-cards"></div>
+            <div class="lx-pop" hidden></div>
+          </div>
+        </div>
+        <figcaption>Plans, not results: nothing in this figure has been run yet. Its numbers come from the tests above, the code and the recorded demonstrations.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -445,7 +476,8 @@
   <script src="overview.js?v=20261119c" defer></script>
   <script src="forecast.js?v=1" defer></script>
   <script src="system-data.js?v=20261120j" defer></script>
-  <script src="system.js?v=20261120e" defer></script>
+  <script src="next-data.js?v=1" defer></script>
+  <script src="system.js?v=202611201625" defer></script>
   <script src="concept.js?v=20261120c" defer></script>
 </body>
 </html>
