@@ -370,18 +370,32 @@
       <div class="tests" style="margin-top:16px">
         <div class="test now"><b>How it works</b><p>As test 2, but in place of the 11 tokens π0.5 reads 44 of FlightFlow’s hidden states, through a 3-layer adapter.</p></div>
         <div class="test now"><b>Default physics · 20 Nov</b><p>All 11 tasks.</p><p class="out">84.5 % <span>π0.5 alone: 82.1 % · 330 rollouts</span></p></div>
-        <div class="test now"><b>Aero and wind</b><p>Four conditions not seen in training.</p><p class="out">running</p></div>
+        <div class="test now"><b>10 % wind · running</b><p>268 of 330 rollouts judged so far, 7 of 11 tasks done (20 Nov, 16:01).</p><p class="out">92 of 268 <span>same rollouts: test 2 86 · π0.5 alone 76 · judged only when all 330 are in</span></p></div>
       </div>
       <figure class="figure" style="margin-top:36px">
         <h3 class="fig-title">Hidden states, 11 tokens or no message: no measurable difference<small>success rate, 330 rollouts per cell, on the same seeds</small></h3>
         <details class="numbers" open><summary>Numbers</summary><div class="table-wrap"><table><thead><tr><th>Condition</th><th>π0.5 alone</th><th>π0.5 retrained, no message</th><th>Test 2: 11 tokens</th><th>Test 3: hidden states</th></tr></thead><tbody>
 <tr><td>Default</td><td>82.1 %</td><td>82.7 %</td><td>81.8 %</td><td>84.5 %</td></tr>
-<tr><td>Aero</td><td>50.6 %</td><td>not run</td><td>45.8 %</td><td>running</td></tr>
-<tr><td>Wind 5 %</td><td>44.8 %</td><td>not run</td><td>47.6 %</td><td>running</td></tr>
-<tr><td>Wind 10 %</td><td>33.9 %</td><td>not run</td><td>38.8 %</td><td>running</td></tr>
-<tr><td>Wind 20 %</td><td>3.3 %</td><td>not run</td><td>3.0 %</td><td>running</td></tr>
+<tr><td>Aero</td><td>50.6 %</td><td>not run</td><td>45.8 %</td><td>not run yet</td></tr>
+<tr><td>Wind 5 %</td><td>44.8 %</td><td>not run</td><td>47.6 %</td><td>not run yet</td></tr>
+<tr><td>Wind 10 %</td><td>33.9 %</td><td>not run</td><td>38.8 %</td><td>running: 92 of 268 so far</td></tr>
+<tr><td>Wind 20 %</td><td>3.3 %</td><td>not run</td><td>3.0 %</td><td>not run yet</td></tr>
 </tbody></table></div></details>
-        <figcaption>Default physics: 279 of 330 rollouts with the hidden states, against 271 for π0.5 alone, 273 for π0.5 retrained without a message and 270 with the 11 tokens. By the rule fixed in advance (a difference counts from 18 of 330 rollouts, with p &lt; 0.05 on the paired seeds), no measurable difference to any of them (p = 0.21 to 0.41). The hidden states are FlightFlow’s last-layer outputs for the ten waypoints and z, at each of its 4 sampling steps, averaged over 8 samples.</figcaption>
+        <figcaption>Default physics: 279 of 330 rollouts with the hidden states, against 271 for π0.5 alone, 273 for π0.5 retrained without a message and 270 with the 11 tokens. By the rule fixed in advance (a difference counts from 18 of 330 rollouts, with p &lt; 0.05 on the paired seeds), no measurable difference to any of them (p = 0.21 to 0.41). The hidden states are FlightFlow’s last-layer outputs for the ten waypoints and z, at each of its 4 sampling steps, averaged over 8 samples. 10 % wind, interim (20 Nov, 16:01): on the 268 rollouts judged so far, 92 succeed with the hidden states, 86 with the 11 tokens and 76 with π0.5 alone, on the same rollouts; crashes 60, 56 and 70. The rule is applied once all 330 are in.</figcaption>
+        <details class="numbers"><summary>10 % wind so far, task by task</summary><div class="table-wrap"><table><thead><tr><th>Task</th><th>Test 3: hidden states</th><th>Test 2, same rollouts</th><th>π0.5 alone, same rollouts</th><th>Crashes: 3, 2, π0.5 alone</th></tr></thead><tbody>
+<tr><td>Press button</td><td>4 / 4 (running)</td><td>4 / 4</td><td>4 / 4</td><td>0, 0, 0</td></tr>
+<tr><td>Peg in hole</td><td>7 / 11 (running)</td><td>5 / 11</td><td>6 / 11</td><td>1, 1, 1</td></tr>
+<tr><td>Inspect surface</td><td>27 / 30</td><td>28 / 30</td><td>18 / 30</td><td>2, 2, 8</td></tr>
+<tr><td>Wipe window</td><td>3 / 21 (running)</td><td>0 / 21</td><td>0 / 21</td><td>3, 5, 3</td></tr>
+<tr><td>Cabinet pick and place</td><td>7 / 30</td><td>6 / 30</td><td>10 / 30</td><td>8, 10, 5</td></tr>
+<tr><td>Frame assembly</td><td>14 / 30</td><td>17 / 30</td><td>11 / 30</td><td>6, 6, 10</td></tr>
+<tr><td>Harvest lemon</td><td>10 / 30</td><td>7 / 30</td><td>9 / 30</td><td>12, 10, 13</td></tr>
+<tr><td>Rotate valve</td><td>4 / 30</td><td>3 / 30</td><td>7 / 30</td><td>8, 4, 11</td></tr>
+<tr><td>Push slider</td><td>8 / 30</td><td>7 / 30</td><td>4 / 30</td><td>2, 0, 2</td></tr>
+<tr><td>Pull lever</td><td>6 / 22 (running)</td><td>5 / 22</td><td>3 / 22</td><td>4, 4, 4</td></tr>
+<tr><td>Open door</td><td>2 / 30</td><td>4 / 30</td><td>4 / 30</td><td>14, 14, 13</td></tr>
+<tr><td><b>All tasks</b></td><td><b>92 / 268</b></td><td><b>86 / 268</b></td><td><b>76 / 268</b></td><td><b>60, 56, 70</b></td></tr>
+</tbody></table></div></details>
       </figure>
       <ul class="takeaways">
         <li><b>A richer message changes what π0.5 learns, not measurably how often it succeeds:</b> its training loss ends 11 % below the run without a message.</li>
@@ -402,7 +416,7 @@
     </div>
   </footer>
   <script src="overview.js?v=20261119c" defer></script>
-  <script src="system-data.js?v=20261120i" defer></script>
+  <script src="system-data.js?v=20261120j" defer></script>
   <script src="system.js?v=20261120e" defer></script>
   <script src="concept.js?v=20261120c" defer></script>
 </body>

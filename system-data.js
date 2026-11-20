@@ -217,13 +217,13 @@ window.LX_DATA = (() => {
           line: "π0.5 gets FlightFlow's hidden states: 11 tokens × 4 Euler steps." },
         { tab: "Adapter", dur: 3200, card: 2, now: ["hid", "vlm", "ax"], fx: [["flow", "in_pi pi_in vlm_ax", 0, 0.55], ["pills", "act", 0.35, 0.75], ["flow", "hand", 0.62, 1]],
           line: "A 3-layer MLP adapter maps them into the action expert." },
-        FLY("Fly", "Default physics: 84.5 % vs 82.1 %, no measurable difference. The other conditions are still running.", 3),
+        FLY("Fly", "Default physics: 84.5 % vs 82.1 %, no measurable difference. 10 % wind so far: 92 of 268 rollouts, against 86 with the tokens and 76 for π0.5 alone; still running.", 3),
       ],
       cards: [
         { t: "The forecast", big: "the same", text: "Same FlightFlow and same flight as test 2; only the message changes." },
         { t: "Hidden states", big: "44 × 512", viz: "hidden", wide: true, text: "The last block's output at the 10 waypoint tokens and [Z], at each of the 4 Euler steps, averaged over the 8 samples." },
         { t: "Adapter", big: "3-layer MLP", text: "Standardised, then 512 → 1024 → 1024 → 1024; the 44 tokens take the 11 tokens' place." },
-        { t: "Result", big: "84.5 %", viz: ["bars", [["π0.5 alone", 82.1, "grey"], ["no message", 82.7, "fd2"], ["11 tokens", 81.8, "fd"], ["hidden states", 84.5, "hid"]]], text: "330 rollouts each; no measurable difference to any (p = 0.21–0.41). Still barely read offline (1.8 mm)." },
+        { t: "Result", big: "84.5 %", viz: ["bars", [["π0.5 alone", 82.1, "grey"], ["no message", 82.7, "fd2"], ["11 tokens", 81.8, "fd"], ["hidden states", 84.5, "hid"]]], text: "Default physics, 330 rollouts each; no measurable difference to any (p = 0.21–0.41). 10 % wind, still running: 92 of 268 so far (tokens 86, π0.5 alone 76)." },
       ],
       tips: {
         hid: { text: "What FlightFlow's decoders read the waypoints and z from (after AC-DiT's latent mobility feature).",
