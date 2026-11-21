@@ -74,7 +74,7 @@ window.LX_NEXT = (() => {
       beats: [
         { tab: "Tested", dur: 3800, card: 0, now: ["chunk", "tok", "hid", "tried"],
           fx: [...READY, ["send", "msg", 0, 0.02], ["send", "chunk", 0, 0.02], ["show", "tried", 0.1, 0.5]],
-          line: "Tested: π0.5’s plan into FlightFlow, 11 tokens, 44 hidden states. None made a measurable difference, and π0.5 barely reads the message." },
+          line: "Tested: π0.5’s plan into FlightFlow, 11 tokens, 44 hidden states. No gain so far comes from the message itself, and π0.5 barely reads it." },
         { tab: "A · every layer", dur: 4400, card: 1, now: ["zmod", "fc", "ax"], parts: { chunk: "off", tok: "off", hid: "off" },
           fx: [["show", "zmod", 0, 0.15], ["send", "zA", 0.08, 0.55], ["rail", "", 0.5, 0.95]],
           line: "A: z steers all 18 layers of the action expert, the way the flow time already does." },

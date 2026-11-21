@@ -208,7 +208,7 @@ window.LX_DATA = (() => {
     },
     {
       name: "FlightFlow → π0.5: hidden states", sub: "FlightFlow's hidden states instead of the 11 tokens", colour: "#0d6772", soft: "#ecf5f6", short: "test 3",
-      when: "test 3 · from 20 Nov, still running", branches: ["b-hid"],
+      when: "test 3 · 20 Nov", branches: ["b-hid"],
       parts: { chunk: "dim", tok: "dim", insets: "off" },
       status: { ...FROZEN_FF, ax2: ["+ MLP adapter", "pi"], axnote: "44 message + 50 action tokens", hid1: "44 hidden states", hid2: "of 512 values" },
       beats: [
@@ -217,13 +217,13 @@ window.LX_DATA = (() => {
           line: "π0.5 gets FlightFlow's hidden states: 11 tokens × 4 Euler steps." },
         { tab: "Adapter", dur: 3200, card: 2, now: ["hid", "vlm", "ax"], fx: [["flow", "in_pi pi_in vlm_ax", 0, 0.55], ["pills", "act", 0.35, 0.75], ["flow", "hand", 0.62, 1]],
           line: "A 3-layer MLP adapter maps them into the action expert." },
-        FLY("Fly", "Default physics: 84.5 % vs 82.1 %, no measurable difference. 10 % wind so far: 92 of 268 rollouts, against 86 with the tokens and 76 for π0.5 alone; still running.", 3),
+        FLY("Fly", "Default physics: 84.5 % vs 82.1 %, no measurable difference. 10 % wind: 40.0 % vs 33.9 % for π0.5 alone, better by the rule; 38.8 % with the tokens, no measurable difference.", 3),
       ],
       cards: [
         { t: "The forecast", big: "the same", text: "Same FlightFlow and same flight as test 2; only the message changes." },
         { t: "Hidden states", big: "44 × 512", viz: "hidden", wide: true, text: "The last block's output at the 10 waypoint tokens and [Z], at each of the 4 Euler steps, averaged over the 8 samples." },
         { t: "Adapter", big: "3-layer MLP", text: "Standardised, then 512 → 1024 → 1024 → 1024; the 44 tokens take the 11 tokens' place." },
-        { t: "Result", big: "84.5 %", viz: ["bars", [["π0.5 alone", 82.1, "grey"], ["no message", 82.7, "fd2"], ["11 tokens", 81.8, "fd"], ["hidden states", 84.5, "hid"]]], text: "Default physics, 330 rollouts each; no measurable difference to any (p = 0.21–0.41). 10 % wind, still running: 92 of 268 so far (tokens 86, π0.5 alone 76)." },
+        { t: "Result", big: "84.5 %", viz: ["bars", [["π0.5 alone", 82.1, "grey"], ["no message", 82.7, "fd2"], ["11 tokens", 81.8, "fd"], ["hidden states", 84.5, "hid"]]], text: "Default physics, 330 rollouts each; no measurable difference to any (p = 0.21–0.41). 10 % wind: 132 of 330, against 112 for π0.5 alone (p = 0.021, better) and 128 with the tokens (p = 0.69). No run without a message under wind, so the gain is not yet the message's." },
       ],
       tips: {
         hid: { text: "What FlightFlow's decoders read the waypoints and z from (after AC-DiT's latent mobility feature).",
